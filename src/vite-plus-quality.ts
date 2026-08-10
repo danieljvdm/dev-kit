@@ -28,7 +28,7 @@ const BEFORE_CHECKS_MARKER =
 const DEFAULT_WORKFLOW_TYPECHECK = `      - name: Type check with Effect TypeScript-Go
         run: vp run typecheck`;
 
-const replaceUniqueTemplateMarker = (
+export const replaceUniqueTemplateMarker = (
   template: string,
   marker: string,
   replacement: string,

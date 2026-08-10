@@ -402,6 +402,46 @@ primary
 [Vite Task run guide](https://viteplus.dev/guide/run) when maintaining the
 templates.
 
+## Worktrunk project config
+
+Enable a scaffolded default [Worktrunk](https://worktrunk.dev) project config
+in the manifest:
+
+```jsonc
+{
+  "include": ["dev-kit"],
+  "setup": {
+    "worktrunk": { "config": { "enabled": true } },
+  },
+}
+```
+
+`setup.worktrunk.config` scaffolds `.config/wt.toml` with the portable hooks an
+app repository wants in every worktree: a `pre-start` pipeline that copies
+gitignored files matched by `.worktreeinclude` (a no-op without that file) and
+then installs dependencies, plus a `pre-merge` full-validation hook. Hook
+commands render for the repository's command runner: a direct `vite-plus`
+dependency selects `vp install` and `vp run check`; otherwise Dev Kit requires
+a declared root `check` package script, runs it through `bun run check`, and
+takes the install command from the detected package manager. Repositories with
+neither fail the plan instead of shipping a broken hook.
+
+Unlike managed outputs, the scaffold is created once and then belongs to the
+repository: it is never recorded in `dev-kit.lock.json`, an existing file is
+never read, compared, updated, or removed, and disabling the task leaves the
+file in place. Edit hooks freely after creation. When the shipped template
+improves, apply relevant changes deliberately—compare against
+`node_modules/@danieljvdm/dev-kit/templates/worktrunk/wt.toml` and merge what
+fits the repository.
+
+The config intentionally carries no worktree-path template or other user
+preferences—those belong in each user's `~/.config/worktrunk/config.toml`. A
+commented `post-start` block shows how to run a per-worktree dev server on a
+stable branch-derived port (`{{ branch | hash_port }}`) under `wt step tether`;
+point it at the repository's dev entrypoint and uncomment to opt in. Worktrunk
+never runs project hooks until each user approves them with
+`wt config approvals add`.
+
 ## Effect source checkout
 
 Enable a local checkout of the exact installed Effect release in the manifest:

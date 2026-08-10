@@ -172,6 +172,21 @@ maintained `setup-bun` major tag, name an explicit `setup-vp` release because
 its `v1` tag is frozen, and let Vite+ resolve the consumer's compatible locked
 version.
 
+Enable `setup.worktrunk.config` to scaffold the default Worktrunk project
+config at `.config/wt.toml`: a copy-ignored-then-install pre-start pipeline, a
+full-validation pre-merge hook, and a commented per-worktree dev-server
+post-start block to enable deliberately. Hook commands follow the repository's
+command authority: `vp install` and `vp run check` with a direct `vite-plus`
+dependency, otherwise the detected package manager's install command with
+`bun run check`, which requires a declared root `check` script. The scaffold is
+not a managed output: apply creates the file only when it is missing, records
+nothing in the lock, and never reads, updates, or removes an existing config,
+so the repository owns it from creation and edits hooks freely. Apply template
+improvements deliberately by comparing the repository's file against the
+installed `templates/worktrunk/wt.toml` and merging what fits. Keep user-level
+Worktrunk settings such as worktree-path templates out of the project config;
+each user approves the hooks once with `wt config approvals add`.
+
 ## Ownership and conflicts
 
 Dev-kit adopts an existing destination only when its digest exactly matches a
@@ -320,7 +335,8 @@ in the consuming project.
 
 Manage skill outputs, the `setup.agentInstructions` marked sections, the
 `setup.claudeInstructions` link, the `setup.vitePlus.hooks` dispatcher, the
-opt-in `setup.vitePlus.quality.workflow`, the `setup.effectSource` checkout,
-and the explicit `setup.effectTsgo` task. `vite.config.ts`, dependency, and
+opt-in `setup.vitePlus.quality.workflow`, the `setup.worktrunk.config`
+scaffold (create-only; the repository owns the file), the `setup.effectSource`
+checkout, and the explicit `setup.effectTsgo` task. `vite.config.ts`, dependency, and
 `tsconfig.json` contributions remain deliberate user-owned edits. Compose the
 Vite+ factory or lower-level Oxlint/Oxfmt exports locally.

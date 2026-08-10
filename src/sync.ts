@@ -26,7 +26,13 @@ import {
   observePathWithRawModes,
   type ObservedPath,
 } from "./path-digest.ts";
-import { readDirectDependencyNames, readProjectPackage } from "./project-package.ts";
+import {
+  detectPackageManager,
+  PACKAGE_MANAGER_COMMANDS,
+  readDirectDependencyNames,
+  readProjectPackage,
+  type PackageManagerName,
+} from "./project-package.ts";
 import { acquireProjectProcessLock, PROJECT_PROCESS_LOCK_PATH } from "./project-process-lock.ts";
 import {
   AppliedStateSchema,
@@ -56,6 +62,11 @@ import {
   VITE_PLUS_GITHUB_ACTIONS_PATH,
   VITE_PLUS_GITHUB_ACTIONS_TEMPLATE,
 } from "./vite-plus-quality.ts";
+import {
+  applyWorktrunkConfigPlan,
+  planWorktrunkConfig,
+  type WorktrunkConfigPlan,
+} from "./worktrunk-config.ts";
 
 export type SyncOptions = {
   readonly manifestPath?: string;
@@ -144,6 +155,7 @@ export type SkillPlan = {
   readonly effectSource?: EffectSourcePlan;
   readonly effectTsgo?: EffectTsgoPatchPlan;
   readonly vitePlusHooks?: VitePlusHooksPlan;
+  readonly worktrunkConfig?: WorktrunkConfigPlan;
   readonly nextLock: DevKitLock;
   readonly nextState: AppliedState;
   readonly metadataChanged: boolean;
@@ -435,57 +447,6 @@ const renderVitePlusCommandPolicy = (
     "Do not use `bun run`, `npm run`, `pnpm run`, or `yarn run` in this repository. Do not invoke underlying tools such as `tsc`, `vitest`, `oxlint`, or `oxfmt` directly; use the Vite+ entry points above.",
   ].join("\n");
 };
-
-const PACKAGE_MANAGER_COMMANDS = {
-  bun: { install: "bun install", label: "Bun" },
-  npm: { install: "npm install", label: "npm" },
-  pnpm: { install: "pnpm install", label: "pnpm" },
-  yarn: { install: "yarn install", label: "Yarn" },
-} as const;
-
-type PackageManagerName = keyof typeof PACKAGE_MANAGER_COMMANDS;
-
-const packageManagerName = (declaration: string | undefined): PackageManagerName | undefined => {
-  const name = declaration?.split("@", 1)[0];
-
-  return name !== undefined && name in PACKAGE_MANAGER_COMMANDS
-    ? (name as PackageManagerName)
-    : undefined;
-};
-
-const detectPackageManager = Effect.fn("detectPackageManager")(function* (
-  projectDir: string,
-  declaration: string | undefined,
-) {
-  const declared = packageManagerName(declaration);
-
-  if (declared !== undefined || declaration !== undefined) return declared;
-  const fs = yield* FileSystem.FileSystem;
-  const path = yield* Path.Path;
-  const lockfiles: ReadonlyArray<readonly [PackageManagerName, ReadonlyArray<string>]> = [
-    ["bun", ["bun.lock", "bun.lockb"]],
-    ["npm", ["package-lock.json", "npm-shrinkwrap.json"]],
-    ["pnpm", ["pnpm-lock.yaml"]],
-    ["yarn", ["yarn.lock"]],
-  ];
-  const detected: Array<PackageManagerName> = [];
-
-  for (const [manager, files] of lockfiles) {
-    let found = false;
-
-    for (const file of files) {
-      if (yield* fs.exists(path.join(projectDir, file))) {
-        found = true;
-        break;
-      }
-    }
-    if (found) {
-      detected.push(manager);
-    }
-  }
-
-  return detected.length === 1 ? detected[0] : undefined;
-});
 
 const renderPackageScriptCommandPolicy = (
   manager: PackageManagerName | undefined,
@@ -1415,6 +1376,9 @@ export const planProjectSkills = Effect.fn("planProjectSkills")(function* (optio
   const vitePlusHooks = manifest.setup.vitePlus.hooks.enabled
     ? yield* planVitePlusHooks(projectDir)
     : undefined;
+  const worktrunkConfig = manifest.setup.worktrunk.config.enabled
+    ? yield* planWorktrunkConfig(packageRoot, projectDir)
+    : undefined;
   const catalog = yield* loadSkillCatalog(packageRoot, projectDir);
   const availableSkills = catalog.skills.map((skill) => skill.selector);
   const skillFamilies = { ...SKILL_FAMILIES, ...catalog.families };
@@ -1601,6 +1565,7 @@ export const planProjectSkills = Effect.fn("planProjectSkills")(function* (optio
     ...(effectSource === undefined ? {} : { effectSource }),
     ...(effectTsgo === undefined ? {} : { effectTsgo }),
     ...(vitePlusHooks === undefined ? {} : { vitePlusHooks }),
+    ...(worktrunkConfig === undefined ? {} : { worktrunkConfig }),
     nextLock,
     nextState: planned.nextState,
     metadataChanged:
@@ -1627,7 +1592,8 @@ const operationalChangeCount = (plan: SkillPlan): number =>
   plan.actions.filter((action) => action.action !== "unchanged").length +
   (plan.effectSource?.action === "sync" ? 1 : 0) +
   (plan.effectTsgo !== undefined && !plan.effectTsgo.alreadyPatched ? 1 : 0) +
-  (plan.vitePlusHooks?.action === "configure" ? 1 : 0);
+  (plan.vitePlusHooks?.action === "configure" ? 1 : 0) +
+  (plan.worktrunkConfig?.action === "scaffold" ? 1 : 0);
 
 const plannedChangeCount = (plan: SkillPlan): number => {
   const operational = operationalChangeCount(plan);
@@ -1657,6 +1623,9 @@ export const printSkillPlan = Effect.fn("printSkillPlan")(function* (plan: Skill
   }
   if (plan.vitePlusHooks?.action === "configure") {
     yield* printDetail(`+ Vite+ hooks → ${plan.vitePlusHooks.hooksPath}`);
+  }
+  if (plan.worktrunkConfig?.action === "scaffold") {
+    yield* printDetail(`+ scaffold Worktrunk config → ${plan.worktrunkConfig.path}`);
   }
   if (operationalChangeCount(plan) === 0 && plan.metadataChanged) {
     yield* printDetail("+ Dev kit metadata");
@@ -1952,6 +1921,7 @@ export const runProjectSkillPlan = Effect.fn("runProjectSkillPlan")(function* (
     effectSource: plan.effectSource,
     effectTsgo: plan.effectTsgo,
     vitePlusHooks: plan.vitePlusHooks,
+    worktrunkConfig: plan.worktrunkConfig,
     nextLock: plan.nextLock,
     nextState: plan.nextState,
   });
@@ -1960,6 +1930,7 @@ export const runProjectSkillPlan = Effect.fn("runProjectSkillPlan")(function* (
     effectSource: replanned.effectSource,
     effectTsgo: replanned.effectTsgo,
     vitePlusHooks: replanned.vitePlusHooks,
+    worktrunkConfig: replanned.worktrunkConfig,
     nextLock: replanned.nextLock,
     nextState: replanned.nextState,
   });
@@ -1980,6 +1951,9 @@ export const runProjectSkillPlan = Effect.fn("runProjectSkillPlan")(function* (
       }
       if (replanned.vitePlusHooks !== undefined) {
         yield* applyVitePlusHooksPlan(replanned.vitePlusHooks);
+      }
+      if (replanned.worktrunkConfig !== undefined) {
+        yield* applyWorktrunkConfigPlan(replanned.worktrunkConfig);
       }
       yield* applyPlannedSkillChanges(replanned);
     }),

@@ -156,6 +156,7 @@ describe("shipped skills", () => {
         assert.isTrue(selfManifest.setup.effectTsgo.enabled);
         assert.isTrue(selfManifest.setup.vitePlus.hooks.enabled);
         assert.isTrue(selfManifest.setup.vitePlus.quality.workflow.enabled);
+        assert.isTrue(selfManifest.setup.worktrunk.config.enabled);
         assert.isUndefined(packageJson.scripts.check);
         assert.isUndefined(packageJson.scripts.typecheck);
         assert.isFalse(selfManifest.targets.agents.enabled);

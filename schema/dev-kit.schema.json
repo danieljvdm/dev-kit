@@ -48,6 +48,9 @@
         },
         "vitePlus": {
           "$ref": "#/$defs/vitePlusSetup"
+        },
+        "worktrunk": {
+          "$ref": "#/$defs/worktrunkSetup"
         }
       },
       "default": {}
@@ -215,6 +218,27 @@
             "type": "string",
             "minLength": 1
           }
+        }
+      }
+    },
+    "worktrunkSetup": {
+      "description": "Manage project-local Worktrunk setup tasks.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "$ref": "#/$defs/worktrunkConfigSetup"
+        }
+      }
+    },
+    "worktrunkConfigSetup": {
+      "description": "Scaffold the default Worktrunk project config (.config/wt.toml) with portable pre-start and pre-merge hooks rendered for the repository's command runner; the repository owns the file after creation.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
         }
       }
     },

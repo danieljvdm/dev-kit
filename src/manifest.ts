@@ -78,6 +78,16 @@ export const VitePlusSetupSchema = Schema.Struct({
 
 export type VitePlusSetup = typeof VitePlusSetupSchema.Type;
 
+export const WorktrunkConfigSetupSchema = Schema.Struct({
+  enabled: Schema.optional(Schema.Boolean),
+});
+export type WorktrunkConfigSetup = typeof WorktrunkConfigSetupSchema.Type;
+
+export const WorktrunkSetupSchema = Schema.Struct({
+  config: Schema.optional(WorktrunkConfigSetupSchema),
+});
+export type WorktrunkSetup = typeof WorktrunkSetupSchema.Type;
+
 export const DevKitManifestSchema = Schema.Struct({
   $schema: Schema.optional(Schema.String),
   include: Schema.Array(Schema.String.check(Schema.isPattern(SKILL_SELECTOR_PATTERN))),
@@ -91,6 +101,7 @@ export const DevKitManifestSchema = Schema.Struct({
       effectSource: Schema.optional(EffectSourceSetupSchema),
       effectTsgo: Schema.optional(EffectTsgoSetupSchema),
       vitePlus: Schema.optional(VitePlusSetupSchema),
+      worktrunk: Schema.optional(WorktrunkSetupSchema),
     }),
   ),
   targets: Schema.optional(
@@ -141,6 +152,11 @@ export type NormalizedManifest = {
           readonly beforeChecks: ReadonlyArray<VitePlusQualityWorkflowStep>;
           readonly typecheck: ReadonlyArray<string>;
         };
+      };
+    };
+    readonly worktrunk: {
+      readonly config: {
+        readonly enabled: boolean;
       };
     };
   };
@@ -209,6 +225,11 @@ export const normalizeManifest = (manifest: DevKitManifest): NormalizedManifest 
             beforeChecks: quality?.workflow?.beforeChecks ?? [],
             typecheck: quality?.workflow?.typecheck ?? ["vp run typecheck"],
           },
+        },
+      },
+      worktrunk: {
+        config: {
+          enabled: manifest.setup?.worktrunk?.config?.enabled ?? false,
         },
       },
     },

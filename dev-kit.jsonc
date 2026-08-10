@@ -12,6 +12,9 @@
         "workflow": { "enabled": true },
       },
     },
+    "worktrunk": {
+      "config": { "enabled": true },
+    },
   },
   "targets": {
     "agents": { "enabled": false },
