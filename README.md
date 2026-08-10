@@ -179,6 +179,7 @@ tool versions. A project-local process lock also prevents concurrent applies.
   "include": [
     "dev-kit",
     "effect",
+    "open-pull-request",
     "workers-best-practices",
     "wrangler",
     "serve-sim",
@@ -198,11 +199,14 @@ tool versions. A project-local process lock also prevents concurrent applies.
 ```
 
 - `dev-kit` installs guidance for operating the toolkit itself.
+- `open-pull-request` provides a conventional, context-complete PR workflow
+  with terse English descriptions and verified proof of work.
 - `effect` expands to the package-guidance `effect-ts` bootstrap, the
   opinionated `effect-architecture-audit`, `build-effect-apis` for shared HTTP
   contracts and clients, and `build-effect-clis` for typed command-line
-  applications. The focused references cover Effect Atom, TanStack Start,
-  Cloudflare Workers, child processes, runtime entrypoints, and CLI testing.
+  applications, one-off scripts, and CI/deploy/build automation. The focused
+  references cover Effect Atom, TanStack Start, Cloudflare Workers, child
+  processes, runtime entrypoints, and script/CLI testing.
 - Prefer individual external skills such as `workers-best-practices` and
   `wrangler`, selected after scanning the project for relevant technologies.
 - `serve-sim` selects the approved Evan Bacon simulator skill directly.
