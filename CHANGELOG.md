@@ -1,5 +1,15 @@
 # @danieljvdm/dev-kit
 
+## 0.14.0
+
+### Minor Changes
+
+- 7faee08: Add `open-pull-request`, a model-triggered workflow for conventional commits, terse context-complete PR descriptions, and verified screenshots or other proof of work.
+
+### Patch Changes
+
+- 7faee08: Require every script and CLI in Effect repositories—including existing plain-TypeScript scripts being modified and CI/deploy/build automation—to use Effect unless a concrete exception is explicitly stated.
+
 ## 0.13.0
 
 ### Minor Changes
