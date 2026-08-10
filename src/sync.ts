@@ -23,10 +23,15 @@ import {
   digestSymlinkTarget,
   digestText,
   observePath,
-  observePathWithRawModes,
   type ObservedPath,
 } from "./path-digest.ts";
-import { readDirectDependencyNames, readProjectPackage } from "./project-package.ts";
+import {
+  detectPackageManager,
+  PACKAGE_MANAGER_COMMANDS,
+  readDirectDependencyNames,
+  readProjectPackage,
+  type PackageManagerName,
+} from "./project-package.ts";
 import { acquireProjectProcessLock, PROJECT_PROCESS_LOCK_PATH } from "./project-process-lock.ts";
 import {
   AppliedStateSchema,
@@ -38,11 +43,11 @@ import {
   type DevKitLock,
   type ManagedAgentInstructionsOutput,
   type ManagedClaudeInstructionsOutput,
-  type ManagedGeneratedFileOutput,
   type ManagedOutput,
   type ManagedSkillOutput,
   type OwnershipReceipt,
 } from "./project-state.ts";
+import { applyScaffoldPlan, type ScaffoldPlan } from "./scaffold.ts";
 import { parseSkillSelector } from "./skill-selector.ts";
 import { DEV_KIT_VERSION } from "./tool-metadata.ts";
 import {
@@ -50,12 +55,8 @@ import {
   planVitePlusHooks,
   type VitePlusHooksPlan,
 } from "./vite-plus-hooks.ts";
-import {
-  renderVitePlusWorkflowTemplate,
-  validateVitePlusQualitySupport,
-  VITE_PLUS_GITHUB_ACTIONS_PATH,
-  VITE_PLUS_GITHUB_ACTIONS_TEMPLATE,
-} from "./vite-plus-quality.ts";
+import { planVitePlusWorkflow } from "./vite-plus-workflow.ts";
+import { planWorktrunkConfig } from "./worktrunk-config.ts";
 
 export type SyncOptions = {
   readonly manifestPath?: string;
@@ -98,17 +99,10 @@ type DesiredClaudeInstructionsOutput = ManagedClaudeInstructionsOutput & {
   readonly linkTarget: string;
 };
 
-type DesiredGeneratedFileOutput = ManagedGeneratedFileOutput & {
-  readonly adoptIfExact: true;
-  readonly content: string;
-  readonly destination: string;
-};
-
 type DesiredOutput =
   | DesiredSkillOutput
   | DesiredAgentInstructionsOutput
-  | DesiredClaudeInstructionsOutput
-  | DesiredGeneratedFileOutput;
+  | DesiredClaudeInstructionsOutput;
 
 type SkillPlanAction =
   | {
@@ -144,6 +138,8 @@ export type SkillPlan = {
   readonly effectSource?: EffectSourcePlan;
   readonly effectTsgo?: EffectTsgoPatchPlan;
   readonly vitePlusHooks?: VitePlusHooksPlan;
+  readonly vitePlusWorkflow?: ScaffoldPlan;
+  readonly worktrunkConfig?: ScaffoldPlan;
   readonly nextLock: DevKitLock;
   readonly nextState: AppliedState;
   readonly metadataChanged: boolean;
@@ -436,57 +432,6 @@ const renderVitePlusCommandPolicy = (
   ].join("\n");
 };
 
-const PACKAGE_MANAGER_COMMANDS = {
-  bun: { install: "bun install", label: "Bun" },
-  npm: { install: "npm install", label: "npm" },
-  pnpm: { install: "pnpm install", label: "pnpm" },
-  yarn: { install: "yarn install", label: "Yarn" },
-} as const;
-
-type PackageManagerName = keyof typeof PACKAGE_MANAGER_COMMANDS;
-
-const packageManagerName = (declaration: string | undefined): PackageManagerName | undefined => {
-  const name = declaration?.split("@", 1)[0];
-
-  return name !== undefined && name in PACKAGE_MANAGER_COMMANDS
-    ? (name as PackageManagerName)
-    : undefined;
-};
-
-const detectPackageManager = Effect.fn("detectPackageManager")(function* (
-  projectDir: string,
-  declaration: string | undefined,
-) {
-  const declared = packageManagerName(declaration);
-
-  if (declared !== undefined || declaration !== undefined) return declared;
-  const fs = yield* FileSystem.FileSystem;
-  const path = yield* Path.Path;
-  const lockfiles: ReadonlyArray<readonly [PackageManagerName, ReadonlyArray<string>]> = [
-    ["bun", ["bun.lock", "bun.lockb"]],
-    ["npm", ["package-lock.json", "npm-shrinkwrap.json"]],
-    ["pnpm", ["pnpm-lock.yaml"]],
-    ["yarn", ["yarn.lock"]],
-  ];
-  const detected: Array<PackageManagerName> = [];
-
-  for (const [manager, files] of lockfiles) {
-    let found = false;
-
-    for (const file of files) {
-      if (yield* fs.exists(path.join(projectDir, file))) {
-        found = true;
-        break;
-      }
-    }
-    if (found) {
-      detected.push(manager);
-    }
-  }
-
-  return detected.length === 1 ? detected[0] : undefined;
-});
-
 const renderPackageScriptCommandPolicy = (
   manager: PackageManagerName | undefined,
   scripts: Readonly<Record<string, string>>,
@@ -746,16 +691,6 @@ const outputOwnershipIdentity = (output: ManagedOutput) =>
         },
   );
 
-const usesRawFileModeDigests = (toolVersion: string): boolean => {
-  const match = /^(\d+)\.(\d+)\./.exec(toolVersion);
-
-  if (match === null) return false;
-  const major = Number(match[1]);
-  const minor = Number(match[2]);
-
-  return major === 0 && minor <= 6;
-};
-
 const validateInventory = Effect.fn("validateManagedInventory")(function* (
   projectDir: string,
   outputs: ReadonlyArray<ManagedOutput | OwnershipReceipt>,
@@ -904,23 +839,6 @@ guide doesn't cover, search through the source code in \`node_modules/effect/src
   return `${devKitInstructions}\n`;
 });
 
-const readGeneratedFileTemplate = Effect.fn("readGeneratedFileTemplate")(function* (
-  packageRoot: string,
-  sourcePath: string,
-) {
-  const fs = yield* FileSystem.FileSystem;
-  const path = yield* Path.Path;
-  const templatePath = path.join(packageRoot, sourcePath);
-
-  if ((yield* observePath(templatePath)).kind !== "file") {
-    return yield* InvalidProjectStateError.make({
-      message: `dev-kit generated file template is not a regular file: ${sourcePath}`,
-    });
-  }
-
-  return yield* fs.readFileString(templatePath);
-});
-
 const buildDesiredOutputs = Effect.fn("buildDesiredSkillOutputs")(function* (
   packageRoot: string,
   projectDir: string,
@@ -938,9 +856,7 @@ const buildDesiredOutputs = Effect.fn("buildDesiredSkillOutputs")(function* (
       packageRoot,
       projectDir,
       sourceBySkill,
-      setup.vitePlus.quality.workflow.enabled &&
-        setup.vitePlus.quality.workflow.typecheck.length === 1 &&
-        setup.vitePlus.quality.workflow.typecheck[0] === "vp run typecheck",
+      setup.vitePlus.workflow.enabled,
       targets,
     );
 
@@ -978,32 +894,6 @@ const buildDesiredOutputs = Effect.fn("buildDesiredSkillOutputs")(function* (
       digest: yield* digestSymlinkTarget(linkTarget),
       destination: managed.absolute,
       linkTarget,
-    });
-  }
-  if (setup.vitePlus.quality.workflow.enabled) {
-    const managed = yield* resolveManagedPath(projectDir, VITE_PLUS_GITHUB_ACTIONS_PATH);
-    const template = yield* readGeneratedFileTemplate(
-      packageRoot,
-      VITE_PLUS_GITHUB_ACTIONS_TEMPLATE,
-    );
-    const content = renderVitePlusWorkflowTemplate(template, {
-      devKitCommand:
-        projectDir === packageRoot
-          ? "./bin/dev-kit.mjs apply --locked"
-          : "bun ./node_modules/@danieljvdm/dev-kit/bin/dev-kit.mjs apply --locked",
-      workflow: setup.vitePlus.quality.workflow,
-    });
-
-    outputs.push({
-      resourceId: "setup:vite-plus-github-actions",
-      path: managed.relative,
-      sourcePath: VITE_PLUS_GITHUB_ACTIONS_TEMPLATE,
-      mode: "copy",
-      kind: "file",
-      digest: yield* digestFileContent(content),
-      destination: managed.absolute,
-      content,
-      adoptIfExact: true,
     });
   }
   const agentsTarget = targets.agents;
@@ -1116,20 +1006,10 @@ const planDesiredOutputs = Effect.fn("planDesiredSkillOutputs")(function* (
       observed.kind === locked.kind
         ? locked
         : undefined;
-    const rawModeObservation =
-      matchingLockedOutput !== undefined &&
-      observed.kind !== "missing" &&
-      observed.digest !== matchingLockedOutput.digest &&
-      currentLock !== undefined &&
-      usesRawFileModeDigests(currentLock.toolVersion)
-        ? yield* observePathWithRawModes(output.destination)
-        : undefined;
     const lockedOwnsObserved =
       matchingLockedOutput !== undefined &&
       observed.kind !== "missing" &&
-      (observed.digest === matchingLockedOutput.digest ||
-        (rawModeObservation?.kind === matchingLockedOutput.kind &&
-          rawModeObservation.digest === matchingLockedOutput.digest));
+      observed.digest === matchingLockedOutput.digest;
 
     if (output.resourceId === "setup:agent-instructions" && "content" in output) {
       if (observed.kind === "missing") {
@@ -1217,7 +1097,7 @@ const planDesiredOutputs = Effect.fn("planDesiredSkillOutputs")(function* (
     if (observed.kind === "missing") {
       actions.push({ action: "create", desired: output, observed });
     } else if (observed.kind === output.kind && observed.digest === output.digest) {
-      if (sameReceipt || lockedOwnsObserved || ("adoptIfExact" in output && output.adoptIfExact)) {
+      if (sameReceipt || lockedOwnsObserved) {
         actions.push({ action: "unchanged", desired: output, observed, adopted: !sameReceipt });
       } else {
         actions.push({
@@ -1375,28 +1255,6 @@ export const planProjectSkills = Effect.fn("planProjectSkills")(function* (optio
   const packageRoot = yield* resolvePackageRoot();
   const manifest = normalizeManifest(yield* readManifest(manifestManaged.absolute));
 
-  const vitePlusQuality = manifest.setup.vitePlus.quality;
-  const vitePlusQualityEnabled = vitePlusQuality.workflow.enabled;
-
-  if (vitePlusQualityEnabled) {
-    if (!manifest.setup.effectTsgo.enabled) {
-      return yield* InvalidProjectStateError.make({
-        message:
-          "setup.vitePlus.quality requires setup.effectTsgo.enabled so managed quality setup converges the Effect-patched compiler",
-      });
-    }
-    yield* validateVitePlusQualitySupport(
-      projectDir,
-      packageRoot,
-      manifest.setup.effectTsgo.typescriptPackage,
-      {
-        workflow: {
-          beforeChecks: vitePlusQuality.workflow.beforeChecks,
-          typecheck: vitePlusQuality.workflow.typecheck,
-        },
-      },
-    );
-  }
   const effectSource = manifest.setup.effectSource.enabled
     ? yield* planEffectSource({
         packageName: manifest.setup.effectSource.packageName,
@@ -1414,6 +1272,17 @@ export const planProjectSkills = Effect.fn("planProjectSkills")(function* (optio
     : undefined;
   const vitePlusHooks = manifest.setup.vitePlus.hooks.enabled
     ? yield* planVitePlusHooks(projectDir)
+    : undefined;
+  const vitePlusWorkflow = manifest.setup.vitePlus.workflow.enabled
+    ? yield* planVitePlusWorkflow({
+        packageRoot,
+        projectDir,
+        effectTsgoEnabled: manifest.setup.effectTsgo.enabled,
+        typescriptPackage: manifest.setup.effectTsgo.typescriptPackage,
+      })
+    : undefined;
+  const worktrunkConfig = manifest.setup.worktrunk.config.enabled
+    ? yield* planWorktrunkConfig(packageRoot, projectDir)
     : undefined;
   const catalog = yield* loadSkillCatalog(packageRoot, projectDir);
   const availableSkills = catalog.skills.map((skill) => skill.selector);
@@ -1521,16 +1390,6 @@ export const planProjectSkills = Effect.fn("planProjectSkills")(function* (optio
           digest: output.digest,
         };
       }
-      if (output.resourceId === "setup:claude-instructions") {
-        return {
-          resourceId: output.resourceId,
-          path: output.path,
-          sourcePath: output.sourcePath,
-          mode: output.mode,
-          kind: output.kind,
-          digest: output.digest,
-        };
-      }
 
       return {
         resourceId: output.resourceId,
@@ -1553,8 +1412,22 @@ export const planProjectSkills = Effect.fn("planProjectSkills")(function* (optio
   ];
 
   yield* validateReservedPaths(projectDir, reservedPaths, desired);
-  const currentLock = yield* readOptionalStructuredFile(lockManaged.absolute, DevKitLockSchema);
-  const currentState = yield* readOptionalStructuredFile(stateManaged.absolute, AppliedStateSchema);
+  const rawLock = yield* readOptionalStructuredFile(lockManaged.absolute, DevKitLockSchema);
+  const rawState = yield* readOptionalStructuredFile(stateManaged.absolute, AppliedStateSchema);
+  // Migration: dev-kit ≤0.14 owned the check workflow as a managed output. It
+  // is a scaffold now, so stale lock entries and receipts are dropped on read —
+  // releasing ownership to the repository instead of planning a removal.
+  const dropRetiredOutputs = <O extends { readonly resourceId: string }>(
+    outputs: ReadonlyArray<O>,
+  ) => outputs.filter((output) => output.resourceId !== "setup:vite-plus-github-actions");
+  const currentLock =
+    rawLock === undefined
+      ? undefined
+      : { ...rawLock, outputs: dropRetiredOutputs(rawLock.outputs) };
+  const currentState =
+    rawState === undefined
+      ? undefined
+      : { ...rawState, outputs: dropRetiredOutputs(rawState.outputs) };
 
   yield* validateReservedPaths(projectDir, reservedPaths, [
     ...(currentLock?.outputs ?? []),
@@ -1601,6 +1474,8 @@ export const planProjectSkills = Effect.fn("planProjectSkills")(function* (optio
     ...(effectSource === undefined ? {} : { effectSource }),
     ...(effectTsgo === undefined ? {} : { effectTsgo }),
     ...(vitePlusHooks === undefined ? {} : { vitePlusHooks }),
+    ...(vitePlusWorkflow === undefined ? {} : { vitePlusWorkflow }),
+    ...(worktrunkConfig === undefined ? {} : { worktrunkConfig }),
     nextLock,
     nextState: planned.nextState,
     metadataChanged:
@@ -1627,7 +1502,9 @@ const operationalChangeCount = (plan: SkillPlan): number =>
   plan.actions.filter((action) => action.action !== "unchanged").length +
   (plan.effectSource?.action === "sync" ? 1 : 0) +
   (plan.effectTsgo !== undefined && !plan.effectTsgo.alreadyPatched ? 1 : 0) +
-  (plan.vitePlusHooks?.action === "configure" ? 1 : 0);
+  (plan.vitePlusHooks?.action === "configure" ? 1 : 0) +
+  (plan.vitePlusWorkflow?.action === "scaffold" ? 1 : 0) +
+  (plan.worktrunkConfig?.action === "scaffold" ? 1 : 0);
 
 const plannedChangeCount = (plan: SkillPlan): number => {
   const operational = operationalChangeCount(plan);
@@ -1657,6 +1534,12 @@ export const printSkillPlan = Effect.fn("printSkillPlan")(function* (plan: Skill
   }
   if (plan.vitePlusHooks?.action === "configure") {
     yield* printDetail(`+ Vite+ hooks → ${plan.vitePlusHooks.hooksPath}`);
+  }
+  if (plan.vitePlusWorkflow?.action === "scaffold") {
+    yield* printDetail(`+ scaffold check workflow → ${plan.vitePlusWorkflow.path}`);
+  }
+  if (plan.worktrunkConfig?.action === "scaffold") {
+    yield* printDetail(`+ scaffold Worktrunk config → ${plan.worktrunkConfig.path}`);
   }
   if (operationalChangeCount(plan) === 0 && plan.metadataChanged) {
     yield* printDetail("+ Dev kit metadata");
@@ -1952,6 +1835,8 @@ export const runProjectSkillPlan = Effect.fn("runProjectSkillPlan")(function* (
     effectSource: plan.effectSource,
     effectTsgo: plan.effectTsgo,
     vitePlusHooks: plan.vitePlusHooks,
+    vitePlusWorkflow: plan.vitePlusWorkflow,
+    worktrunkConfig: plan.worktrunkConfig,
     nextLock: plan.nextLock,
     nextState: plan.nextState,
   });
@@ -1960,6 +1845,8 @@ export const runProjectSkillPlan = Effect.fn("runProjectSkillPlan")(function* (
     effectSource: replanned.effectSource,
     effectTsgo: replanned.effectTsgo,
     vitePlusHooks: replanned.vitePlusHooks,
+    vitePlusWorkflow: replanned.vitePlusWorkflow,
+    worktrunkConfig: replanned.worktrunkConfig,
     nextLock: replanned.nextLock,
     nextState: replanned.nextState,
   });
@@ -1980,6 +1867,12 @@ export const runProjectSkillPlan = Effect.fn("runProjectSkillPlan")(function* (
       }
       if (replanned.vitePlusHooks !== undefined) {
         yield* applyVitePlusHooksPlan(replanned.vitePlusHooks);
+      }
+      if (replanned.vitePlusWorkflow !== undefined) {
+        yield* applyScaffoldPlan(replanned.vitePlusWorkflow);
+      }
+      if (replanned.worktrunkConfig !== undefined) {
+        yield* applyScaffoldPlan(replanned.worktrunkConfig);
       }
       yield* applyPlannedSkillChanges(replanned);
     }),

@@ -199,21 +199,14 @@ tool versions. A project-local process lock also prevents concurrent applies.
 ```
 
 - `dev-kit` installs guidance for operating the toolkit itself.
-- `open-pull-request` provides a conventional, context-complete PR workflow
-  with terse English descriptions and verified proof of work.
-- `effect` expands to the package-guidance `effect-ts` bootstrap, the
-  opinionated `effect-architecture-audit`, `build-effect-apis` for shared HTTP
-  contracts and clients, and `build-effect-clis` for typed command-line
-  applications, one-off scripts, and CI/deploy/build automation. The focused
-  references cover Effect Atom, TanStack Start, Cloudflare Workers, child
-  processes, runtime entrypoints, and script/CLI testing.
-- Prefer individual external skills such as `workers-best-practices` and
-  `wrangler`, selected after scanning the project for relevant technologies.
-- `serve-sim` selects the approved Evan Bacon simulator skill directly.
+- `effect` is a built-in family: the `effect-ts` bootstrap,
+  `effect-architecture-audit`, `build-effect-apis`, and `build-effect-clis`.
+- External Git skills (`workers-best-practices`, `serve-sim`, …) are selected
+  individually after scanning the project for relevant technologies. An
+  approved source ID selects every skill from that source; use it only when
+  the scan confirms that every member applies.
 - `@tanstack/ai#ai-core` explicitly selects a skill discovered in that direct
   project dependency; discovery alone never selects it.
-- An approved source ID is broad shorthand that selects every skill from that
-  source. Use it only when the scan confirms that every member applies.
 
 Dev Kit reserves `.repos/<source-id>` for project-local source checkouts. Run
 `dev-kit gitignore` to add `.repos/` and `.dev-kit/` to the project ignore file.
@@ -239,18 +232,17 @@ bridge in the manifest:
 `AGENTS.md`, preserving handwritten project guidance around them. The Dev Kit
 section contains a short description and a pointer to the installed `dev-kit`
 skill. When the root `package.json` declares `vite-plus` directly, Dev Kit
-renders its own repository-specific Vite+ guidance, including the unified
-toolchain overview, help and documentation entry points, and `vp env doctor`
-troubleshooting. It does not import Vite+'s generic `AGENTS.md`, which can
-conflict with the repository's exact commands; transitive installations do not
-opt a project in. Previously managed Vite+ sections are removed during a safe
-owned update. Ambiguous or malformed managed markers fail closed.
+renders its own repository-specific Vite+ guidance — toolchain overview, help
+and documentation entry points, `vp env doctor` troubleshooting — rather than
+importing Vite+'s generic `AGENTS.md`, which can contradict the repository's
+exact commands; transitive installations do not opt a project in. Ambiguous or
+malformed managed markers fail closed.
 
 The Dev Kit section also renders an opinionated project command policy. A
 direct Vite+ dependency makes `vp` the only supported front door: built-in
 format, lint, and test commands use `vp`, while repository tasks and package
-scripts use `vp run`. When Dev Kit manages the quality config, the canonical
-full validation and typecheck commands are `vp run check` and
+scripts use `vp run`. When the manifest enables the Vite+ workflow scaffold,
+the canonical full validation and typecheck commands are `vp run check` and
 `vp run typecheck`; `vp check` alone is only the Vite+ static-check command.
 Without Vite+, Bun is the required package-script runner and Dev Kit lists only
 quality scripts the root package actually declares. The package manager named
@@ -291,7 +283,7 @@ worktree converges its own copy during install while the project-owned
 ## Vite+ quality setup
 
 The repository always owns `vite.config.ts`. Compose Dev Kit's quality defaults
-from that project-owned config, then opt into the hardened GitHub Actions
+from that project-owned config, then opt into the scaffolded GitHub Actions
 workflow independently:
 
 ```ts
@@ -321,13 +313,6 @@ Project and framework-generated paths belong in `ignorePatterns` as shown;
 custom harness target paths belong there too. Dev Kit does not grow a global
 framework ignore list.
 
-Vite+ 0.2.6 forwards JavaScript-plugin declarations into its effective lint
-config but its bundled native Oxlint path does not register or execute those
-rules. Native Oxlint rules and Oxfmt settings remain active; run standalone
-Oxlint when enforcement of Dev Kit's `effect/*` or
-`stylistic/padding-line-between-statements` rules is required. This limitation
-can be removed once a supported Vite+ release executes configured JS plugins.
-
 ```jsonc
 {
   "include": ["dev-kit", "effect"],
@@ -335,19 +320,24 @@ can be removed once a supported Vite+ release executes configured JS plugins.
     "effectTsgo": { "enabled": true },
     "vitePlus": {
       "hooks": { "enabled": true },
-      "quality": {
-        "workflow": { "enabled": true },
-      },
+      "workflow": { "enabled": true },
     },
   },
 }
 ```
 
-`quality.workflow.enabled` owns `.github/workflows/check.yml` but never reads,
-rewrites, adopts, or removes `vite.config.ts`. Workflow setup requires direct
-`@danieljvdm/dev-kit`, `vite-plus`, `effect`, `@effect/tsgo`, and native
-TypeScript dependencies with `setup.effectTsgo.enabled`. The installed Vite+
-must satisfy Dev Kit's peer range.
+`setup.vitePlus.workflow` scaffolds `.github/workflows/check.yml` and never
+reads, rewrites, adopts, or removes `vite.config.ts`. Scaffolds are
+create-only: the file is written only when missing, never recorded in
+`dev-kit.lock.json`, and never touched again — the repository owns it from
+creation, and disabling the task leaves it in place. Edit the YAML directly
+for repository-specific preparation steps or a custom typecheck command; when
+the shipped template improves, compare against the installed copy under
+`node_modules/@danieljvdm/dev-kit/templates/` and merge what fits.
+Scaffolding requires direct `@danieljvdm/dev-kit`, `vite-plus`, `effect`,
+`@effect/tsgo`, and native TypeScript dependencies with
+`setup.effectTsgo.enabled`, and the installed Vite+ must satisfy Dev Kit's
+peer range.
 
 Workspaces select bounded, dependency-ordered typechecking in their config:
 
@@ -363,44 +353,51 @@ export default defineConfig(
 );
 ```
 
-Each listed package must expose a pure `typecheck` script. Repositories can
-also declare workflow-specific preparation and typecheck commands:
+Each listed package must expose a pure `typecheck` script.
 
-```jsonc
-{
-  "setup": {
-    "effectTsgo": { "enabled": true },
-    "vitePlus": {
-      "quality": {
-        "workflow": {
-          "enabled": true,
-          "beforeChecks": [
-            {
-              "name": "Install media tools",
-              "run": ["sudo apt-get update", "sudo apt-get install --yes ffmpeg"],
-            },
-          ],
-          "typecheck": [
-            "vp run -F './apps/*' -F './packages/*' check",
-            "vp exec tsc --noEmit -p scripts/tsconfig.json",
-          ],
-        },
-      },
-    },
-  },
-}
-```
-
-The workflow performs one frozen, script-suppressed install, runs
-`dev-kit apply --locked`, and only then runs preparation, formatting, linting,
-tests, and typechecking. Its default typecheck command is `vp run typecheck`;
-`workflow.typecheck` replaces it. Existing workflows remain user-owned until
-their rendered content matches exactly—Dev Kit never merges YAML. See the
-primary
+The scaffolded workflow performs one frozen, script-suppressed install, runs
+`dev-kit apply --locked`, and only then runs formatting, linting, tests, and
+`vp run typecheck`. See the primary
 [`setup-vp` versioning guidance](https://github.com/voidzero-dev/setup-vp#versioning),
 [Vite+ install guide](https://viteplus.dev/guide/install), and
 [Vite Task run guide](https://viteplus.dev/guide/run) when maintaining the
 templates.
+
+## Worktrunk project config
+
+Enable a scaffolded default [Worktrunk](https://worktrunk.dev) project config
+in the manifest:
+
+```jsonc
+{
+  "include": ["dev-kit"],
+  "setup": {
+    "worktrunk": { "config": { "enabled": true } },
+  },
+}
+```
+
+`setup.worktrunk.config` scaffolds `.config/wt.toml` with the portable hooks an
+app repository wants in every worktree: a `pre-start` pipeline that copies
+gitignored files matched by `.worktreeinclude` (a no-op without that file) and
+then installs dependencies, plus a `pre-merge` full-validation hook. Hook
+commands render for the repository's command runner: a direct `vite-plus`
+dependency selects `vp install` and `vp run check`; otherwise Dev Kit requires
+a declared root `check` package script, runs it through `bun run check`, and
+takes the install command from the detected package manager. Repositories with
+neither fail the plan instead of shipping a broken hook.
+
+The config follows the same create-only scaffold semantics as the check
+workflow above: created once, never locked or touched again, owned by the
+repository. Edit hooks freely after creation.
+
+The config intentionally carries no worktree-path template or other user
+preferences—those belong in each user's `~/.config/worktrunk/config.toml`. A
+commented `post-start` block shows how to run a per-worktree dev server on a
+stable branch-derived port (`{{ branch | hash_port }}`) under `wt step tether`;
+point it at the repository's dev entrypoint and uncomment to opt in. Worktrunk
+never runs project hooks until each user approves them with
+`wt config approvals add`.
 
 ## Effect source checkout
 
@@ -522,31 +519,20 @@ bun x dev-kit add @tanstack/ai#ai-core
 That writes `@tanstack/ai#ai-core` to `dev-kit.jsonc` and, unless
 `--no-apply` is passed, installs it through the normal ownership-safe sync
 path. The qualifier prevents ambiguity when two dependencies publish the same
-skill name, and the installed output carries it too: the copied directory is
-named by flattening the package name (drop `@`, turn every other
-non-alphanumeric run into one dash) and appending the skill name, so
-`@tanstack/ai#ai-core` installs as `tanstack-ai-ai-core`. Agent harnesses
-identify a project skill by its directory name, so the copied `SKILL.md`
-frontmatter `name:` is rewritten to that same install name; all other content
-is copied verbatim. Symlink-mode targets link straight into `node_modules`, so
-only the link itself carries the qualified name while the linked frontmatter
-keeps the upstream bare name. Two selected skills that would both write the
-same destination are rejected before any output is changed.
+skill name, and the installed output carries it: the copied directory flattens
+the package name and appends the skill name (`@tanstack/ai#ai-core` →
+`tanstack-ai-ai-core`), and the copied `SKILL.md` frontmatter `name:` is
+rewritten to match because harnesses identify a skill by its directory name.
+Symlink-mode targets link straight into `node_modules`, so only the link
+carries the qualified name. Two selections that would write the same
+destination are rejected before any output changes.
 
-The initial compatibility boundary is intentionally small and deterministic:
-
-- only packages named in the root project's `dependencies`,
-  `devDependencies`, `optionalDependencies`, or `peerDependencies` are
-  scanned;
-- package code is never imported or executed;
-- npm-style and pnpm/workspace symlinks under `node_modules` are supported;
-- Yarn Plug'n'Play and transitive dependency traversal are not scanned; and
-- immediate `skills/<name>/SKILL.md` roots are listed. Nested topic skills and
-  references remain part of that root and are copied with it.
-
-The last rule adapts Intent's routed, nested skill trees to the immediate folder
-and frontmatter-name invariants expected by Agent Skills targets. Dev Kit does
-not rewrite nested names or ask Intent to manage agent configuration.
+The compatibility boundary is intentionally small and deterministic: only the
+root project's direct dependencies are scanned, package code is never imported
+or executed, npm-style and pnpm/workspace symlinks are supported (Yarn
+Plug'n'Play and transitive traversal are not), and only immediate
+`skills/<name>/SKILL.md` roots are listed — nested topic skills and references
+are copied as part of their root.
 
 The project `dev-kit.lock.json` records the selected package name, installed
 version, original bare skill name, and the `node_modules` content digest.
@@ -652,7 +638,11 @@ export default defineConfig({
 The Oxlint preset enables `stylistic/padding-line-between-statements`: adjacent
 variable declarations remain grouped, while the next logical statement and
 all `return` statements require a separating blank line. The rule is fixable,
-so `vp lint --fix` repairs missing spacing automatically.
+so `vp lint --fix` repairs missing spacing automatically. Vite+ 0.2.6 forwards
+the preset's JavaScript-plugin declarations but its native Oxlint path does not
+execute their rules — run standalone Oxlint when `effect/*` or the padding rule
+must be enforced, until a supported Vite+ release executes configured JS
+plugins.
 
 The preset also registers the shared `effect` JavaScript plugin. Effect
 projects opt into its rules in path-specific overrides, for example

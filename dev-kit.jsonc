@@ -8,9 +8,10 @@
     "effectTsgo": { "enabled": true },
     "vitePlus": {
       "hooks": { "enabled": true },
-      "quality": {
-        "workflow": { "enabled": true },
-      },
+      "workflow": { "enabled": true },
+    },
+    "worktrunk": {
+      "config": { "enabled": true },
     },
   },
   "targets": {

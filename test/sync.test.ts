@@ -211,7 +211,6 @@ const createInstructionProject = Effect.fn("createInstructionProject")(function*
 
 const createLockedInstructionFixture = Effect.fn("createLockedInstructionFixture")(function* (
   mode: number,
-  toolVersion?: string,
 ) {
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
@@ -227,7 +226,6 @@ const createLockedInstructionFixture = Effect.fn("createLockedInstructionFixture
   );
 
   assert.isDefined(instructions);
-  if (toolVersion !== undefined) lock.toolVersion = toolVersion;
   instructions.digest = yield* rawModeFileDigest(oldContent, mode);
   yield* fs.writeFileString(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
   yield* fs.remove(fixture.statePath, { force: true, recursive: true });
@@ -252,7 +250,6 @@ describe("project apply", () => {
             setup: {
               vitePlus: {
                 quality: {
-                  config: { enabled: false },
                   workflow: { enabled: false },
                 },
               },
@@ -262,7 +259,7 @@ describe("project apply", () => {
         const result = yield* runDevKit(projectDir, ["plan", "--project-dir", projectDir]);
 
         assert.notStrictEqual(result.exitCode, 0);
-        assert.include(result.output, "config");
+        assert.include(result.output, "quality");
         assert.match(result.output, /excess property|Unexpected key/i);
       }),
     );
@@ -566,21 +563,6 @@ describe("project apply", () => {
 
         assert.notStrictEqual(result.exitCode, 0);
         assert.match(result.output, /managed instruction sections exist but are not owned/);
-      }),
-    );
-
-    it.effect("updates an unchanged pre-normalization lock without local state", () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const fixture = yield* createLockedInstructionFixture(0o600, "0.6.0");
-        const result = yield* runDevKit(fixture.projectDir, [
-          "apply",
-          "--project-dir",
-          fixture.projectDir,
-        ]);
-
-        assert.strictEqual(result.exitCode, 0, result.output);
-        assert.notInclude(yield* fs.readFileString(fixture.instructionsPath), "old release");
       }),
     );
 

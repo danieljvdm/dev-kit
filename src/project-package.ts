@@ -40,6 +40,57 @@ export const readProjectPackage = Effect.fn("readProjectPackage")(function* (pro
   return manifest;
 });
 
+export const PACKAGE_MANAGER_COMMANDS = {
+  bun: { install: "bun install", label: "Bun" },
+  npm: { install: "npm install", label: "npm" },
+  pnpm: { install: "pnpm install", label: "pnpm" },
+  yarn: { install: "yarn install", label: "Yarn" },
+} as const;
+
+export type PackageManagerName = keyof typeof PACKAGE_MANAGER_COMMANDS;
+
+const packageManagerName = (declaration: string | undefined): PackageManagerName | undefined => {
+  const name = declaration?.split("@", 1)[0];
+
+  return name !== undefined && name in PACKAGE_MANAGER_COMMANDS
+    ? (name as PackageManagerName)
+    : undefined;
+};
+
+export const detectPackageManager = Effect.fn("detectPackageManager")(function* (
+  projectDir: string,
+  declaration: string | undefined,
+) {
+  const declared = packageManagerName(declaration);
+
+  if (declared !== undefined || declaration !== undefined) return declared;
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+  const lockfiles: ReadonlyArray<readonly [PackageManagerName, ReadonlyArray<string>]> = [
+    ["bun", ["bun.lock", "bun.lockb"]],
+    ["npm", ["package-lock.json", "npm-shrinkwrap.json"]],
+    ["pnpm", ["pnpm-lock.yaml"]],
+    ["yarn", ["yarn.lock"]],
+  ];
+  const detected: Array<PackageManagerName> = [];
+
+  for (const [manager, files] of lockfiles) {
+    let found = false;
+
+    for (const file of files) {
+      if (yield* fs.exists(path.join(projectDir, file))) {
+        found = true;
+        break;
+      }
+    }
+    if (found) {
+      detected.push(manager);
+    }
+  }
+
+  return detected.length === 1 ? detected[0] : undefined;
+});
+
 export const readDirectDependencyNames = Effect.fn("readDirectDependencyNames")(function* (
   projectDir: string,
 ) {

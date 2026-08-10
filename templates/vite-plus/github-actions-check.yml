@@ -38,8 +38,6 @@ jobs:
       - name: Verify locked Dev Kit setup
         run: bun ./node_modules/@danieljvdm/dev-kit/bin/dev-kit.mjs apply --locked
 
-      # Dev Kit inserts configured quality.workflow.beforeChecks steps here.
-
       - name: Check formatting
         run: vp fmt --check
 

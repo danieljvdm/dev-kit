@@ -2,12 +2,7 @@ import { NodeServices } from "@effect/platform-node";
 import { assert, describe, layer } from "@effect/vitest";
 import { Effect, FileSystem, Path } from "effect";
 
-import {
-  digestFileContent,
-  digestText,
-  observePath,
-  observePathWithRawModes,
-} from "../src/path-digest.ts";
+import { digestFileContent, digestText, observePath } from "../src/path-digest.ts";
 
 describe("path digest", () => {
   layer(NodeServices.layer)((it) => {
@@ -89,10 +84,6 @@ describe("path digest", () => {
         assert.strictEqual(
           yield* digestFileContent("same\n", 0o700),
           yield* digestFileContent("same\n", 0o755),
-        );
-        assert.notDeepEqual(
-          yield* observePathWithRawModes(restricted),
-          yield* observePathWithRawModes(readable),
         );
       }),
     );
