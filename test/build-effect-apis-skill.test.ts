@@ -61,6 +61,7 @@ describe("build-effect-apis skill", () => {
           path.join(referencesDir, "server-and-middleware.md"),
         );
         const runtime = yield* fs.readFileString(path.join(referencesDir, "runtime-assembly.md"));
+        const verification = yield* fs.readFileString(path.join(referencesDir, "verification.md"));
 
         assert.match(cloudflare, /effect-cf/);
         assert.match(cloudflare, /raw route escape hatches/i);
@@ -74,6 +75,13 @@ describe("build-effect-apis skill", () => {
         assert.match(server, /Effect\.catchReasons/);
         assert.match(runtime, /HttpRouter\.toWebHandler/);
         assert.match(runtime, /HttpApiScalar\.layer/);
+        assert.match(skill, /Choose typed Schema codecs by default/);
+        assert.match(skill, /Schema\.decodeEffect/);
+        assert.match(skill, /Schema\.encodePromise/);
+        assert.match(skill, /Never choose an unknown codec to bypass a `Schema\.Class`/);
+        assert.match(verification, /Inventory every `Schema\.decodeUnknown\*`/);
+        assert.match(verification, /concrete untyped-boundary justification/);
+        assert.match(verification, /lint warning/);
       }),
     );
   });
