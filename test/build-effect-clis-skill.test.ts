@@ -15,7 +15,18 @@ describe("build-effect-clis skill", () => {
         const skill = yield* fs.readFileString(path.join(skillDir, "SKILL.md"));
 
         assert.match(skill, /^---\nname: build-effect-clis\ndescription: /);
-        assert.match(skill, /command-line applications entirely with Effect/i);
+        assert.match(
+          skill,
+          /description: .*every executable script.*CI check.*existing plain-TypeScript script/i,
+        );
+        assert.match(skill, /Every executable script and CLI .* is an Effect program/i);
+        assert.match(skill, /convert the whole script to Effect\s+in the same change/i);
+        assert.match(
+          skill,
+          /matching the surrounding file's style or minimizing the\s+diff is not a valid exception/i,
+        );
+        assert.match(skill, /good, concrete technical or user\s+constraint/i);
+        assert.match(skill, /Raw `node:\*`.*`process\.env`.*`child_process`/s);
         assert.match(skill, /Command\.run/);
         assert.match(skill, /Schema\.TaggedError/);
         assert.notMatch(skill, /TODO/);
