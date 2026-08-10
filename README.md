@@ -249,8 +249,8 @@ owned update. Ambiguous or malformed managed markers fail closed.
 The Dev Kit section also renders an opinionated project command policy. A
 direct Vite+ dependency makes `vp` the only supported front door: built-in
 format, lint, and test commands use `vp`, while repository tasks and package
-scripts use `vp run`. When Dev Kit manages the quality config, the canonical
-full validation and typecheck commands are `vp run check` and
+scripts use `vp run`. When the manifest enables the Vite+ workflow scaffold,
+the canonical full validation and typecheck commands are `vp run check` and
 `vp run typecheck`; `vp check` alone is only the Vite+ static-check command.
 Without Vite+, Bun is the required package-script runner and Dev Kit lists only
 quality scripts the root package actually declares. The package manager named
@@ -291,7 +291,7 @@ worktree converges its own copy during install while the project-owned
 ## Vite+ quality setup
 
 The repository always owns `vite.config.ts`. Compose Dev Kit's quality defaults
-from that project-owned config, then opt into the hardened GitHub Actions
+from that project-owned config, then opt into the scaffolded GitHub Actions
 workflow independently:
 
 ```ts
@@ -335,19 +335,24 @@ can be removed once a supported Vite+ release executes configured JS plugins.
     "effectTsgo": { "enabled": true },
     "vitePlus": {
       "hooks": { "enabled": true },
-      "quality": {
-        "workflow": { "enabled": true },
-      },
+      "workflow": { "enabled": true },
     },
   },
 }
 ```
 
-`quality.workflow.enabled` owns `.github/workflows/check.yml` but never reads,
-rewrites, adopts, or removes `vite.config.ts`. Workflow setup requires direct
-`@danieljvdm/dev-kit`, `vite-plus`, `effect`, `@effect/tsgo`, and native
-TypeScript dependencies with `setup.effectTsgo.enabled`. The installed Vite+
-must satisfy Dev Kit's peer range.
+`setup.vitePlus.workflow` scaffolds `.github/workflows/check.yml` and never
+reads, rewrites, adopts, or removes `vite.config.ts`. Like the Worktrunk
+scaffold below, the workflow is created once and then belongs to the
+repository: it is never recorded in `dev-kit.lock.json`, an existing file is
+never touched, and disabling the task leaves it in place. Edit the YAML
+directly for repository-specific preparation steps or a custom typecheck
+command; when the shipped template improves, compare against
+`node_modules/@danieljvdm/dev-kit/templates/vite-plus/github-actions-check.yml`
+and merge what fits. Scaffolding requires direct `@danieljvdm/dev-kit`,
+`vite-plus`, `effect`, `@effect/tsgo`, and native TypeScript dependencies with
+`setup.effectTsgo.enabled`, and the installed Vite+ must satisfy Dev Kit's peer
+range.
 
 Workspaces select bounded, dependency-ordered typechecking in their config:
 
@@ -363,40 +368,11 @@ export default defineConfig(
 );
 ```
 
-Each listed package must expose a pure `typecheck` script. Repositories can
-also declare workflow-specific preparation and typecheck commands:
+Each listed package must expose a pure `typecheck` script.
 
-```jsonc
-{
-  "setup": {
-    "effectTsgo": { "enabled": true },
-    "vitePlus": {
-      "quality": {
-        "workflow": {
-          "enabled": true,
-          "beforeChecks": [
-            {
-              "name": "Install media tools",
-              "run": ["sudo apt-get update", "sudo apt-get install --yes ffmpeg"],
-            },
-          ],
-          "typecheck": [
-            "vp run -F './apps/*' -F './packages/*' check",
-            "vp exec tsc --noEmit -p scripts/tsconfig.json",
-          ],
-        },
-      },
-    },
-  },
-}
-```
-
-The workflow performs one frozen, script-suppressed install, runs
-`dev-kit apply --locked`, and only then runs preparation, formatting, linting,
-tests, and typechecking. Its default typecheck command is `vp run typecheck`;
-`workflow.typecheck` replaces it. Existing workflows remain user-owned until
-their rendered content matches exactly—Dev Kit never merges YAML. See the
-primary
+The scaffolded workflow performs one frozen, script-suppressed install, runs
+`dev-kit apply --locked`, and only then runs formatting, linting, tests, and
+`vp run typecheck`. See the primary
 [`setup-vp` versioning guidance](https://github.com/voidzero-dev/setup-vp#versioning),
 [Vite+ install guide](https://viteplus.dev/guide/install), and
 [Vite Task run guide](https://viteplus.dev/guide/run) when maintaining the

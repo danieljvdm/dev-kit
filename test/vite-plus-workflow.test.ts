@@ -9,12 +9,13 @@ import {
   renderVitePlusWorkflowTemplate,
   VITE_PLUS_GITHUB_ACTIONS_PATH,
   VITE_PLUS_GITHUB_ACTIONS_TEMPLATE,
-} from "../src/vite-plus-quality.ts";
+} from "../src/vite-plus-workflow.ts";
 import { repositoryRoot, runCommandSuccess, runDevKit } from "./test-platform.ts";
 
 const VITE_CONFIG_PATH = "vite.config.ts";
+const FAKE_DIGEST = `sha256:${"0".repeat(64)}`;
 
-const writePackageVersion = Effect.fn("writeQualityTestPackageVersion")(function* (
+const writePackageVersion = Effect.fn("writeWorkflowTestPackageVersion")(function* (
   projectDir: string,
   packageName: string,
   version: string,
@@ -30,7 +31,7 @@ const writePackageVersion = Effect.fn("writeQualityTestPackageVersion")(function
   );
 });
 
-const installSupportedToolchain = Effect.fn("installQualityTestToolchain")(function* (
+const installSupportedToolchain = Effect.fn("installWorkflowTestToolchain")(function* (
   projectDir: string,
 ) {
   const fs = yield* FileSystem.FileSystem;
@@ -72,17 +73,12 @@ cp "$PWD/node_modules/${effectPlatformPackage}/lib/tsc" "$PWD/node_modules/${typ
   yield* fs.writeFileString(path.join(binDir, "vp"), "#!/bin/sh\nexit 0\n", { mode: 0o755 });
 });
 
-const writeFixture = Effect.fn("writeQualityTestFixture")(function* (
+const writeFixture = Effect.fn("writeWorkflowTestFixture")(function* (
   projectDir: string,
   options: {
     readonly workflow?: boolean;
     readonly effectTsgo?: boolean;
     readonly completeDependencies?: boolean;
-    readonly beforeChecks?: ReadonlyArray<{
-      readonly name: string;
-      readonly run: ReadonlyArray<string>;
-    }>;
-    readonly workflowTypecheck?: ReadonlyArray<string>;
   } = {},
 ) {
   const fs = yield* FileSystem.FileSystem;
@@ -96,19 +92,7 @@ const writeFixture = Effect.fn("writeQualityTestFixture")(function* (
         include: [],
         setup: {
           effectTsgo: { enabled: options.effectTsgo ?? true },
-          vitePlus: {
-            quality: {
-              workflow: {
-                enabled: options.workflow ?? true,
-                ...(options.beforeChecks === undefined
-                  ? {}
-                  : { beforeChecks: options.beforeChecks }),
-                ...(options.workflowTypecheck === undefined
-                  ? {}
-                  : { typecheck: options.workflowTypecheck }),
-              },
-            },
-          },
+          vitePlus: { workflow: { enabled: options.workflow ?? true } },
         },
         targets: { agents: { enabled: false } },
       },
@@ -120,7 +104,7 @@ const writeFixture = Effect.fn("writeQualityTestFixture")(function* (
     path.join(projectDir, "package.json"),
     `${JSON.stringify(
       {
-        name: "quality-fixture",
+        name: "workflow-fixture",
         dependencies: completeDependencies
           ? { "@danieljvdm/dev-kit": "0.11.3", effect: "4.0.0-beta.105" }
           : {},
@@ -138,9 +122,9 @@ const writeFixture = Effect.fn("writeQualityTestFixture")(function* (
   );
 });
 
-const createFixture = Effect.fn("createQualityTestFixture")(function* () {
+const createFixture = Effect.fn("createWorkflowTestFixture")(function* () {
   const fs = yield* FileSystem.FileSystem;
-  const projectDir = yield* fs.makeTempDirectoryScoped({ prefix: "dev-kit-quality-test-" });
+  const projectDir = yield* fs.makeTempDirectoryScoped({ prefix: "dev-kit-workflow-test-" });
 
   yield* runCommandSuccess(projectDir, "git", ["init", "--initial-branch", "main"]);
   yield* writeFixture(projectDir);
@@ -149,7 +133,7 @@ const createFixture = Effect.fn("createQualityTestFixture")(function* () {
   return projectDir;
 });
 
-describe("Vite+ quality setup", () => {
+describe("Vite+ workflow setup", () => {
   layer(NodeServices.layer)((it) => {
     it.effect("tests a Vite+ version inside the advertised peer range", () =>
       Effect.sync(() => {
@@ -157,7 +141,7 @@ describe("Vite+ quality setup", () => {
       }),
     );
 
-    it.effect("manages the workflow while preserving a project-owned Vite config", () =>
+    it.effect("scaffolds the workflow without owning it or the Vite config", () =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
         const path = yield* Path.Path;
@@ -172,44 +156,113 @@ describe("Vite+ quality setup", () => {
           yield* fs.readFileString(path.join(projectDir, VITE_CONFIG_PATH)),
           customConfig,
         );
-        assert.isTrue(yield* fs.exists(path.join(projectDir, VITE_PLUS_GITHUB_ACTIONS_PATH)));
-        const lock = JSON.parse(
-          yield* fs.readFileString(path.join(projectDir, "dev-kit.lock.json")),
-        );
-
-        assert.deepEqual(
-          lock.outputs.map((output: { resourceId: string }) => output.resourceId),
-          ["setup:vite-plus-github-actions"],
-        );
-      }),
-    );
-
-    it.effect("renders custom preparation and typecheck commands", () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const path = yield* Path.Path;
-        const projectDir = yield* createFixture();
-
-        yield* writeFixture(projectDir, {
-          beforeChecks: [
-            {
-              name: "Install media tools",
-              run: ["sudo apt-get update", "sudo apt-get install --yes ffmpeg"],
-            },
-          ],
-          workflowTypecheck: ["vp run -F './apps/*' check", "vp exec tsc -p scripts/tsconfig.json"],
-        });
-        const applied = yield* runDevKit(projectDir, ["apply", "--project-dir", projectDir]);
-
-        assert.strictEqual(applied.exitCode, 0, applied.output);
         const workflow = yield* fs.readFileString(
           path.join(projectDir, VITE_PLUS_GITHUB_ACTIONS_PATH),
         );
 
-        assert.include(workflow, '- name: "Install media tools"');
-        assert.include(workflow, "sudo apt-get install --yes ffmpeg");
-        assert.include(workflow, "vp run -F './apps/*' check");
-        assert.include(workflow, "vp exec tsc -p scripts/tsconfig.json");
+        assert.include(workflow, "apply --locked");
+        const lock = JSON.parse(
+          yield* fs.readFileString(path.join(projectDir, "dev-kit.lock.json")),
+        );
+
+        assert.deepEqual(lock.outputs, []);
+      }),
+    );
+
+    it.effect("never rewrites an existing repository-owned workflow", () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const projectDir = yield* createFixture();
+        const destination = path.join(projectDir, VITE_PLUS_GITHUB_ACTIONS_PATH);
+        const customWorkflow = "name: Custom Check\non: [push]\n";
+
+        yield* fs.makeDirectory(path.dirname(destination), { recursive: true });
+        yield* fs.writeFileString(destination, customWorkflow);
+        const applied = yield* runDevKit(projectDir, ["apply", "--project-dir", projectDir]);
+
+        assert.strictEqual(applied.exitCode, 0, applied.output);
+        assert.strictEqual(yield* fs.readFileString(destination), customWorkflow);
+      }),
+    );
+
+    it.effect("releases a previously managed workflow to the repository on upgrade", () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const projectDir = yield* createFixture();
+        const destination = path.join(projectDir, VITE_PLUS_GITHUB_ACTIONS_PATH);
+        const existingWorkflow = "name: Check\non: [push]\n";
+        const legacyOutput = {
+          resourceId: "setup:vite-plus-github-actions",
+          path: VITE_PLUS_GITHUB_ACTIONS_PATH,
+          sourcePath: VITE_PLUS_GITHUB_ACTIONS_TEMPLATE,
+          mode: "copy",
+          kind: "file",
+          digest: FAKE_DIGEST,
+        };
+
+        yield* fs.makeDirectory(path.dirname(destination), { recursive: true });
+        yield* fs.writeFileString(destination, existingWorkflow);
+        yield* fs.writeFileString(
+          path.join(projectDir, "dev-kit.lock.json"),
+          `${JSON.stringify(
+            {
+              version: 1,
+              toolVersion: "0.14.0",
+              manifestDigest: FAKE_DIGEST,
+              outputs: [legacyOutput],
+            },
+            null,
+            2,
+          )}\n`,
+        );
+        yield* fs.makeDirectory(path.join(projectDir, ".dev-kit"), { recursive: true });
+        yield* fs.writeFileString(
+          path.join(projectDir, ".dev-kit", "state.json"),
+          `${JSON.stringify(
+            {
+              version: 1,
+              appliedLockDigest: FAKE_DIGEST,
+              outputs: [
+                {
+                  resourceId: "setup:vite-plus-github-actions",
+                  path: VITE_PLUS_GITHUB_ACTIONS_PATH,
+                  mode: "copy",
+                  kind: "file",
+                  digest: FAKE_DIGEST,
+                },
+              ],
+            },
+            null,
+            2,
+          )}\n`,
+        );
+        const applied = yield* runDevKit(projectDir, ["apply", "--project-dir", projectDir]);
+
+        assert.strictEqual(applied.exitCode, 0, applied.output);
+        assert.strictEqual(yield* fs.readFileString(destination), existingWorkflow);
+        const lock = JSON.parse(
+          yield* fs.readFileString(path.join(projectDir, "dev-kit.lock.json")),
+        );
+
+        assert.deepEqual(lock.outputs, []);
+      }),
+    );
+
+    it.effect("leaves the scaffolded workflow in place when disabled", () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const projectDir = yield* createFixture();
+        const applied = yield* runDevKit(projectDir, ["apply", "--project-dir", projectDir]);
+
+        assert.strictEqual(applied.exitCode, 0, applied.output);
+        yield* writeFixture(projectDir, { workflow: false });
+        const disabled = yield* runDevKit(projectDir, ["apply", "--project-dir", projectDir]);
+
+        assert.strictEqual(disabled.exitCode, 0, disabled.output);
+        assert.isTrue(yield* fs.exists(path.join(projectDir, VITE_PLUS_GITHUB_ACTIONS_PATH)));
       }),
     );
 
@@ -236,48 +289,19 @@ describe("Vite+ quality setup", () => {
       }),
     );
 
-    it.effect("fails closed when a workflow template marker drifts", () =>
+    it.effect("fails closed when the locked-command template marker drifts", () =>
       Effect.sync(() => {
         assert.throws(
           () =>
-            renderVitePlusWorkflowTemplate(
-              "run: bun ./node_modules/@danieljvdm/dev-kit/bin/dev-kit.mjs apply --locked\n",
-              {
-                workflow: {
-                  beforeChecks: [{ name: "Prepare", run: ["true"] }],
-                  typecheck: ["vp run typecheck"],
-                },
-              },
-            ),
+            renderVitePlusWorkflowTemplate("run: vp run check\n", {
+              devKitCommand: "./bin/dev-kit.mjs apply --locked",
+            }),
           /expected exactly one generated template marker/,
         );
       }),
     );
 
-    it.effect("removes only the workflow when disabled", () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const path = yield* Path.Path;
-        const projectDir = yield* createFixture();
-        const customConfig = "export default { custom: true };\n";
-
-        yield* fs.writeFileString(path.join(projectDir, VITE_CONFIG_PATH), customConfig);
-        const applied = yield* runDevKit(projectDir, ["apply", "--project-dir", projectDir]);
-
-        assert.strictEqual(applied.exitCode, 0, applied.output);
-        yield* writeFixture(projectDir, { workflow: false });
-        const removed = yield* runDevKit(projectDir, ["apply", "--project-dir", projectDir]);
-
-        assert.strictEqual(removed.exitCode, 0, removed.output);
-        assert.isFalse(yield* fs.exists(path.join(projectDir, VITE_PLUS_GITHUB_ACTIONS_PATH)));
-        assert.strictEqual(
-          yield* fs.readFileString(path.join(projectDir, VITE_CONFIG_PATH)),
-          customConfig,
-        );
-      }),
-    );
-
-    it.effect("rejects unsupported workflow repositories", () =>
+    it.effect("rejects unsupported workflow repositories before scaffolding", () =>
       Effect.gen(function* () {
         const projectDir = yield* createFixture();
 

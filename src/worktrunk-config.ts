@@ -1,13 +1,12 @@
-import { Effect, FileSystem, Path, Schema } from "effect";
+import { Effect, Schema } from "effect";
 
-import { observeSymbolicLink } from "./node-symbolic-link.ts";
 import {
   detectPackageManager,
   PACKAGE_MANAGER_COMMANDS,
   readDirectDependencyNames,
   readProjectPackage,
 } from "./project-package.ts";
-import { replaceUniqueTemplateMarker } from "./vite-plus-quality.ts";
+import { planScaffold, readScaffoldTemplate, replaceUniqueTemplateMarker } from "./scaffold.ts";
 
 export const WORKTRUNK_CONFIG_PATH = ".config/wt.toml";
 export const WORKTRUNK_CONFIG_TEMPLATE = "templates/worktrunk/wt.toml";
@@ -21,13 +20,6 @@ export type WorktrunkConfigCommands = {
   readonly preMerge: string;
   readonly install: string;
   readonly dev: string;
-};
-
-export type WorktrunkConfigPlan = {
-  readonly action: "scaffold" | "unchanged";
-  readonly path: string;
-  readonly destination: string;
-  readonly content?: string;
 };
 
 const TEMPLATE_COMMANDS: WorktrunkConfigCommands = {
@@ -83,50 +75,14 @@ export const resolveWorktrunkConfigCommands = Effect.fn("resolveWorktrunkConfigC
   },
 );
 
-// The config is a scaffold, not a managed output: dev-kit creates it once and
-// the repository owns it afterwards, so an existing destination is never read,
-// compared, updated, or removed.
-export const planWorktrunkConfig = Effect.fn("planWorktrunkConfig")(function* (
-  packageRoot: string,
-  projectDir: string,
-) {
-  const fs = yield* FileSystem.FileSystem;
-  const path = yield* Path.Path;
-  const destination = path.join(projectDir, ...WORKTRUNK_CONFIG_PATH.split("/"));
-  const observed = yield* observeSymbolicLink(destination);
-
-  if (observed.kind !== "missing") {
-    return {
-      action: "unchanged",
-      path: WORKTRUNK_CONFIG_PATH,
-      destination,
-    } satisfies WorktrunkConfigPlan;
-  }
-  const templatePath = path.join(packageRoot, WORKTRUNK_CONFIG_TEMPLATE);
-
-  if (!(yield* fs.exists(templatePath))) {
-    return yield* WorktrunkConfigSupportError.make({
-      message: `dev-kit worktrunk config template is missing: ${WORKTRUNK_CONFIG_TEMPLATE}`,
-    });
-  }
-  const template = yield* fs.readFileString(templatePath);
-  const commands = yield* resolveWorktrunkConfigCommands(projectDir);
-
-  return {
-    action: "scaffold",
+export const planWorktrunkConfig = (packageRoot: string, projectDir: string) =>
+  planScaffold({
+    projectDir,
     path: WORKTRUNK_CONFIG_PATH,
-    destination,
-    content: renderWorktrunkConfigTemplate(template, commands),
-  } satisfies WorktrunkConfigPlan;
-});
+    content: Effect.gen(function* () {
+      const template = yield* readScaffoldTemplate(packageRoot, WORKTRUNK_CONFIG_TEMPLATE);
+      const commands = yield* resolveWorktrunkConfigCommands(projectDir);
 
-export const applyWorktrunkConfigPlan = Effect.fn("applyWorktrunkConfigPlan")(function* (
-  plan: WorktrunkConfigPlan,
-) {
-  if (plan.action !== "scaffold" || plan.content === undefined) return;
-  const fs = yield* FileSystem.FileSystem;
-  const path = yield* Path.Path;
-
-  yield* fs.makeDirectory(path.dirname(plan.destination), { recursive: true });
-  yield* fs.writeFileString(plan.destination, plan.content);
-});
+      return renderWorktrunkConfigTemplate(template, commands);
+    }),
+  });

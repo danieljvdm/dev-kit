@@ -147,8 +147,8 @@
         "hooks": {
           "$ref": "#/$defs/vitePlusHooksSetup"
         },
-        "quality": {
-          "$ref": "#/$defs/vitePlusQualitySetup"
+        "workflow": {
+          "$ref": "#/$defs/vitePlusWorkflowSetup"
         }
       }
     },
@@ -163,61 +163,14 @@
         }
       }
     },
-    "vitePlusQualitySetup": {
-      "description": "Manage the Vite+ quality workflow while the repository owns and extends vite.config.ts.",
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "workflow": {
-          "$ref": "#/$defs/vitePlusQualityWorkflowSetup"
-        }
-      }
-    },
-    "vitePlusQualityWorkflowSetup": {
-      "description": "Manage the canonical GitHub Actions check workflow without requiring Dev Kit to own the Vite config.",
+    "vitePlusWorkflowSetup": {
+      "description": "Scaffold the canonical GitHub Actions check workflow (.github/workflows/check.yml); the repository owns the file after creation.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "enabled": {
           "type": "boolean",
           "default": false
-        },
-        "beforeChecks": {
-          "description": "Repository-specific preparation steps inserted after locked setup verification and before quality checks.",
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/vitePlusQualityWorkflowStep"
-          },
-          "default": []
-        },
-        "typecheck": {
-          "description": "Shell commands for the workflow's pure typecheck step.",
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string",
-            "minLength": 1
-          },
-          "default": ["vp run typecheck"]
-        }
-      }
-    },
-    "vitePlusQualityWorkflowStep": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["name", "run"],
-      "properties": {
-        "name": {
-          "type": "string",
-          "minLength": 1
-        },
-        "run": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string",
-            "minLength": 1
-          }
         }
       }
     },

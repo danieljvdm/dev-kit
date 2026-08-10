@@ -27,7 +27,6 @@ const textEncoder = new TextEncoder();
 // Git preserves only the executable distinction for regular files. Canonicalizing
 // the remaining bits keeps digests stable across checkout and copy umasks.
 const canonicalFileMode = (mode: number): number => ((mode & 0o111) === 0 ? 0o644 : 0o755);
-const rawFileMode = (mode: number): number => mode & 0o777;
 
 const frame = (value: string | Uint8Array): Uint8Array => {
   const bytes = typeof value === "string" ? textEncoder.encode(value) : value;
@@ -145,18 +144,6 @@ const digestFileSystemPath = Effect.fn("digestFileSystemPath")(function* (
 
 export const observePath = Effect.fn("observeManagedPath")(function* (absolutePath: string) {
   return yield* digestFileSystemPath(absolutePath, canonicalFileMode).pipe(
-    Effect.mapError((cause) =>
-      Schema.is(PathInspectionError)(cause)
-        ? cause
-        : PathInspectionError.make({ path: absolutePath, operation: "inspect", cause }),
-    ),
-  );
-});
-
-export const observePathWithRawModes = Effect.fn("observeManagedPathWithRawModes")(function* (
-  absolutePath: string,
-) {
-  return yield* digestFileSystemPath(absolutePath, rawFileMode).pipe(
     Effect.mapError((cause) =>
       Schema.is(PathInspectionError)(cause)
         ? cause

@@ -49,6 +49,9 @@ export const ManagedClaudeInstructionsOutputSchema = Schema.Struct({
 });
 export type ManagedClaudeInstructionsOutput = typeof ManagedClaudeInstructionsOutputSchema.Type;
 
+// Legacy (dev-kit ≤0.14) lock entry for the previously managed check workflow.
+// Kept only so old locks and receipts still decode; planning discards these
+// entries, releasing the file to the repository. Never produced anymore.
 export const ManagedGeneratedFileOutputSchema = Schema.Struct({
   resourceId: Schema.Literal("setup:vite-plus-github-actions"),
   path: Schema.String,

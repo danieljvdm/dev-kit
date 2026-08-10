@@ -53,27 +53,14 @@ export const VitePlusHooksSetupSchema = Schema.Struct({
   enabled: Schema.optional(Schema.Boolean),
 });
 
-export const VitePlusQualityWorkflowStepSchema = Schema.Struct({
-  name: Schema.String,
-  run: Schema.Array(Schema.String),
-});
-export type VitePlusQualityWorkflowStep = typeof VitePlusQualityWorkflowStepSchema.Type;
-
-export const VitePlusQualityWorkflowSetupSchema = Schema.Struct({
+export const VitePlusWorkflowSetupSchema = Schema.Struct({
   enabled: Schema.optional(Schema.Boolean),
-  beforeChecks: Schema.optional(Schema.Array(VitePlusQualityWorkflowStepSchema)),
-  typecheck: Schema.optional(Schema.Array(Schema.String)),
 });
-export type VitePlusQualityWorkflowSetup = typeof VitePlusQualityWorkflowSetupSchema.Type;
-
-export const VitePlusQualitySetupSchema = Schema.Struct({
-  workflow: Schema.optional(VitePlusQualityWorkflowSetupSchema),
-});
-export type VitePlusQualitySetup = typeof VitePlusQualitySetupSchema.Type;
+export type VitePlusWorkflowSetup = typeof VitePlusWorkflowSetupSchema.Type;
 
 export const VitePlusSetupSchema = Schema.Struct({
   hooks: Schema.optional(VitePlusHooksSetupSchema),
-  quality: Schema.optional(VitePlusQualitySetupSchema),
+  workflow: Schema.optional(VitePlusWorkflowSetupSchema),
 });
 
 export type VitePlusSetup = typeof VitePlusSetupSchema.Type;
@@ -146,12 +133,8 @@ export type NormalizedManifest = {
       readonly hooks: {
         readonly enabled: boolean;
       };
-      readonly quality: {
-        readonly workflow: {
-          readonly enabled: boolean;
-          readonly beforeChecks: ReadonlyArray<VitePlusQualityWorkflowStep>;
-          readonly typecheck: ReadonlyArray<string>;
-        };
+      readonly workflow: {
+        readonly enabled: boolean;
       };
     };
     readonly worktrunk: {
@@ -191,7 +174,6 @@ export const normalizeManifest = (manifest: DevKitManifest): NormalizedManifest 
       };
     }
   }
-  const quality = manifest.setup?.vitePlus?.quality;
 
   return {
     exclude: manifest.exclude ?? [],
@@ -219,12 +201,8 @@ export const normalizeManifest = (manifest: DevKitManifest): NormalizedManifest 
         hooks: {
           enabled: manifest.setup?.vitePlus?.hooks?.enabled ?? false,
         },
-        quality: {
-          workflow: {
-            enabled: quality?.workflow?.enabled ?? false,
-            beforeChecks: quality?.workflow?.beforeChecks ?? [],
-            typecheck: quality?.workflow?.typecheck ?? ["vp run typecheck"],
-          },
+        workflow: {
+          enabled: manifest.setup?.vitePlus?.workflow?.enabled ?? false,
         },
       },
       worktrunk: {

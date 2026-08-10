@@ -88,9 +88,7 @@ changes.
     "claudeInstructions": { "enabled": true },
     "vitePlus": {
       "hooks": { "enabled": true },
-      "quality": {
-        "workflow": { "enabled": true },
-      },
+      "workflow": { "enabled": true },
     },
   },
   "targets": {
@@ -158,19 +156,21 @@ bounded-concurrency filters. Spread the returned top-level config before local
 options; spread a returned nested block before overriding that block, and merge
 nested collections such as `lint.rules` so the recommended rules remain active.
 
-Enable `setup.vitePlus.quality.workflow` to own only
-`.github/workflows/check.yml`. It requires direct Dev Kit, compatible Vite+,
-Effect, Effect TypeScript-Go, and native TypeScript dependencies with
-`setup.effectTsgo.enabled`. Preserve unowned workflows and adopt only an exact
-rendered match. Consumers may configure `workflow.beforeChecks` and
-`workflow.typecheck`; treat these commands as trusted manifest input.
+Enable `setup.vitePlus.workflow` to scaffold the canonical check workflow at
+`.github/workflows/check.yml`. Scaffolding requires direct Dev Kit, compatible
+Vite+, Effect, Effect TypeScript-Go, and native TypeScript dependencies with
+`setup.effectTsgo.enabled`. Like every scaffold, apply creates the file only
+when it is missing, records nothing in the lock, and never reads, updates, or
+removes an existing workflow — the repository owns it from creation. Add
+preparation steps or a custom typecheck command by editing the YAML directly,
+and apply template improvements deliberately by comparing against the
+installed `templates/vite-plus/github-actions-check.yml`.
 
-The workflow must use one frozen, script-suppressed install, then locked Dev Kit
-convergence before preparation or checks. Set up Bun from the consumer's
-`packageManager` or `engines.bun` declaration before Vite+ setup. Follow the
-maintained `setup-bun` major tag, name an explicit `setup-vp` release because
-its `v1` tag is frozen, and let Vite+ resolve the consumer's compatible locked
-version.
+The template must use one frozen, script-suppressed install, then locked Dev
+Kit convergence before checks. Set up Bun from the consumer's `packageManager`
+or `engines.bun` declaration before Vite+ setup. Follow the maintained
+`setup-bun` major tag, name an explicit `setup-vp` release because its `v1`
+tag is frozen, and let Vite+ resolve the consumer's compatible locked version.
 
 Enable `setup.worktrunk.config` to scaffold the default Worktrunk project
 config at `.config/wt.toml`: a copy-ignored-then-install pre-start pipeline, a
@@ -335,8 +335,8 @@ in the consuming project.
 
 Manage skill outputs, the `setup.agentInstructions` marked sections, the
 `setup.claudeInstructions` link, the `setup.vitePlus.hooks` dispatcher, the
-opt-in `setup.vitePlus.quality.workflow`, the `setup.worktrunk.config`
-scaffold (create-only; the repository owns the file), the `setup.effectSource`
-checkout, and the explicit `setup.effectTsgo` task. `vite.config.ts`, dependency, and
+`setup.effectSource` checkout, and the explicit `setup.effectTsgo` task. The
+`setup.vitePlus.workflow` and `setup.worktrunk.config` tasks are create-only
+scaffolds: the repository owns those files from creation. `vite.config.ts`, dependency, and
 `tsconfig.json` contributions remain deliberate user-owned edits. Compose the
 Vite+ factory or lower-level Oxlint/Oxfmt exports locally.
