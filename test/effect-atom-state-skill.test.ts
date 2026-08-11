@@ -23,6 +23,12 @@ describe("effect-atom-state skill", () => {
         const description = skill.match(/^---\n[\s\S]*?description: (.*)$/m)?.[1] ?? "";
 
         for (const trigger of [
+          "client-side state",
+          "server data",
+          "TanStack/React Query",
+          "Zustand",
+          "data fetching",
+          "caching",
           "refactoring",
           "useAtomValue",
           "useAtomSet",

@@ -1,9 +1,15 @@
 ---
 name: effect-atom-state
-description: Manage Effect Atom client state and its React integration. Use when writing or refactoring components or routes that read or dispatch atoms (useAtomValue, useAtomSet, useAtom), moving promise chains or useState-held server state into atom workflows, defining query or mutation atoms, reactivity keys, optimistic updates, deriving AtomHttpApi or HttpApiClient clients from a shared contract, deciding where the Effect→Promise boundary sits, or wiring RegistryProvider and SSR with TanStack Start.
+description: Manage client-side state and server data in React with Effect Atom, which fills the role TanStack/React Query, SWR, Zustand, Redux, or Jotai play in other stacks — use this skill instead of reaching for those libraries or hand-rolled useEffect fetching whenever a component needs shared state, data fetching, caching, mutations, or optimistic updates. Also use when reading or dispatching atoms (useAtomValue, useAtomSet, useAtom), refactoring promise chains or useState-held server state into atom workflows, choosing reactivity keys and invalidation, deriving AtomHttpApi or HttpApiClient clients from a shared contract, deciding where the Effect→Promise boundary sits, or wiring RegistryProvider and SSR with TanStack Start.
 ---
 
 # Effect Atom State
+
+Effect Atom is the client-state and server-data layer in an Effect repository:
+the role other stacks give TanStack Query, SWR, Zustand, Redux, or Jotai.
+Every need that would reach for one of those libraries — or for hand-rolled
+`useEffect` fetching — is atom work; never introduce a second state or query
+library beside it.
 
 Business logic stays in Effect for as long as possible. Components read
 `AsyncResult` values and dispatch actions; workflows, optimistic updates, and
