@@ -2,6 +2,11 @@ import { Config, Effect, FileSystem, Path, Schema, Stream } from "effect";
 import { ChildProcess } from "effect/unstable/process";
 
 import { printStatus, withSpinner } from "./cli-ui.ts";
+import {
+  commitCacheDirectory,
+  resolveGlobalCacheDirectory,
+  stampTagUsage,
+} from "./global-cache.ts";
 import { observeSymbolicLink } from "./node-symbolic-link.ts";
 import { acquireProjectProcessLock } from "./project-process-lock.ts";
 import { isTypeScriptPackageName } from "./typescript-package-name.ts";
@@ -272,12 +277,73 @@ export const planEffectSource = Effect.fn("planEffectSource")(function* (
   } satisfies EffectSourcePlan;
 });
 
+// The shared bare repository accumulates shallow tag fetches machine-wide, so
+// a project checkout only contacts the network when its tag has never been
+// cached on this machine. Entries are keyed by repository URL.
+const ensureSharedRepository = Effect.fn("ensureSharedEffectRepository")(function* (
+  repository: string,
+  tag: string,
+) {
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+  const repositoryDir = path.join(
+    yield* resolveGlobalCacheDirectory(),
+    "effect-source",
+    encodeURIComponent(repository),
+  );
+  const populated = fs.exists(path.join(repositoryDir, "HEAD"));
+
+  if (!(yield* populated)) {
+    yield* fs.makeDirectory(path.dirname(repositoryDir), { recursive: true });
+    const staged = path.join(
+      yield* fs.makeTempDirectoryScoped({
+        directory: path.dirname(repositoryDir),
+        prefix: ".dev-kit-effect-source-stage-",
+      }),
+      "repository",
+    );
+
+    yield* runGit(path.dirname(staged), ["init", "--quiet", "--bare", staged]);
+    yield* commitCacheDirectory(staged, repositoryDir, populated);
+  }
+  yield* stampTagUsage(repositoryDir, tag);
+  const cached = yield* runGit(repositoryDir, [
+    "rev-parse",
+    "-q",
+    "--verify",
+    `refs/tags/${tag}^{commit}`,
+  ]).pipe(Effect.catchTag("EffectSourceCommandError", () => Effect.void));
+
+  if (cached === undefined) {
+    yield* runGit(repositoryDir, [
+      "fetch",
+      "--depth",
+      "1",
+      "--force",
+      "--quiet",
+      repository,
+      `refs/tags/${tag}:refs/tags/${tag}`,
+    ]).pipe(
+      // A concurrent apply may have fetched the tag first; keep its result.
+      Effect.catchTag("EffectSourceCommandError", (error) =>
+        runGit(repositoryDir, ["rev-parse", "-q", "--verify", `refs/tags/${tag}^{commit}`]).pipe(
+          Effect.mapError(() => error),
+          Effect.asVoid,
+        ),
+      ),
+    );
+  }
+
+  return repositoryDir;
+});
+
 export const applyEffectSourcePlan = Effect.fn("applyEffectSourcePlan")(function* (
   plan: EffectSourcePlan,
 ) {
   if (plan.action !== "sync") return;
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
+  const repositoryDir = yield* ensureSharedRepository(plan.repository, plan.tag);
 
   if (!(yield* fs.exists(plan.checkoutDir))) {
     const parent = path.dirname(plan.checkoutDir);
@@ -291,15 +357,15 @@ export const applyEffectSourcePlan = Effect.fn("applyEffectSourcePlan")(function
 
     yield* runGit(plan.projectDir, [
       "clone",
-      "--depth",
-      "1",
+      "--quiet",
       "--branch",
       plan.tag,
       "--single-branch",
       "--",
-      plan.repository,
+      repositoryDir,
       staged,
     ]);
+    yield* runGit(staged, ["remote", "set-url", "origin", plan.repository]);
     if (yield* fs.exists(plan.checkoutDir)) {
       return yield* EffectSourceCheckoutError.make({
         message: `Effect source destination appeared while cloning: ${plan.checkoutDir}`,
@@ -316,7 +382,7 @@ export const applyEffectSourcePlan = Effect.fn("applyEffectSourcePlan")(function
     "1",
     "--force",
     "--quiet",
-    "origin",
+    repositoryDir,
     `refs/tags/${plan.tag}:refs/tags/${plan.tag}`,
   ]);
   const target = yield* runGit(plan.checkoutDir, [

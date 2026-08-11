@@ -12,6 +12,7 @@ import { printError } from "../cli-ui.ts";
 import { syncEffectSource } from "../effect-source.ts";
 import { patchEffectTsgo } from "../effect-tsgo.ts";
 import { patchProjectGitignore } from "../gitignore.ts";
+import { CACHE_PRUNE_AGE_DAYS, runCachePrune } from "../global-cache.ts";
 import {
   addSkills,
   chooseSkillsToAdd,
@@ -351,6 +352,25 @@ const catalogVerifyCommand = CliCommand.make(
     refreshSkillCatalog({ locked: true, lockfilePath: lockfile, repoDir, sourcesPath: sources }),
 ).pipe(CliCommand.withDescription("Verify the committed catalog without advancing refs."));
 
+const cachePruneCommand = CliCommand.make(
+  "prune",
+  {
+    all: Flag.boolean("all").pipe(
+      Flag.withDescription("Remove the entire cache instead of only stale content."),
+    ),
+    maxAgeDays: Flag.integer("max-age-days").pipe(
+      Flag.withDefault(CACHE_PRUNE_AGE_DAYS),
+      Flag.withDescription("Evict content unused for this many days."),
+    ),
+  },
+  ({ all, maxAgeDays }) => runCachePrune({ all, maxAgeDays }),
+).pipe(CliCommand.withDescription("Evict stale content from the machine-global source cache."));
+
+const cacheCommand = CliCommand.make("cache").pipe(
+  CliCommand.withDescription("Manage the machine-global source cache."),
+  CliCommand.withSubcommands([cachePruneCommand] as const),
+);
+
 const catalogCommand = CliCommand.make("catalog").pipe(
   CliCommand.withDescription("Maintain the approved upstream catalog."),
   CliCommand.withSubcommands([
@@ -382,6 +402,7 @@ const command = CliCommand.make("dev-kit", projectFlags, ({ manifest, projectDir
         effectCommand,
         tsgoCommand,
         catalogCommand,
+        cacheCommand,
       ],
     },
   ] as const),

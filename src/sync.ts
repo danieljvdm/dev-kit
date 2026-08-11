@@ -15,6 +15,7 @@ import {
   planEffectTsgoPatch,
   type EffectTsgoPatchPlan,
 } from "./effect-tsgo.ts";
+import { maybePruneGlobalCache } from "./global-cache.ts";
 import { DevKitManifestSchema, normalizeManifest } from "./manifest.ts";
 import { observeSymbolicLink } from "./node-symbolic-link.ts";
 import { resolvePackageSkillSelector } from "./package-skill-source.ts";
@@ -1877,6 +1878,18 @@ export const runProjectSkillPlan = Effect.fn("runProjectSkillPlan")(function* (
       yield* applyPlannedSkillChanges(replanned);
     }),
   );
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+
+  // Catalog checkouts moved to the machine-global cache; drop the regenerable
+  // project-local copies left behind by earlier dev-kit versions.
+  yield* fs
+    .remove(path.join(plan.projectDir, ".dev-kit", "cache", "catalog"), {
+      force: true,
+      recursive: true,
+    })
+    .pipe(Effect.ignore);
+  yield* maybePruneGlobalCache().pipe(Effect.ignore);
   yield* printStatus(
     "success",
     changes === 0 && !replanned.metadataChanged ? "Dev kit up to date" : "Dev kit ready",
