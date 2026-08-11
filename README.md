@@ -200,7 +200,8 @@ tool versions. A project-local process lock also prevents concurrent applies.
 
 - `dev-kit` installs guidance for operating the toolkit itself.
 - `effect` is a built-in family: the `effect-ts` bootstrap,
-  `effect-architecture-audit`, `build-effect-apis`, and `build-effect-clis`.
+  `effect-architecture-audit`, `build-effect-apis`, `effect-atom-state`, and
+  `build-effect-clis`.
 - External Git skills (`workers-best-practices`, `serve-sim`, …) are selected
   individually after scanning the project for relevant technologies. An
   approved source ID selects every skill from that source; use it only when
