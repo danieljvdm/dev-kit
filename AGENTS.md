@@ -37,3 +37,12 @@ Use these repository commands:
 Do not use `bun run`, `npm run`, `pnpm run`, or `yarn run` in this repository. Do not invoke underlying tools such as `tsc`, `vitest`, `oxlint`, or `oxfmt` directly; use the Vite+ entry points above.
 
 <!-- DEV KIT END -->
+
+# Testing policy
+
+Do not add tests proactively. Write a test only when a human asks for one, or
+when red/greening a real breakage: reproduce the failure as a failing test, fix
+it, and keep that test as the regression guard. The same applies to a genuinely
+load-bearing seam a human has called out. Every test in the suite must be
+traceable to a breakage or an explicit request — otherwise build it, verify it
+works in the running app, and move on.

@@ -64,105 +64,6 @@ printf '%s' "$((count + 1))" > .vite-hooks/_/config-count
 
 describe("Vite+ hooks setup", () => {
   layer(NodeServices.layer)((it) => {
-    it.effect("configures hooks once and recreates the dispatcher in a linked worktree", () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const path = yield* Path.Path;
-        const fixtureRoot = yield* fs.makeTempDirectoryScoped({
-          prefix: "dev-kit-vite-hooks-test-",
-        });
-        const projectDir = path.join(fixtureRoot, "main");
-
-        yield* fs.makeDirectory(projectDir);
-        yield* runCommandSuccess(projectDir, "git", ["init", "--initial-branch", "main"]);
-        yield* runCommandSuccess(projectDir, "git", ["config", "user.email", "test@example.com"]);
-        yield* runCommandSuccess(projectDir, "git", ["config", "user.name", "Dev Kit Test"]);
-        yield* writeFixture(projectDir);
-        yield* installFakeVitePlus(projectDir);
-
-        const planned = yield* runDevKit(projectDir, ["plan", "--project-dir", projectDir]);
-
-        assert.strictEqual(planned.exitCode, 0, planned.output);
-        assert.match(planned.output, /Vite\+ hooks → \.vite-hooks\/_/);
-        assert.isFalse(yield* fs.exists(path.join(projectDir, ".vite-hooks")));
-
-        const applied = yield* runDevKit(projectDir, ["apply", "--project-dir", projectDir]);
-
-        assert.strictEqual(applied.exitCode, 0, applied.output);
-        assert.strictEqual(
-          yield* fs.readFileString(path.join(projectDir, ".vite-hooks", "_", "config-count")),
-          "1",
-        );
-        assert.include(
-          yield* fs.readFileString(path.join(projectDir, ".vite-hooks", "_", ".gitignore")),
-          "*",
-        );
-        assert.strictEqual(
-          (yield* runCommandSuccess(projectDir, "git", [
-            "config",
-            "--local",
-            "--get",
-            "core.hooksPath",
-          ])).trim(),
-          ".vite-hooks/_",
-        );
-
-        const converged = yield* runDevKit(projectDir, [
-          "apply",
-          "--locked",
-          "--project-dir",
-          projectDir,
-        ]);
-
-        assert.strictEqual(converged.exitCode, 0, converged.output);
-        assert.match(converged.output, /Dev kit up to date/);
-        assert.strictEqual(
-          yield* fs.readFileString(path.join(projectDir, ".vite-hooks", "_", "config-count")),
-          "1",
-        );
-
-        yield* runCommandSuccess(projectDir, "git", ["add", "."]);
-        yield* runCommandSuccess(projectDir, "git", ["commit", "-m", "fixture"]);
-        const linkedDir = path.join(fixtureRoot, "linked");
-
-        yield* runCommandSuccess(projectDir, "git", ["worktree", "add", "-b", "linked", linkedDir]);
-        yield* installFakeVitePlus(linkedDir);
-
-        assert.isFalse(yield* fs.exists(path.join(linkedDir, ".vite-hooks", "_")));
-        const linked = yield* runDevKit(linkedDir, [
-          "apply",
-          "--locked",
-          "--project-dir",
-          linkedDir,
-        ]);
-
-        assert.strictEqual(linked.exitCode, 0, linked.output);
-        assert.strictEqual(
-          yield* fs.readFileString(path.join(linkedDir, ".vite-hooks", "_", "config-count")),
-          "1",
-        );
-      }),
-    );
-
-    it.effect("requires vite-plus to be a direct installed dependency", () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const path = yield* Path.Path;
-        const projectDir = yield* fs.makeTempDirectoryScoped({
-          prefix: "dev-kit-vite-hooks-dependency-test-",
-        });
-
-        yield* runCommandSuccess(projectDir, "git", ["init", "--initial-branch", "main"]);
-        yield* writeFixture(projectDir);
-        yield* fs.writeFileString(path.join(projectDir, "package.json"), "{}\n");
-
-        const result = yield* runDevKit(projectDir, ["plan", "--project-dir", projectDir]);
-
-        assert.notStrictEqual(result.exitCode, 0);
-        assert.match(result.output, /vite-plus must be a direct project dependency/);
-      }),
-    );
-
     it.effect("rejects an incompatible installed Vite+ version", () =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
@@ -177,33 +78,6 @@ describe("Vite+ hooks setup", () => {
 
         assert.notStrictEqual(result.exitCode, 0);
         assert.match(result.output, /installed vite-plus 0\.3\.0 is incompatible/);
-      }),
-    );
-
-    it.effect("preserves a competing Git hook manager", () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const projectDir = yield* fs.makeTempDirectoryScoped({
-          prefix: "dev-kit-vite-hooks-conflict-test-",
-        });
-
-        yield* runCommandSuccess(projectDir, "git", ["init", "--initial-branch", "main"]);
-        yield* runCommandSuccess(projectDir, "git", ["config", "core.hooksPath", ".custom-hooks"]);
-        yield* writeFixture(projectDir);
-        yield* installFakeVitePlus(projectDir);
-
-        const result = yield* runDevKit(projectDir, ["apply", "--project-dir", projectDir]);
-
-        assert.notStrictEqual(result.exitCode, 0);
-        assert.match(result.output, /refusing to replace another Git hook manager/);
-        assert.strictEqual(
-          (yield* runCommandSuccess(projectDir, "git", [
-            "config",
-            "--get",
-            "core.hooksPath",
-          ])).trim(),
-          ".custom-hooks",
-        );
       }),
     );
   });
