@@ -48,6 +48,36 @@ describe("recommended Vite+ config", () => {
     expect(config.lint?.ignorePatterns).toEqual(config.fmt?.ignorePatterns);
   });
 
+  it("appends the absolute-imports override when opted in", () => {
+    const files = ["apps/app/src/**/*.{ts,tsx}", "apps/mobile/src/**/*.{ts,tsx}"];
+    const config = createPackagedConfig({ absoluteImports: { files } });
+    const defaultOverrides = createPackagedConfig().lint?.overrides ?? [];
+
+    expect(config.lint?.overrides).toEqual([
+      ...defaultOverrides,
+      {
+        files,
+        rules: { "import/no-relative-parent-imports": "error" },
+      },
+    ]);
+    expect(defaultOverrides).not.toContainEqual(
+      expect.objectContaining({
+        rules: expect.objectContaining({ "import/no-relative-parent-imports": "error" }),
+      }),
+    );
+    expect(() => createPackagedConfig({ absoluteImports: { files: [] } })).toThrow(
+      /at least one file glob/,
+    );
+    expect(() => createPackagedConfig({ absoluteImports: { files: [" "] } })).toThrow(
+      /must not be blank/,
+    );
+    expect(() =>
+      createPackagedConfig({
+        absoluteImports: { files: ["apps/app/src/**/*.ts", "apps/app/src/**/*.ts"] },
+      }),
+    ).toThrow(/must be unique/);
+  });
+
   it("renders validated workspace typechecking", () => {
     const config = createPackagedConfig({
       typecheck: {

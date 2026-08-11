@@ -1,5 +1,5 @@
 import { recommendedOxfmtConfig } from "./oxfmt.js";
-import { recommendedOxlintConfig } from "./oxlint.js";
+import { createAbsoluteImportsOxlintOverride, recommendedOxlintConfig } from "./oxlint.js";
 import { devKitToolIgnorePatterns } from "./tool-ignore-patterns.js";
 
 export { devKitToolIgnorePatterns } from "./tool-ignore-patterns.js";
@@ -58,6 +58,12 @@ const createTypecheckTask = (options) => {
 /** Build composable quality defaults for a project-owned Vite+ config. */
 export const createRecommendedVitePlusConfig = (options = {}) => {
   const ignorePatterns = [...devKitToolIgnorePatterns, ...(options.ignorePatterns ?? [])];
+  const lintOverrides = options.absoluteImports
+    ? [
+        ...recommendedOxlintConfig.overrides,
+        createAbsoluteImportsOxlintOverride(options.absoluteImports),
+      ]
+    : recommendedOxlintConfig.overrides;
 
   return {
     staged: {
@@ -70,6 +76,7 @@ export const createRecommendedVitePlusConfig = (options = {}) => {
     lint: {
       ...recommendedOxlintConfig,
       ignorePatterns,
+      overrides: lintOverrides,
     },
     run: {
       tasks: {

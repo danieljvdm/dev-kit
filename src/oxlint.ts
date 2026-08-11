@@ -1,8 +1,44 @@
-import type { OxlintConfig } from "oxlint";
+import type { OxlintConfig, OxlintOverride } from "oxlint";
 
 import { devKitToolIgnorePatterns } from "./tool-ignore-patterns.ts";
 
 export { devKitToolIgnorePatterns } from "./tool-ignore-patterns.ts";
+
+export type AbsoluteImportsOptions = {
+  /** Globs that must use path-alias imports, e.g. `"apps/app/src/**"`. */
+  readonly files: ReadonlyArray<string>;
+};
+
+/**
+ * Build an Oxlint override that forbids `../` imports inside the given globs,
+ * so those files import through tsconfig path aliases such as `@/*`. Append it
+ * to a standalone Oxlint config's `overrides`, or opt in through
+ * `createRecommendedVitePlusConfig({ absoluteImports })`.
+ */
+export const createAbsoluteImportsOxlintOverride = (
+  options: AbsoluteImportsOptions,
+): OxlintOverride => {
+  if (options.files.length === 0) {
+    throw new Error("absolute imports enforcement requires at least one file glob");
+  }
+  const files = [...new Set(options.files)];
+
+  if (files.length !== options.files.length) {
+    throw new Error("absolute imports file globs must be unique");
+  }
+  for (const glob of files) {
+    if (glob.trim().length === 0) {
+      throw new Error("absolute imports file globs must not be blank");
+    }
+  }
+
+  return {
+    files,
+    rules: {
+      "import/no-relative-parent-imports": "error",
+    },
+  };
+};
 
 /**
  * High-signal Oxlint defaults for TypeScript projects.

@@ -1,7 +1,12 @@
 import { recommendedOxfmtConfig } from "./oxfmt.ts";
-import { recommendedOxlintConfig } from "./oxlint.ts";
+import {
+  type AbsoluteImportsOptions,
+  createAbsoluteImportsOxlintOverride,
+  recommendedOxlintConfig,
+} from "./oxlint.ts";
 import { devKitToolIgnorePatterns } from "./tool-ignore-patterns.ts";
 
+export type { AbsoluteImportsOptions } from "./oxlint.ts";
 export { devKitToolIgnorePatterns } from "./tool-ignore-patterns.ts";
 
 export type VitePlusTypecheckOptions =
@@ -16,6 +21,8 @@ export type VitePlusTypecheckOptions =
     };
 
 export type RecommendedVitePlusConfigOptions = {
+  /** Enforce path-alias imports (no `../`) inside the given globs. */
+  readonly absoluteImports?: AbsoluteImportsOptions;
   /** Additional project-owned generated or vendored paths. */
   readonly ignorePatterns?: ReadonlyArray<string>;
   readonly typecheck?: VitePlusTypecheckOptions;
@@ -79,6 +86,12 @@ const createTypecheckTask = (options: VitePlusTypecheckOptions | undefined) => {
  */
 export const createRecommendedVitePlusConfig = (options: RecommendedVitePlusConfigOptions = {}) => {
   const ignorePatterns = [...devKitToolIgnorePatterns, ...(options.ignorePatterns ?? [])];
+  const lintOverrides = options.absoluteImports
+    ? [
+        ...recommendedOxlintConfig.overrides,
+        createAbsoluteImportsOxlintOverride(options.absoluteImports),
+      ]
+    : recommendedOxlintConfig.overrides;
 
   return {
     staged: {
@@ -91,6 +104,7 @@ export const createRecommendedVitePlusConfig = (options: RecommendedVitePlusConf
     lint: {
       ...recommendedOxlintConfig,
       ignorePatterns,
+      overrides: lintOverrides,
     },
     run: {
       tasks: {

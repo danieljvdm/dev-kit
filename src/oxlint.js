@@ -8,6 +8,29 @@ import { devKitToolIgnorePatterns } from "./tool-ignore-patterns.js";
 
 export { devKitToolIgnorePatterns } from "./tool-ignore-patterns.js";
 
+export const createAbsoluteImportsOxlintOverride = (options) => {
+  if (options.files.length === 0) {
+    throw new Error("absolute imports enforcement requires at least one file glob");
+  }
+  const files = [...new Set(options.files)];
+
+  if (files.length !== options.files.length) {
+    throw new Error("absolute imports file globs must be unique");
+  }
+  for (const glob of files) {
+    if (glob.trim().length === 0) {
+      throw new Error("absolute imports file globs must not be blank");
+    }
+  }
+
+  return {
+    files,
+    rules: {
+      "import/no-relative-parent-imports": "error",
+    },
+  };
+};
+
 export const recommendedOxlintConfig = {
   ignorePatterns: [...devKitToolIgnorePatterns],
   options: {

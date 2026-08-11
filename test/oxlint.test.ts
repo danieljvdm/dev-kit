@@ -1,7 +1,13 @@
-import { recommendedOxlintConfig as packagedOxlintConfig } from "@danieljvdm/dev-kit/oxlint";
+import {
+  createAbsoluteImportsOxlintOverride as createPackagedOverride,
+  recommendedOxlintConfig as packagedOxlintConfig,
+} from "@danieljvdm/dev-kit/oxlint";
 import { describe, expect, it } from "vitest";
 
-import { recommendedOxlintConfig as sourceOxlintConfig } from "../src/oxlint.ts";
+import {
+  createAbsoluteImportsOxlintOverride as createSourceOverride,
+  recommendedOxlintConfig as sourceOxlintConfig,
+} from "../src/oxlint.ts";
 
 const recommendedOxlintConfig = packagedOxlintConfig;
 
@@ -52,6 +58,16 @@ describe("recommended Oxlint config", () => {
     expect(recommendedOxlintConfig.overrides[0]?.rules["typescript/no-non-null-assertion"]).toBe(
       "off",
     );
+  });
+
+  it("builds the absolute-imports override for opted-in globs", () => {
+    const files = ["apps/app/src/**/*.{ts,tsx}"];
+
+    expect(createPackagedOverride({ files })).toEqual({
+      files,
+      rules: { "import/no-relative-parent-imports": "error" },
+    });
+    expect(createPackagedOverride({ files })).toEqual(createSourceOverride({ files }));
   });
 
   it("keeps the JavaScript runtime export aligned with the typed source", () => {
