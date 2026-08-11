@@ -413,9 +413,12 @@ Enable a local checkout of the exact installed Effect release in the manifest:
 ```
 
 `dev-kit apply` reads `node_modules/effect/package.json`, then shallow-clones or
-updates `.repos/effect` to the detached `effect@<version>` tag. It skips the
-checkout in CI, leaves the repository in place when the task is disabled, and
-refuses to switch a checkout with local changes or an unexpected origin.
+updates `.repos/effect` to the detached `effect@<version>` tag. Tag fetches go
+through a shared clone in the machine-global cache, so a new worktree or
+project reuses tags already cached on the machine and only contacts the
+network for a tag the cache has never seen. It skips the checkout in CI,
+leaves the repository in place when the task is disabled, and refuses to
+switch a checkout with local changes or an unexpected origin.
 
 The path, package name, and repository URL may be overridden for compatible
 Effect package layouts. Use `dev-kit effect sync --dry-run` to inspect this
@@ -587,9 +590,16 @@ names and paths, rejects symlinks and collisions, extracts descriptions, and
 updates `skill-sources.lock.json`.
 
 When a project selects one of these Git-backed skills, Dev Kit fetches the
-approved commit into the ignored `.dev-kit/cache` and installs it through the
-same ownership-safe sync path. Only a reviewed catalog refresh changes the
-approved Git content.
+approved commit into a machine-global cache and installs it through the same
+ownership-safe sync path. Cache entries are keyed by resolved commit SHA, so
+every project and git worktree on the machine shares one download; a warm
+`dev-kit plan` or `dev-kit apply` performs no network operations. The cache
+lives in `$XDG_CACHE_HOME/dev-kit` (falling back to `~/Library/Caches/dev-kit`
+on macOS and `~/.cache/dev-kit` elsewhere) and may be overridden with
+`DEV_KIT_CACHE_DIR`; it is safe to delete at any time. Populating this
+immutable commit-keyed cache is not project state, so planning and `--locked`
+verification use it too. Only a reviewed catalog refresh changes the approved
+Git content.
 
 ## Oxlint and Oxfmt configurations
 

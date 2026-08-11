@@ -2,6 +2,7 @@ import { Effect, FileSystem, Path, Schema, Stream } from "effect";
 import { ChildProcess } from "effect/unstable/process";
 import { parse as parseJsonc, type ParseError } from "jsonc-parser";
 
+import { commitCacheDirectory, resolveGlobalCacheDirectory } from "./global-cache.ts";
 import {
   discoverPackageSkills,
   resolvePackageSkillSelector,
@@ -261,26 +262,35 @@ const materializePackageSkill = Effect.fn("materializePackageSkill")(function* (
   return staged;
 });
 
+// Catalog checkouts are keyed by source id and resolved commit SHA, so the
+// materialized content is immutable and shared machine-wide across projects
+// and worktrees. Planning and locked verification populate the same cache:
+// writing an immutable commit-keyed cache entry is not project state.
 const materializeSource = Effect.fn("materializeCatalogSource")(function* (
-  projectDir: string,
   source: LockedSkillSource,
   selected: ReadonlyArray<string>,
-  cache: boolean,
 ) {
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
-  const root = cache
-    ? path.join(projectDir, ".dev-kit", "cache", "catalog", source.id, source.resolved)
-    : path.join(
-        yield* fs.makeTempDirectoryScoped({ prefix: "dev-kit-catalog-plan-" }),
-        source.id,
-        source.resolved,
-      );
-  const checkout = path.join(root, "checkout");
+  const root = path.join(
+    yield* resolveGlobalCacheDirectory(),
+    "catalog",
+    source.id,
+    source.resolved,
+  );
   const ready = path.join(root, ".ready");
 
   if (!(yield* fs.exists(ready))) {
-    yield* fs.remove(root, { force: true, recursive: true });
+    yield* fs.makeDirectory(path.dirname(root), { recursive: true });
+    const staged = path.join(
+      yield* fs.makeTempDirectoryScoped({
+        directory: path.dirname(root),
+        prefix: ".dev-kit-catalog-stage-",
+      }),
+      source.resolved,
+    );
+    const checkout = path.join(staged, "checkout");
+
     yield* fs.makeDirectory(checkout, { recursive: true });
     yield* runGit(checkout, ["init", "--quiet"]);
     yield* runGit(checkout, ["remote", "add", "origin", source.repository]);
@@ -302,7 +312,7 @@ const materializeSource = Effect.fn("materializeCatalogSource")(function* (
     }
     for (const skill of source.skills) {
       const from = path.join(checkout, source.skillsPath, skill);
-      const to = path.join(root, "skills", skill);
+      const to = path.join(staged, "skills", skill);
       const observation = yield* observePath(from);
 
       if (observation.kind !== "directory") {
@@ -320,7 +330,8 @@ const materializeSource = Effect.fn("materializeCatalogSource")(function* (
         );
       }
     }
-    yield* fs.writeFileString(ready, `${source.resolved}\n`);
+    yield* fs.writeFileString(path.join(staged, ".ready"), `${source.resolved}\n`);
+    yield* commitCacheDirectory(staged, root, fs.exists(ready));
   }
   for (const skill of selected) {
     const observation = yield* observePath(path.join(root, "skills", skill));
@@ -351,6 +362,8 @@ const materializeSource = Effect.fn("materializeCatalogSource")(function* (
   );
 });
 
+// The cache flag only affects package skills, whose staging area is project
+// state under .dev-kit; catalog sources always use the machine-global cache.
 export const resolveSkillSources = Effect.fn("resolveSkillSources")(function* (
   packageRoot: string,
   projectDir: string,
@@ -370,7 +383,7 @@ export const resolveSkillSources = Effect.fn("resolveSkillSources")(function* (
     const wanted = source.skills.filter((skill) => selected.includes(skill));
 
     if (wanted.length === 0) continue;
-    for (const [name, sourcePath] of yield* materializeSource(projectDir, source, wanted, cache)) {
+    for (const [name, sourcePath] of yield* materializeSource(source, wanted)) {
       sources.set(name, sourcePath);
     }
   }

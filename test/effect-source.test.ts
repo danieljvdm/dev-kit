@@ -4,11 +4,19 @@ import { Effect, FileSystem, Path } from "effect";
 
 import { runCommandSuccess, runDevKit as runDevKitCommand } from "./test-platform.ts";
 
+type EffectSourceFixture = {
+  readonly cacheDir: string;
+  readonly project: string;
+  readonly root: string;
+  readonly upstream: string;
+};
+
 const runDevKit = (
+  fixture: EffectSourceFixture,
   cwd: string,
   args: ReadonlyArray<string>,
   env: Readonly<Record<string, string>> = {},
-) => runDevKitCommand(cwd, args, { CI: "", ...env });
+) => runDevKitCommand(cwd, args, { CI: "", DEV_KIT_CACHE_DIR: fixture.cacheDir, ...env });
 
 const commitAll = Effect.fn("commitEffectSourceFixture")(function* (
   repository: string,
@@ -26,6 +34,7 @@ const createFixture = Effect.fn("createEffectSourceFixture")(function* () {
   });
   const upstream = path.join(root, "upstream");
   const project = path.join(root, "project");
+  const cacheDir = path.join(root, "cache");
 
   yield* fs.makeDirectory(upstream);
   yield* fs.makeDirectory(project);
@@ -38,7 +47,7 @@ const createFixture = Effect.fn("createEffectSourceFixture")(function* () {
   yield* runCommandSuccess(project, "git", ["init", "-b", "main"]);
   yield* writeInstalledVersion(project, "1.2.3");
 
-  return { project, root, upstream };
+  return { cacheDir, project, root, upstream } satisfies EffectSourceFixture;
 });
 
 const writeInstalledVersion = Effect.fn("writeInstalledEffectVersion")(function* (
@@ -94,7 +103,7 @@ describe("Effect source checkout", () => {
         const fixture = yield* createFixture();
         const checkout = path.join(fixture.project, ".repos", "effect");
 
-        const planned = yield* runDevKit(fixture.project, [
+        const planned = yield* runDevKit(fixture, fixture.project, [
           ...effectSyncArgs(fixture.project, fixture.upstream),
           "--dry-run",
         ]);
@@ -104,6 +113,7 @@ describe("Effect source checkout", () => {
         assert.isFalse(yield* fs.exists(checkout));
 
         const applied = yield* runDevKit(
+          fixture,
           fixture.project,
           effectSyncArgs(fixture.project, fixture.upstream),
         );
@@ -129,6 +139,7 @@ describe("Effect source checkout", () => {
         );
 
         const second = yield* runDevKit(
+          fixture,
           fixture.project,
           effectSyncArgs(fixture.project, fixture.upstream),
         );
@@ -146,7 +157,7 @@ describe("Effect source checkout", () => {
 
         yield* writeManifest(fixture.project, fixture.upstream);
 
-        const planned = yield* runDevKit(fixture.project, [
+        const planned = yield* runDevKit(fixture, fixture.project, [
           "plan",
           "--project-dir",
           fixture.project,
@@ -156,7 +167,7 @@ describe("Effect source checkout", () => {
         assert.match(planned.output, /Effect source effect@1\.2\.3 → \.repos\/effect/);
         assert.isFalse(yield* fs.exists(path.join(fixture.project, ".repos", "effect")));
 
-        const applied = yield* runDevKit(fixture.project, [
+        const applied = yield* runDevKit(fixture, fixture.project, [
           "apply",
           "--project-dir",
           fixture.project,
@@ -174,7 +185,7 @@ describe("Effect source checkout", () => {
           tag: "effect@1.2.3",
         });
 
-        const locked = yield* runDevKit(fixture.project, [
+        const locked = yield* runDevKit(fixture, fixture.project, [
           "apply",
           "--locked",
           "--project-dir",
@@ -195,7 +206,8 @@ describe("Effect source checkout", () => {
 
         yield* writeManifest(fixture.project, fixture.upstream);
         assert.strictEqual(
-          (yield* runDevKit(fixture.project, ["apply", "--project-dir", fixture.project])).exitCode,
+          (yield* runDevKit(fixture, fixture.project, ["apply", "--project-dir", fixture.project]))
+            .exitCode,
           0,
         );
 
@@ -205,7 +217,7 @@ describe("Effect source checkout", () => {
         yield* writeInstalledVersion(fixture.project, "2.0.0");
         const checkout = path.join(fixture.project, ".repos", "effect");
 
-        const locked = yield* runDevKit(fixture.project, [
+        const locked = yield* runDevKit(fixture, fixture.project, [
           "apply",
           "--locked",
           "--project-dir",
@@ -219,7 +231,7 @@ describe("Effect source checkout", () => {
           "version one\n",
         );
 
-        const updated = yield* runDevKit(fixture.project, [
+        const updated = yield* runDevKit(fixture, fixture.project, [
           "apply",
           "--project-dir",
           fixture.project,
@@ -245,7 +257,7 @@ describe("Effect source checkout", () => {
         const fixture = yield* createFixture();
         const args = effectSyncArgs(fixture.project, fixture.upstream);
 
-        assert.strictEqual((yield* runDevKit(fixture.project, args)).exitCode, 0);
+        assert.strictEqual((yield* runDevKit(fixture, fixture.project, args)).exitCode, 0);
         const checkout = path.join(fixture.project, ".repos", "effect");
 
         yield* fs.writeFileString(path.join(fixture.upstream, "source.txt"), "version two\n");
@@ -254,7 +266,7 @@ describe("Effect source checkout", () => {
         yield* writeInstalledVersion(fixture.project, "2.0.0");
         yield* fs.writeFileString(path.join(checkout, "local.txt"), "keep me\n");
 
-        const result = yield* runDevKit(fixture.project, args);
+        const result = yield* runDevKit(fixture, fixture.project, args);
 
         assert.notStrictEqual(result.exitCode, 0);
         assert.match(result.output, /local changes; refusing to switch/);
@@ -266,12 +278,82 @@ describe("Effect source checkout", () => {
       }),
     );
 
+    it.effect("reuses the shared clone across projects without contacting the repository", () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const fixture = yield* createFixture();
+
+        assert.strictEqual(
+          (yield* runDevKit(
+            fixture,
+            fixture.project,
+            effectSyncArgs(fixture.project, fixture.upstream),
+          )).exitCode,
+          0,
+        );
+
+        yield* fs.writeFileString(path.join(fixture.upstream, "source.txt"), "version two\n");
+        yield* commitAll(fixture.upstream, "version two");
+        yield* runCommandSuccess(fixture.upstream, "git", ["tag", "effect@2.0.0"]);
+        yield* writeInstalledVersion(fixture.project, "2.0.0");
+        assert.strictEqual(
+          (yield* runDevKit(
+            fixture,
+            fixture.project,
+            effectSyncArgs(fixture.project, fixture.upstream),
+          )).exitCode,
+          0,
+        );
+
+        const projectB = path.join(fixture.root, "project-b");
+
+        yield* fs.makeDirectory(projectB);
+        yield* runCommandSuccess(projectB, "git", ["init", "-b", "main"]);
+        yield* writeInstalledVersion(projectB, "1.2.3");
+
+        // Any git operation against the upstream would now fail.
+        yield* fs.remove(fixture.upstream, { force: true, recursive: true });
+
+        const cloned = yield* runDevKit(
+          fixture,
+          projectB,
+          effectSyncArgs(projectB, fixture.upstream),
+        );
+        const checkout = path.join(projectB, ".repos", "effect");
+
+        assert.strictEqual(cloned.exitCode, 0, cloned.output);
+        assert.strictEqual(
+          yield* fs.readFileString(path.join(checkout, "source.txt")),
+          "version one\n",
+        );
+        assert.strictEqual(
+          (yield* runCommandSuccess(checkout, "git", ["remote", "get-url", "origin"])).trim(),
+          fixture.upstream,
+        );
+
+        yield* writeInstalledVersion(projectB, "2.0.0");
+        const updated = yield* runDevKit(
+          fixture,
+          projectB,
+          effectSyncArgs(projectB, fixture.upstream),
+        );
+
+        assert.strictEqual(updated.exitCode, 0, updated.output);
+        assert.strictEqual(
+          yield* fs.readFileString(path.join(checkout, "source.txt")),
+          "version two\n",
+        );
+      }),
+    );
+
     it.effect("skips source checkout setup in CI", () =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
         const path = yield* Path.Path;
         const fixture = yield* createFixture();
         const result = yield* runDevKit(
+          fixture,
           fixture.project,
           effectSyncArgs(fixture.project, fixture.upstream),
           { CI: "true" },
@@ -292,6 +374,7 @@ describe("Effect source checkout", () => {
         yield* writeInstalledVersion(fixture.project, "9.9.9");
 
         const result = yield* runDevKit(
+          fixture,
           fixture.project,
           effectSyncArgs(fixture.project, fixture.upstream),
         );
