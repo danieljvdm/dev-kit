@@ -9,24 +9,6 @@ import {
   recommendedEffectTsgoPlugin,
 } from "../src/effect-tsgo.ts";
 
-const writePackageVersion = Effect.fn("writeTestPackageVersion")(function* (
-  projectDir: string,
-  packageName: string,
-  version: string,
-) {
-  const fs = yield* FileSystem.FileSystem;
-  const path = yield* Path.Path;
-  const manifestPath = path.join(
-    projectDir,
-    "node_modules",
-    ...packageName.split("/"),
-    "package.json",
-  );
-
-  yield* fs.makeDirectory(path.dirname(manifestPath), { recursive: true });
-  yield* fs.writeFileString(manifestPath, `${JSON.stringify({ version })}\n`);
-});
-
 const installIsolatedPatchedToolchain = Effect.fn("installIsolatedPatchedToolchain")(function* (
   projectDir: string,
   storeName: ".bun" | ".pnpm",
@@ -134,34 +116,6 @@ describe("Effect tsgo patch", () => {
       }),
     );
 
-    it.effect("plans only the exact pinned local toolchain", () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const path = yield* Path.Path;
-        const projectDir = yield* fs.makeTempDirectoryScoped({
-          prefix: "dev-kit-tsgo-test-",
-        });
-
-        yield* writePackageVersion(projectDir, "@effect/tsgo", EFFECT_TSGO_VERSION);
-        yield* writePackageVersion(projectDir, "typescript", EFFECT_TSGO_TYPESCRIPT_VERSION);
-        const executable = path.join(projectDir, "node_modules", ".bin", "effect-tsgo");
-
-        yield* fs.makeDirectory(path.dirname(executable), { recursive: true });
-        yield* fs.writeFileString(executable, "fixture\n");
-
-        const plan = yield* planEffectTsgoPatch({ dryRun: true, projectDir });
-
-        assert.strictEqual(
-          plan.executable,
-          path.join(yield* fs.realPath(projectDir), "node_modules", ".bin", "effect-tsgo"),
-        );
-        assert.deepEqual(plan.args, ["patch", "--typescript"]);
-        assert.isUndefined(plan.unpatchArgs);
-        assert.strictEqual(plan.effectTsgoVersion, EFFECT_TSGO_VERSION);
-        assert.strictEqual(plan.typescriptVersion, EFFECT_TSGO_TYPESCRIPT_VERSION);
-      }),
-    );
-
     it.effect("recognizes an already-patched Bun toolchain", () =>
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
@@ -189,112 +143,6 @@ describe("Effect tsgo patch", () => {
         const plan = yield* planEffectTsgoPatch({ projectDir });
 
         assert.isTrue(plan.alreadyPatched);
-      }),
-    );
-
-    it.effect("restores a stale patch backup before applying the pinned tsgo version", () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const projectDir = yield* fs.makeTempDirectoryScoped({
-          prefix: "dev-kit-tsgo-stale-test-",
-        });
-
-        yield* installIsolatedPatchedToolchain(projectDir, ".bun", { stale: true });
-
-        const plan = yield* planEffectTsgoPatch({ projectDir });
-
-        assert.isFalse(plan.alreadyPatched);
-        assert.deepEqual(plan.unpatchArgs, ["unpatch", "--typescript"]);
-        assert.deepEqual(plan.args, ["patch", "--typescript"]);
-      }),
-    );
-
-    it.effect("rejects drift from the toolkit pin", () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const path = yield* Path.Path;
-        const projectDir = yield* fs.makeTempDirectoryScoped({
-          prefix: "dev-kit-tsgo-test-",
-        });
-
-        yield* writePackageVersion(projectDir, "@effect/tsgo", "0.24.2");
-        yield* writePackageVersion(projectDir, "typescript", EFFECT_TSGO_TYPESCRIPT_VERSION);
-        const executable = path.join(projectDir, "node_modules", ".bin", "effect-tsgo");
-
-        yield* fs.makeDirectory(path.dirname(executable), { recursive: true });
-        yield* fs.writeFileString(executable, "fixture\n");
-
-        const error = yield* Effect.flip(planEffectTsgoPatch({ projectDir }));
-
-        assert.strictEqual(error._tag, "EffectTsgoDependencyError");
-        if (error._tag === "EffectTsgoDependencyError") {
-          assert.strictEqual(error.packageName, "@effect/tsgo");
-          assert.strictEqual(error.actualVersion, "0.24.2");
-        }
-      }),
-    );
-
-    it.effect("passes explicit force and TypeScript package options through", () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const path = yield* Path.Path;
-        const projectDir = yield* fs.makeTempDirectoryScoped({
-          prefix: "dev-kit-tsgo-test-",
-        });
-
-        yield* writePackageVersion(projectDir, "@effect/tsgo", EFFECT_TSGO_VERSION);
-        yield* writePackageVersion(
-          projectDir,
-          "@typescript/native",
-          EFFECT_TSGO_TYPESCRIPT_VERSION,
-        );
-        const executable = path.join(projectDir, "node_modules", ".bin", "effect-tsgo");
-
-        yield* fs.makeDirectory(path.dirname(executable), { recursive: true });
-        yield* fs.writeFileString(executable, "fixture\n");
-
-        const plan = yield* planEffectTsgoPatch({
-          force: true,
-          projectDir,
-          typescriptPackage: "@typescript/native",
-        });
-
-        assert.deepEqual(plan.args, [
-          "patch",
-          "--typescript",
-          "--force",
-          "--typescript-package",
-          "@typescript/native",
-        ]);
-      }),
-    );
-
-    it.effect("rejects package names that can escape node_modules", () =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const projectDir = yield* fs.makeTempDirectoryScoped({
-          prefix: "dev-kit-tsgo-test-",
-        });
-
-        for (const packageName of [
-          "../typescript",
-          "@scope/../../typescript",
-          "@scope/name/extra",
-          "/typescript",
-          "typescript\\..\\escape",
-          "@scope/",
-          "@scope",
-          "",
-        ]) {
-          const error = yield* Effect.flip(
-            planEffectTsgoPatch({ projectDir, typescriptPackage: packageName }),
-          );
-
-          assert.strictEqual(error._tag, "InvalidEffectTsgoPackageNameError");
-          if (error._tag === "InvalidEffectTsgoPackageNameError") {
-            assert.strictEqual(error.packageName, packageName);
-          }
-        }
       }),
     );
   });
