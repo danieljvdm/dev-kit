@@ -363,6 +363,53 @@ The scaffolded workflow performs one frozen, script-suppressed install, runs
 [Vite Task run guide](https://viteplus.dev/guide/run) when maintaining the
 templates.
 
+### Absolute (path-alias) imports
+
+Opt into enforcing path-alias imports for selected app sources. The factory
+appends an Oxlint override that errors on `../` imports inside the given
+globs, so those files import through tsconfig path aliases such as `@/*`:
+
+```ts
+export default defineConfig(
+  createRecommendedVitePlusConfig({
+    absoluteImports: {
+      files: ["apps/app/src/**/*.{ts,tsx}", "apps/mobile/src/**/*.{ts,tsx}"],
+    },
+  }),
+);
+```
+
+The lint rule only forbids relative parent imports; each covered app must map
+the alias itself. Add the `paths` entry to the app's `tsconfig.json`:
+
+```jsonc
+{
+  "compilerOptions": {
+    "paths": { "@/*": ["./src/*"] },
+  },
+}
+```
+
+Vite-built apps also resolve the alias from the same tsconfig by setting
+`resolve: { tsconfigPaths: true }` in the app's Vite config. Expo apps need no
+Metro configuration: Expo SDK 49+ resolves tsconfig `paths` by default.
+
+Standalone Oxlint projects compose the same override directly:
+
+```ts
+// oxlint.config.ts
+import {
+  createAbsoluteImportsOxlintOverride,
+  recommendedOxlintConfig,
+} from "@danieljvdm/dev-kit/oxlint";
+import { defineConfig } from "oxlint";
+
+export default defineConfig({
+  extends: [recommendedOxlintConfig],
+  overrides: [createAbsoluteImportsOxlintOverride({ files: ["src/**/*.{ts,tsx}"] })],
+});
+```
+
 ## Worktrunk project config
 
 Enable a scaffolded default [Worktrunk](https://worktrunk.dev) project config
