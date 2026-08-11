@@ -177,6 +177,11 @@ describe("remote catalog resolution", () => {
               path.join(fixture.cacheDir, "catalog", "test-source", fixture.resolved, ".ready"),
             ),
           );
+          assert.isTrue(
+            yield* fs.exists(
+              path.join(fixture.cacheDir, "catalog", "test-source", fixture.resolved, ".last-used"),
+            ),
+          );
 
           // Any further git operation against the upstream would now fail.
           yield* fs.remove(fixture.upstream, { force: true, recursive: true });

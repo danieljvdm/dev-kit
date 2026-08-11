@@ -2,7 +2,11 @@ import { Config, Effect, FileSystem, Path, Schema, Stream } from "effect";
 import { ChildProcess } from "effect/unstable/process";
 
 import { printStatus, withSpinner } from "./cli-ui.ts";
-import { commitCacheDirectory, resolveGlobalCacheDirectory } from "./global-cache.ts";
+import {
+  commitCacheDirectory,
+  resolveGlobalCacheDirectory,
+  stampTagUsage,
+} from "./global-cache.ts";
 import { observeSymbolicLink } from "./node-symbolic-link.ts";
 import { acquireProjectProcessLock } from "./project-process-lock.ts";
 import { isTypeScriptPackageName } from "./typescript-package-name.ts";
@@ -302,6 +306,7 @@ const ensureSharedRepository = Effect.fn("ensureSharedEffectRepository")(functio
     yield* runGit(path.dirname(staged), ["init", "--quiet", "--bare", staged]);
     yield* commitCacheDirectory(staged, repositoryDir, populated);
   }
+  yield* stampTagUsage(repositoryDir, tag);
   const cached = yield* runGit(repositoryDir, [
     "rev-parse",
     "-q",

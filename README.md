@@ -137,6 +137,7 @@ the root package itself.
 | `dev-kit gitignore`                        | Add `.repos/` and `.dev-kit/` to `.gitignore`.            |
 | `dev-kit effect sync`                      | Sync `.repos/effect` to the installed Effect version.     |
 | `dev-kit tsgo patch`                       | Validate and patch Effect TypeScript-Go directly.         |
+| `dev-kit cache prune`                      | Evict stale machine-global cache content (`--all` wipes). |
 | `dev-kit catalog refresh`                  | Maintainer command to approve current upstream refs.      |
 | `dev-kit catalog add <repository>`         | Inspect a repository and approve selected skills.         |
 | `dev-kit catalog remove <source-or-skill>` | Revoke an approval (`--yes` outside a terminal).          |
@@ -600,6 +601,13 @@ on macOS and `~/.cache/dev-kit` elsewhere) and may be overridden with
 immutable commit-keyed cache is not project state, so planning and `--locked`
 verification use it too. Only a reviewed catalog refresh changes the approved
 Git content.
+
+The cache does not grow without bounds: every use refreshes a recency stamp,
+and `dev-kit apply` sweeps content unused for 30 days at most once a day.
+Shared Effect repositories drop unused tags individually and are removed whole
+once empty. Run `dev-kit cache prune` to sweep on demand (`--max-age-days` to
+tune the threshold, `--all` to clear the cache entirely); an evicted entry is
+simply fetched again the next time a project needs it.
 
 ## Oxlint and Oxfmt configurations
 

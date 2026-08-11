@@ -2,7 +2,11 @@ import { Effect, FileSystem, Path, Schema, Stream } from "effect";
 import { ChildProcess } from "effect/unstable/process";
 import { parse as parseJsonc, type ParseError } from "jsonc-parser";
 
-import { commitCacheDirectory, resolveGlobalCacheDirectory } from "./global-cache.ts";
+import {
+  commitCacheDirectory,
+  resolveGlobalCacheDirectory,
+  stampCacheEntryUsage,
+} from "./global-cache.ts";
 import {
   discoverPackageSkills,
   resolvePackageSkillSelector,
@@ -333,6 +337,7 @@ const materializeSource = Effect.fn("materializeCatalogSource")(function* (
     yield* fs.writeFileString(path.join(staged, ".ready"), `${source.resolved}\n`);
     yield* commitCacheDirectory(staged, root, fs.exists(ready));
   }
+  yield* stampCacheEntryUsage(root);
   for (const skill of selected) {
     const observation = yield* observePath(path.join(root, "skills", skill));
     const approvedDigest = source.digests?.[skill];

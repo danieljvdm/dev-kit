@@ -306,6 +306,18 @@ describe("Effect source checkout", () => {
           0,
         );
 
+        assert.isTrue(
+          yield* fs.exists(
+            path.join(
+              fixture.cacheDir,
+              "effect-source",
+              encodeURIComponent(fixture.upstream),
+              "dev-kit-tag-usage",
+              encodeURIComponent("effect@1.2.3"),
+            ),
+          ),
+        );
+
         const projectB = path.join(fixture.root, "project-b");
 
         yield* fs.makeDirectory(projectB);

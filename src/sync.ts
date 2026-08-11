@@ -15,6 +15,7 @@ import {
   planEffectTsgoPatch,
   type EffectTsgoPatchPlan,
 } from "./effect-tsgo.ts";
+import { maybePruneGlobalCache } from "./global-cache.ts";
 import { DevKitManifestSchema, normalizeManifest } from "./manifest.ts";
 import { observeSymbolicLink } from "./node-symbolic-link.ts";
 import { resolvePackageSkillSelector } from "./package-skill-source.ts";
@@ -1888,6 +1889,7 @@ export const runProjectSkillPlan = Effect.fn("runProjectSkillPlan")(function* (
       recursive: true,
     })
     .pipe(Effect.ignore);
+  yield* maybePruneGlobalCache().pipe(Effect.ignore);
   yield* printStatus(
     "success",
     changes === 0 && !replanned.metadataChanged ? "Dev kit up to date" : "Dev kit ready",

@@ -21,6 +21,14 @@ working copy but clones and fetches tags from a shared cached repository in
 the same global cache, contacting the network only when a tag is missing from
 the cache.
 
+The cache does not grow without bounds. Every use refreshes a recency stamp;
+`dev-kit apply` sweeps content unused for 30 days at most once a day, dropping
+stale catalog entries and unused Effect tags (removing a shared repository
+entirely once it holds no tags). The new `dev-kit cache prune` command sweeps
+on demand, with `--max-age-days` to tune the threshold and `--all` to clear
+the cache entirely. Eviction is always safe: entries are regenerable and are
+re-fetched on next use.
+
 Stale project-local `.dev-kit/cache/catalog` directories left by earlier
 versions are removed on apply (best effort); they were regenerable and are no
 longer read.
