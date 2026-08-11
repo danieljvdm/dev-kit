@@ -1,4 +1,4 @@
-import { Effect, FileSystem, Path, Schema } from "effect";
+import { Effect, FileSystem, Option, Path, Schema } from "effect";
 
 export class ProjectPackageError extends Schema.TaggedError<ProjectPackageError>()(
   "ProjectPackageError",
@@ -91,23 +91,87 @@ export const detectPackageManager = Effect.fn("detectPackageManager")(function* 
   return detected.length === 1 ? detected[0] : undefined;
 });
 
-export const readDirectDependencyNames = Effect.fn("readDirectDependencyNames")(function* (
-  projectDir: string,
+const readOptionalProjectPackage = Effect.fn("readOptionalProjectPackage")(function* (
+  packageDir: string,
 ) {
-  const manifest = yield* readProjectPackage(projectDir).pipe(
+  return yield* readProjectPackage(packageDir).pipe(
     Effect.catchTag("ProjectPackageError", (error) =>
       error.message.startsWith("package.json not found:") ? Effect.void : Effect.fail(error),
     ),
   );
+});
 
-  if (manifest === undefined) return [];
+const manifestDependencyNames = (
+  manifest: (typeof ProjectPackageSchema)["Type"] | undefined | void,
+): ReadonlyArray<string> =>
+  manifest === undefined
+    ? []
+    : [
+        ...Object.keys(manifest.dependencies ?? {}),
+        ...Object.keys(manifest.devDependencies ?? {}),
+        ...Object.keys(manifest.optionalDependencies ?? {}),
+        ...Object.keys(manifest.peerDependencies ?? {}),
+      ];
 
-  return [
-    ...new Set([
-      ...Object.keys(manifest.dependencies ?? {}),
-      ...Object.keys(manifest.devDependencies ?? {}),
-      ...Object.keys(manifest.optionalDependencies ?? {}),
-      ...Object.keys(manifest.peerDependencies ?? {}),
-    ]),
-  ].sort();
+export const readDirectDependencyNames = Effect.fn("readDirectDependencyNames")(function* (
+  projectDir: string,
+) {
+  const manifest = yield* readOptionalProjectPackage(projectDir);
+
+  return [...new Set(manifestDependencyNames(manifest))].sort();
+});
+
+const WorkspacePatternsSchema = Schema.Union([
+  Schema.Array(Schema.String),
+  Schema.Struct({ packages: Schema.Array(Schema.String) }),
+]);
+// `workspaces` is declared `Schema.Unknown` in the project manifest schema, so
+// this is a genuinely untyped boundary.
+const decodeWorkspacePatterns = Schema.decodeUnknownOption(WorkspacePatternsSchema);
+
+const workspacePatterns = (workspaces: unknown): ReadonlyArray<string> => {
+  const decoded = decodeWorkspacePatterns(workspaces);
+
+  if (Option.isNone(decoded)) return [];
+
+  return "packages" in decoded.value ? decoded.value.packages : decoded.value;
+};
+
+/**
+ * Direct dependency names of the project package plus every workspace member
+ * package. Only literal workspace paths and single trailing-star globs
+ * (`apps/*`) are expanded; other patterns are skipped.
+ */
+export const readWorkspaceDependencyNames = Effect.fn("readWorkspaceDependencyNames")(function* (
+  projectDir: string,
+) {
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+  const manifest = yield* readOptionalProjectPackage(projectDir);
+  const names = new Set(manifestDependencyNames(manifest));
+
+  for (const pattern of workspacePatterns(manifest?.workspaces)) {
+    if (pattern.startsWith("!")) continue;
+    const star = pattern.indexOf("*");
+    let memberDirs: ReadonlyArray<string> = [];
+
+    if (star === -1) {
+      memberDirs = [pattern];
+    } else if (pattern.endsWith("/*") && star === pattern.length - 1) {
+      const parent = path.join(projectDir, pattern.slice(0, -2));
+
+      if (yield* fs.exists(parent)) {
+        memberDirs = (yield* fs.readDirectory(parent)).map((name) =>
+          path.join(pattern.slice(0, -2), name),
+        );
+      }
+    }
+    for (const memberDir of memberDirs) {
+      const member = yield* readOptionalProjectPackage(path.join(projectDir, memberDir));
+
+      for (const name of manifestDependencyNames(member)) names.add(name);
+    }
+  }
+
+  return [...names].sort();
 });

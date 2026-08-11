@@ -17,19 +17,15 @@ describe("build-effect-apis skill", () => {
         assert.match(skill, /^---\nname: build-effect-apis\ndescription: /);
         assert.match(skill, /contract spine/i);
         assert.match(skill, /HttpApiBuilder or HttpApiServer/);
-        assert.match(skill, /AtomHttpApi\.Service/);
+        assert.match(skill, /\$effect-atom-state/);
         assert.notMatch(skill, /TODO/);
         assert.isTrue(yield* fs.exists(path.join(skillDir, "agents", "openai.yaml")));
 
         const expectedReferences = new Set([
           "cloudflare-workers.md",
-          "effect-atom-client.md",
-          "effect-atom-lifecycle.md",
-          "effect-atom-testing.md",
           "runtime-assembly.md",
           "server-and-middleware.md",
           "shared-contracts.md",
-          "tanstack-start.md",
           "verification.md",
         ]);
         const referenceNames = new Set(yield* fs.readDirectory(referencesDir));
@@ -47,16 +43,6 @@ describe("build-effect-apis skill", () => {
         const cloudflare = yield* fs.readFileString(
           path.join(referencesDir, "cloudflare-workers.md"),
         );
-        const tanstack = yield* fs.readFileString(path.join(referencesDir, "tanstack-start.md"));
-        const atomClient = yield* fs.readFileString(
-          path.join(referencesDir, "effect-atom-client.md"),
-        );
-        const atomLifecycle = yield* fs.readFileString(
-          path.join(referencesDir, "effect-atom-lifecycle.md"),
-        );
-        const atomTesting = yield* fs.readFileString(
-          path.join(referencesDir, "effect-atom-testing.md"),
-        );
         const server = yield* fs.readFileString(
           path.join(referencesDir, "server-and-middleware.md"),
         );
@@ -65,12 +51,6 @@ describe("build-effect-apis skill", () => {
 
         assert.match(cloudflare, /effect-cf/);
         assert.match(cloudflare, /raw route escape hatches/i);
-        assert.match(tanstack, /request-specific runtime\/layers per request/);
-        assert.match(atomClient, /reactivity-key constructors/);
-        assert.match(atomLifecycle, /AsyncResult\.all/);
-        assert.match(atomLifecycle, /Atom\.Interrupt/);
-        assert.match(atomTesting, /unmounting one\s+consumer does not cancel work/);
-        assert.match(atomClient, /HttpApiMiddleware\.layerClient/);
         assert.match(server, /requiredForClient/);
         assert.match(server, /Effect\.catchReasons/);
         assert.match(runtime, /HttpRouter\.toWebHandler/);
@@ -82,6 +62,7 @@ describe("build-effect-apis skill", () => {
         assert.match(verification, /Inventory every `Schema\.decodeUnknown\*`/);
         assert.match(verification, /concrete untyped-boundary justification/);
         assert.match(verification, /lint warning/);
+        assert.match(verification, /\$effect-atom-state/);
       }),
     );
   });

@@ -30,6 +30,7 @@ import {
   detectPackageManager,
   PACKAGE_MANAGER_COMMANDS,
   readDirectDependencyNames,
+  readWorkspaceDependencyNames,
   readProjectPackage,
   type PackageManagerName,
 } from "./project-package.ts";
@@ -267,7 +268,13 @@ const encodePlanSnapshotJson = Schema.encodeSync(Schema.fromJsonString(Schema.Un
 const encodeAppliedStatePrettyJson = Schema.encodeSync(fromJsonString(AppliedStateSchema, 2));
 
 const SKILL_FAMILIES: SkillCatalog = {
-  effect: ["effect-ts", "effect-architecture-audit", "build-effect-apis", "build-effect-clis"],
+  effect: [
+    "effect-ts",
+    "effect-architecture-audit",
+    "build-effect-apis",
+    "effect-atom-state",
+    "build-effect-clis",
+  ],
 };
 
 export const DEFAULT_MANIFEST = "dev-kit.jsonc";
@@ -806,7 +813,7 @@ const renderAgentInstructions = Effect.fn("renderAgentInstructions")(function* (
           );
   const directDependencyNames = yield* readDirectDependencyNames(projectDir);
   const usesVitePlus = directDependencyNames.includes("vite-plus");
-  const effectInstructions =
+  const effectGuideInstructions =
     directDependencyNames.includes("effect") &&
     (yield* observePath(path.join(projectDir, "node_modules", "effect", "AGENTS.md"))).kind ===
       "file"
@@ -822,6 +829,20 @@ guide doesn't cover, search through the source code in \`node_modules/effect/src
 
 `
       : "";
+  const atomBoundaryInstructions = (yield* readWorkspaceDependencyNames(projectDir)).includes(
+    "@effect/atom-react",
+  )
+    ? `# Effect Atom client boundary
+
+This repository consumes APIs through Effect Atom clients (\`@effect/atom-react\`).
+Keep business logic in Effect: compose multi-step client workflows as atoms,
+declare cross-query invalidation as reactivity keys on mutations, and keep
+promise-mode dispatches at the React boundary logic-free — no \`.then\` chains
+in components or routes.
+
+`
+    : "";
+  const effectInstructions = `${effectGuideInstructions}${atomBoundaryInstructions}`;
   const projectPackage = yield* readProjectPackage(projectDir).pipe(
     Effect.catchTag("ProjectPackageError", (error) =>
       error.message.startsWith("package.json not found:") ? Effect.void : Effect.fail(error),

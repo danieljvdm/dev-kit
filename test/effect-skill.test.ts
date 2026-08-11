@@ -188,6 +188,7 @@ describe("shipped skills", () => {
               "effect-ts",
               "effect-architecture-audit",
               "build-effect-apis",
+              "effect-atom-state",
               "build-effect-clis",
             ],
           },
@@ -196,6 +197,7 @@ describe("shipped skills", () => {
             include: ["effect-architecture-audit"],
             expectedSkills: ["effect-architecture-audit"],
           },
+          { include: ["effect-atom-state"], expectedSkills: ["effect-atom-state"] },
           { include: ["build-effect-clis"], expectedSkills: ["build-effect-clis"] },
         ]) {
           yield* writeManifest(projectDir, include);
@@ -206,6 +208,7 @@ describe("shipped skills", () => {
             "effect-ts",
             "effect-architecture-audit",
             "build-effect-apis",
+            "effect-atom-state",
             "build-effect-clis",
           ]) {
             if (expectedSkills.includes(skillName)) {

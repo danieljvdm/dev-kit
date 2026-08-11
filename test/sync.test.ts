@@ -285,6 +285,10 @@ describe("project apply", () => {
           result.output,
           /\+ copy effect-architecture-audit → \.agents\/skills\/effect-architecture-audit/,
         );
+        assert.match(
+          result.output,
+          /\+ copy effect-atom-state → \.agents\/skills\/effect-atom-state/,
+        );
         assert.match(result.output, /\+ copy effect-ts → \.agents\/skills\/effect-ts/);
         assert.isFalse(yield* fs.exists(path.join(projectDir, ".agents")));
         assert.isFalse(yield* fs.exists(path.join(projectDir, "AGENTS.md")));
@@ -302,7 +306,7 @@ describe("project apply", () => {
         const first = yield* runDevKit(projectDir, ["apply", "--project-dir", projectDir]);
 
         assert.strictEqual(first.exitCode, 0, first.output);
-        assert.match(first.output, /Dev kit ready 4 changes/);
+        assert.match(first.output, /Dev kit ready 5 changes/);
         assert.isTrue(
           yield* fs.exists(
             path.join(projectDir, ".agents", "skills", "build-effect-apis", "SKILL.md"),
@@ -316,6 +320,11 @@ describe("project apply", () => {
         assert.isTrue(
           yield* fs.exists(
             path.join(projectDir, ".agents", "skills", "effect-architecture-audit", "SKILL.md"),
+          ),
+        );
+        assert.isTrue(
+          yield* fs.exists(
+            path.join(projectDir, ".agents", "skills", "effect-atom-state", "SKILL.md"),
           ),
         );
         assert.isTrue(
@@ -337,6 +346,7 @@ describe("project apply", () => {
             ["skill:build-effect-apis@agents", ".agents/skills/build-effect-apis"],
             ["skill:build-effect-clis@agents", ".agents/skills/build-effect-clis"],
             ["skill:effect-architecture-audit@agents", ".agents/skills/effect-architecture-audit"],
+            ["skill:effect-atom-state@agents", ".agents/skills/effect-atom-state"],
             ["skill:effect-ts@agents", ".agents/skills/effect-ts"],
           ],
         );
@@ -372,7 +382,7 @@ describe("project apply", () => {
         const applied = yield* runDevKit(projectDir, ["apply", "--project-dir", projectDir]);
 
         assert.strictEqual(applied.exitCode, 0, applied.output);
-        assert.match(applied.output, /✓ Dev kit ready 5 changes/);
+        assert.match(applied.output, /✓ Dev kit ready 6 changes/);
         assert.notMatch(applied.output, /Verification succeeded|Backed up original binary/);
         assert.strictEqual(yield* fs.readFileString(marker), "1");
 
@@ -454,6 +464,7 @@ describe("project apply", () => {
         assert.match(planned.output, /− skill:build-effect-apis@agents/);
         assert.match(planned.output, /− skill:build-effect-clis@agents/);
         assert.match(planned.output, /− skill:effect-architecture-audit@agents/);
+        assert.match(planned.output, /− skill:effect-atom-state@agents/);
         assert.match(planned.output, /− skill:effect-ts@agents/);
         assert.isTrue(
           yield* fs.exists(path.join(projectDir, ".agents", "skills", "build-effect-apis")),
@@ -463,6 +474,9 @@ describe("project apply", () => {
         );
         assert.isTrue(
           yield* fs.exists(path.join(projectDir, ".agents", "skills", "effect-architecture-audit")),
+        );
+        assert.isTrue(
+          yield* fs.exists(path.join(projectDir, ".agents", "skills", "effect-atom-state")),
         );
         assert.isTrue(yield* fs.exists(path.join(projectDir, ".agents", "skills", "effect-ts")));
 
@@ -477,6 +491,9 @@ describe("project apply", () => {
         );
         assert.isFalse(
           yield* fs.exists(path.join(projectDir, ".agents", "skills", "effect-architecture-audit")),
+        );
+        assert.isFalse(
+          yield* fs.exists(path.join(projectDir, ".agents", "skills", "effect-atom-state")),
         );
         assert.isFalse(yield* fs.exists(path.join(projectDir, ".agents", "skills", "effect-ts")));
         assert.strictEqual(yield* fs.readFileString(path.join(unrelated, "SKILL.md")), "local\n");
@@ -512,7 +529,7 @@ describe("project apply", () => {
         assert.match(yield* fs.readFileString(skillDocument), /local edit/);
         assert.lengthOf(
           JSON.parse(yield* fs.readFileString(path.join(projectDir, "dev-kit.lock.json"))).outputs,
-          4,
+          5,
         );
       }),
     );
@@ -769,6 +786,68 @@ describe("project apply", () => {
         assert.notInclude(
           yield* fs.readFileString(path.join(transitiveProject, "AGENTS.md")),
           "node_modules/effect/AGENTS.md",
+        );
+      }),
+    );
+
+    it.effect("renders the Effect Atom client boundary for atom-react projects", () =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const directProject = yield* createProject();
+
+        yield* writeManifest(directProject, { agentInstructionsEnabled: true });
+        yield* writeProjectPackage(directProject, {
+          dependencies: { "@effect/atom-react": "4.0.0-beta.105" },
+        });
+        const direct = yield* runDevKit(directProject, ["apply", "--project-dir", directProject]);
+
+        assert.strictEqual(direct.exitCode, 0, direct.output);
+        const directInstructions = yield* fs.readFileString(path.join(directProject, "AGENTS.md"));
+
+        assert.include(directInstructions, "# Effect Atom client boundary");
+        assert.include(directInstructions, "reactivity keys");
+
+        const workspaceProject = yield* createProject();
+
+        yield* writeManifest(workspaceProject, { agentInstructionsEnabled: true });
+        yield* writeProjectPackage(workspaceProject, {
+          workspaces: ["apps/*"],
+          dependencies: { effect: "4.0.0-beta.105" },
+        });
+        yield* fs.makeDirectory(path.join(workspaceProject, "apps", "web"), { recursive: true });
+        yield* fs.writeFileString(
+          path.join(workspaceProject, "apps", "web", "package.json"),
+          `${JSON.stringify(
+            { dependencies: { "@effect/atom-react": "4.0.0-beta.105" } },
+            null,
+            2,
+          )}\n`,
+        );
+        const workspace = yield* runDevKit(workspaceProject, [
+          "apply",
+          "--project-dir",
+          workspaceProject,
+        ]);
+
+        assert.strictEqual(workspace.exitCode, 0, workspace.output);
+        assert.include(
+          yield* fs.readFileString(path.join(workspaceProject, "AGENTS.md")),
+          "# Effect Atom client boundary",
+        );
+
+        const plainProject = yield* createProject();
+
+        yield* writeManifest(plainProject, { agentInstructionsEnabled: true });
+        yield* writeProjectPackage(plainProject, {
+          dependencies: { effect: "4.0.0-beta.105" },
+        });
+        const plain = yield* runDevKit(plainProject, ["apply", "--project-dir", plainProject]);
+
+        assert.strictEqual(plain.exitCode, 0, plain.output);
+        assert.notInclude(
+          yield* fs.readFileString(path.join(plainProject, "AGENTS.md")),
+          "Effect Atom client boundary",
         );
       }),
     );
@@ -1437,7 +1516,7 @@ describe("project apply", () => {
         assert.isTrue(yield* fs.exists(path.join(projectDir, ".agents", "skills", "effect-ts")));
         assert.lengthOf(
           JSON.parse(yield* fs.readFileString(path.join(projectDir, "dev-kit.lock.json"))).outputs,
-          4,
+          5,
         );
       }),
     );
@@ -1472,7 +1551,7 @@ describe("project apply", () => {
         ]);
 
         assert.strictEqual(result.exitCode, 0, result.output);
-        assert.match(result.output, /Dev kit ready 4 changes/);
+        assert.match(result.output, /Dev kit ready 5 changes/);
         assert.isFalse(
           yield* fs.exists(path.join(projectDir, ".agents", "skills", "build-effect-apis")),
         );
@@ -1481,6 +1560,9 @@ describe("project apply", () => {
         );
         assert.isFalse(
           yield* fs.exists(path.join(projectDir, ".agents", "skills", "effect-architecture-audit")),
+        );
+        assert.isFalse(
+          yield* fs.exists(path.join(projectDir, ".agents", "skills", "effect-atom-state")),
         );
         assert.isFalse(yield* fs.exists(path.join(projectDir, ".agents", "skills", "effect-ts")));
         assert.deepEqual(
