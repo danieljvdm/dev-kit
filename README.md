@@ -701,14 +701,25 @@ export default defineConfig({
 });
 ```
 
-The Oxlint preset enables `stylistic/padding-line-between-statements`: adjacent
+The Oxlint preset vendors and enables every rule from
+[dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop) at upstream commit
+`9b80d9a5c317d3af94d88a577bdbde4d9a45f7be`. These opinionated rules reject
+low-evidence patterns such as broad `unknown` contracts, runtime `typeof`
+narrowing, module mocking, chained assertions, and assertions without a
+nearby `SAFETY:` justification. The package also exports the plugin from
+`@danieljvdm/dev-kit/oxlint-plugin-anti-slop`. Its vendored MIT license is
+retained beside the source.
+
+The TypeScript files under `src/oxlint-plugin-anti-slop/` are canonical. After
+updating them, run `vp run anti-slop:bundle` to regenerate the package-loadable
+JavaScript entry point without cleaning canonical source.
+
+The preset also enables `stylistic/padding-line-between-statements`: adjacent
 variable declarations remain grouped, while the next logical statement and
 all `return` statements require a separating blank line. The rule is fixable,
-so `vp lint --fix` repairs missing spacing automatically. Vite+ 0.2.6 forwards
-the preset's JavaScript-plugin declarations but its native Oxlint path does not
-execute their rules — run standalone Oxlint when `effect/*` or the padding rule
-must be enforced, until a supported Vite+ release executes configured JS
-plugins.
+so `vp lint --fix` repairs missing spacing automatically. With the matching
+Oxlint 1.78 peer installed, Vite+ 0.2.6 executes the preset's JavaScript-plugin
+rules through the normal `vp lint` command.
 
 The preset also registers the shared `effect` JavaScript plugin. Effect
 projects opt into its rules in path-specific overrides, for example

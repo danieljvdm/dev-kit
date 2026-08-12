@@ -262,11 +262,15 @@ export const planEffectTsgoPatch = Effect.fn("planEffectTsgoPatch")(function* (
   const typescriptPackageArgs =
     typescriptPackage === "typescript" ? [] : ["--typescript-package", typescriptPackage];
 
-  return {
+  const plan = {
     alreadyPatched: patchState.alreadyPatched,
-    ...(patchState.hasBackup && !patchState.alreadyPatched
-      ? { unpatchArgs: ["unpatch", "--typescript", ...typescriptPackageArgs] }
-      : {}),
+  };
+
+  if (patchState.hasBackup && !patchState.alreadyPatched) {
+    Object.assign(plan, { unpatchArgs: ["unpatch", "--typescript", ...typescriptPackageArgs] });
+  }
+
+  return Object.assign(plan, {
     projectDir,
     executable,
     args: [
@@ -278,7 +282,7 @@ export const planEffectTsgoPatch = Effect.fn("planEffectTsgoPatch")(function* (
     effectTsgoVersion,
     typescriptPackage,
     typescriptVersion,
-  } satisfies EffectTsgoPatchPlan;
+  }) satisfies EffectTsgoPatchPlan;
 });
 
 const runEffectTsgoCommand = Effect.fn("runEffectTsgoCommand")(function* (

@@ -19,6 +19,11 @@ type ManagerOptions = {
   readonly apply?: boolean;
 };
 
+type ManagerSyncOptions = {
+  projectDir?: string;
+  manifestPath?: string;
+};
+
 const packageRoot = Effect.fn("skillManagerPackageRoot")(function* () {
   const path = yield* Path.Path;
 
@@ -150,6 +155,11 @@ const readManifest = Effect.fn("readManagedSkillManifest")(function* (
   return { ...paths, manifest, raw };
 });
 
+const ManifestSelectionSchema = Schema.Struct({
+  include: Schema.optional(Schema.Array(Schema.String)),
+  exclude: Schema.optional(Schema.Array(Schema.String)),
+});
+
 const writeArray = Effect.fn("writeManifestArray")(function* (
   manifestPath: string,
   raw: string,
@@ -157,12 +167,10 @@ const writeArray = Effect.fn("writeManifestArray")(function* (
   values: ReadonlyArray<string>,
 ) {
   const fs = yield* FileSystem.FileSystem;
-  const parsed = parseJsonc(raw) as Record<string, unknown>;
-  const current = Array.isArray(parsed[property])
-    ? (parsed[property] as Array<unknown>).filter(
-        (value): value is string => typeof value === "string",
-      )
-    : undefined;
+  const parsed = yield* Schema.decodeUnknownEffect(ManifestSelectionSchema)(parseJsonc(raw)).pipe(
+    Effect.mapError((error) => SkillManagerError.make({ message: error.message })),
+  );
+  const current = parsed[property];
 
   if (current === undefined) {
     if (values.length === 0) return;
@@ -239,13 +247,17 @@ const summary = (description: string, defaultDescription: string): string => {
   return firstSentence.length > 96 ? `${firstSentence.slice(0, 93).trimEnd()}…` : firstSentence;
 };
 
-const applyIfRequested = (options: ManagerOptions) =>
-  options.apply === false
-    ? printStatus("success", "Manifest updated", "run dev-kit sync to apply")
-    : runProjectSkillPlan({
-        ...(options.projectDir === undefined ? {} : { projectDir: options.projectDir }),
-        ...(options.manifestPath === undefined ? {} : { manifestPath: options.manifestPath }),
-      });
+const applyIfRequested = (options: ManagerOptions) => {
+  if (options.apply === false) {
+    return printStatus("success", "Manifest updated", "run dev-kit sync to apply");
+  }
+  const syncOptions: ManagerSyncOptions = {};
+
+  if (options.projectDir !== undefined) syncOptions.projectDir = options.projectDir;
+  if (options.manifestPath !== undefined) syncOptions.manifestPath = options.manifestPath;
+
+  return runProjectSkillPlan(syncOptions);
+};
 
 export const initProject = Effect.fn("initDevKitProject")(function* (options: ManagerOptions) {
   const fs = yield* FileSystem.FileSystem;

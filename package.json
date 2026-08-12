@@ -19,6 +19,7 @@
     "skill-sources.jsonc",
     "skill-sources.lock.json",
     "src/",
+    "scripts/",
     "templates/"
   ],
   "type": "module",
@@ -46,6 +47,10 @@
       "types": "./src/oxlint-plugin-effect.d.ts",
       "default": "./src/oxlint-plugin-effect.js"
     },
+    "./oxlint-plugin-anti-slop": {
+      "types": "./src/oxlint-plugin-anti-slop/runtime.d.ts",
+      "default": "./src/oxlint-plugin-anti-slop/runtime.js"
+    },
     "./oxlint-plugin-style": {
       "types": "./src/oxlint-plugin-style.d.ts",
       "default": "./src/oxlint-plugin-style.js"
@@ -66,10 +71,13 @@
     "test:watch": "vitest --config vitest.config.ts",
     "tsgo:patch": "./bin/dev-kit.mjs tsgo patch",
     "catalog:refresh": "./bin/dev-kit.mjs catalog refresh",
-    "catalog:check": "./bin/dev-kit.mjs catalog verify"
+    "catalog:check": "./bin/dev-kit.mjs catalog verify",
+    "anti-slop:bundle": "vp pack src/oxlint-plugin-anti-slop/index.ts --out-dir .dev-kit/anti-slop-build --format esm --no-dts && node scripts/sync-anti-slop-runtime.mjs",
+    "anti-slop:check": "vp pack src/oxlint-plugin-anti-slop/index.ts --out-dir .dev-kit/anti-slop-build --format esm --no-dts && node scripts/sync-anti-slop-runtime.mjs --check"
   },
   "dependencies": {
     "@effect/platform-bun": "4.0.0-beta.105",
+    "@oxlint/plugins": "1.78.0",
     "@stylistic/eslint-plugin": "5.10.0",
     "effect": "4.0.0-beta.105",
     "jsonc-parser": "3.3.1",
@@ -83,14 +91,14 @@
     "@types/node": "25.9.1",
     "@types/semver": "7.8.0",
     "oxfmt": "0.60.0",
-    "oxlint": "1.75.0",
+    "oxlint": "1.78.0",
     "typescript": "7.0.2",
     "vite-plus": "0.2.6",
     "vitest": "4.1.10"
   },
   "peerDependencies": {
     "oxfmt": ">=0.60.0 <0.61.0",
-    "oxlint": ">=1.75.0 <2.0.0",
+    "oxlint": ">=1.78.0 <2.0.0",
     "vite-plus": ">=0.2.6 <0.3.0"
   },
   "peerDependenciesMeta": {

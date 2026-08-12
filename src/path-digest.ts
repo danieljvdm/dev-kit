@@ -23,13 +23,14 @@ export class PathInspectionError extends Schema.TaggedError<PathInspectionError>
 }
 
 const textEncoder = new TextEncoder();
+const isString = Schema.is(Schema.String);
 
 // Git preserves only the executable distinction for regular files. Canonicalizing
 // the remaining bits keeps digests stable across checkout and copy umasks.
 const canonicalFileMode = (mode: number): number => ((mode & 0o111) === 0 ? 0o644 : 0o755);
 
 const frame = (value: string | Uint8Array): Uint8Array => {
-  const bytes = typeof value === "string" ? textEncoder.encode(value) : value;
+  const bytes = isString(value) ? textEncoder.encode(value) : value;
   const framed = new Uint8Array(4 + bytes.length);
 
   new DataView(framed.buffer).setUint32(0, bytes.length);

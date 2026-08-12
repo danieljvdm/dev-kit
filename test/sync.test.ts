@@ -20,27 +20,22 @@ const writeManifest = Effect.fn("writeSyncTestManifest")(function* (
 ) {
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
+  const hasSetup =
+    options.agentInstructionsEnabled ||
+    options.effectTsgoEnabled ||
+    options.claudeInstructionsEnabled;
+  const setup = {
+    agentInstructions: options.agentInstructionsEnabled ? { enabled: true } : undefined,
+    claudeInstructions: options.claudeInstructionsEnabled ? { enabled: true } : undefined,
+    effectTsgo: options.effectTsgoEnabled ? { enabled: true } : undefined,
+  };
 
   yield* fs.writeFileString(
     path.join(projectDir, "dev-kit.jsonc"),
     `${JSON.stringify(
       {
         include: ["effect", ...(options.devKitEnabled ? ["dev-kit"] : [])],
-        ...(options.agentInstructionsEnabled ||
-        options.effectTsgoEnabled ||
-        options.claudeInstructionsEnabled
-          ? {
-              setup: {
-                ...(options.agentInstructionsEnabled
-                  ? { agentInstructions: { enabled: true } }
-                  : {}),
-                ...(options.claudeInstructionsEnabled
-                  ? { claudeInstructions: { enabled: true } }
-                  : {}),
-                ...(options.effectTsgoEnabled ? { effectTsgo: { enabled: true } } : {}),
-              },
-            }
-          : {}),
+        setup: hasSetup ? setup : undefined,
         targets: {
           agents: { enabled: options.agentsEnabled ?? true, mode: "copy" },
           claude: { enabled: options.claudeEnabled ?? false, mode: "symlink" },

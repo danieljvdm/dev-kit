@@ -146,13 +146,21 @@ export type NormalizedManifest = {
   readonly targets: Readonly<Record<HarnessTarget, NormalizedTargetConfig>>;
 };
 
-const DEFAULT_TARGET_PATHS: Readonly<Record<HarnessTarget, string>> = {
+type DefaultTargetPaths = {
+  readonly [Target in HarnessTarget]: string;
+};
+
+type DefaultTargets = {
+  readonly [Target in HarnessTarget]: NormalizedTargetConfig;
+};
+
+const DEFAULT_TARGET_PATHS: DefaultTargetPaths = {
   agents: ".agents/skills",
   claude: ".claude/skills",
   opencode: ".opencode/skills",
 };
 
-const DEFAULT_TARGETS: Readonly<Record<HarnessTarget, NormalizedTargetConfig>> = {
+const DEFAULT_TARGETS: DefaultTargets = {
   agents: { enabled: true, mode: "copy", path: DEFAULT_TARGET_PATHS.agents },
   claude: { enabled: false, mode: "symlink", path: DEFAULT_TARGET_PATHS.claude },
   opencode: { enabled: false, mode: "symlink", path: DEFAULT_TARGET_PATHS.opencode },

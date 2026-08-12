@@ -50,15 +50,18 @@ type PlannedGitignorePatch = GitignorePatch & {
   readonly previousContents: string;
 };
 
+type GitignoreContentsPatch = {
+  readonly contents: string;
+  readonly added: ReadonlyArray<string>;
+};
+
 const publicPatch = (patch: PlannedGitignorePatch): GitignorePatch => ({
   path: patch.path,
   changed: patch.changed,
   added: patch.added,
 });
 
-export const patchGitignoreContents = (
-  current: string,
-): { readonly contents: string; readonly added: ReadonlyArray<string> } => {
+export const patchGitignoreContents = (current: string): GitignoreContentsPatch => {
   const lines = current.split(/\r?\n/);
   const added = DEV_KIT_GITIGNORE_ENTRIES.filter((entry) => !lines.includes(entry));
 

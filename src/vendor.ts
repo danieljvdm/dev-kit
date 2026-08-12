@@ -158,11 +158,13 @@ const normalizeRepositoryLocator = (
     const normalized = `https://github.com/${owner}/${name}.git`;
 
     if (segments[2] === "tree" && segments[3]) {
-      return Effect.succeed({
-        repository: normalized,
-        ref: segments[3],
-        ...(segments.length > 4 ? { skillsPath: segments.slice(4).join("/") } : {}),
-      });
+      const locator = { repository: normalized, ref: segments[3] };
+
+      if (segments.length > 4) {
+        Object.assign(locator, { skillsPath: segments.slice(4).join("/") });
+      }
+
+      return Effect.succeed(locator);
     }
 
     return Effect.succeed({ repository: normalized });
@@ -493,13 +495,16 @@ const prepareSource = Effect.fn("prepareSkillSource")(function* (
     }
   }
 
-  return {
+  const prepared = {
     checkoutDir,
     resolved,
     skills,
     source,
-    ...(licenseSource ? { licenseSource } : {}),
-  } satisfies PreparedSource;
+  };
+
+  if (licenseSource) Object.assign(prepared, { licenseSource });
+
+  return prepared satisfies PreparedSource;
 });
 
 const readCurrentLock = Effect.fn("readCurrentSkillSourcesLock")(function* (lockfilePath: string) {
@@ -713,20 +718,31 @@ const buildLock = Effect.fn("buildSkillCatalogLock")(function* (
       }
       digests[skill] = observation.digest;
     }
-    sources.push({
+    const lockedSource = {
       id: source.id,
       repository: source.repository,
       ref: source.ref,
       resolved,
       skillsPath: source.skillsPath,
       include: source.include,
-      ...(source.exclude ? { exclude: source.exclude } : {}),
+    };
+
+    if (source.exclude) Object.assign(lockedSource, { exclude: source.exclude });
+
+    const completeLockedSource = Object.assign(lockedSource, {
       skills,
       descriptions,
       digests,
-      ...(source.licensePath ? { licensePath: source.licensePath } : {}),
-      ...(source.stripFrontmatter ? { stripFrontmatter: source.stripFrontmatter } : {}),
-    });
+    }) satisfies LockedSkillSource;
+
+    if (source.licensePath) {
+      Object.assign(completeLockedSource, { licensePath: source.licensePath });
+    }
+    if (source.stripFrontmatter) {
+      Object.assign(completeLockedSource, { stripFrontmatter: source.stripFrontmatter });
+    }
+
+    sources.push(completeLockedSource);
   }
 
   return { version: 1, sources } satisfies SkillSourcesLock;
@@ -807,15 +823,18 @@ export const inspectCatalogRepository = Effect.fn("inspectCatalogRepository")(fu
     }
   }
 
-  return {
+  const inspection: CatalogInspection = {
     id,
     repository,
     ref,
     resolved: prepared.resolved,
     skillsPath: source.skillsPath,
     skills,
-    ...(licensePath ? { licensePath } : {}),
-  } satisfies CatalogInspection;
+  };
+
+  if (licensePath) Object.assign(inspection, { licensePath });
+
+  return inspection;
 });
 
 export const refreshSkillCatalog = Effect.fn("refreshSkillCatalog")(function* (

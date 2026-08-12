@@ -21,6 +21,10 @@ describe("recommended Vite+ config", () => {
     });
     expect(config.lint?.jsPlugins).toEqual([
       {
+        name: "anti-slop",
+        specifier: "@danieljvdm/dev-kit/oxlint-plugin-anti-slop",
+      },
+      {
         name: "effect",
         specifier: "@danieljvdm/dev-kit/oxlint-plugin-effect",
       },
@@ -29,6 +33,7 @@ describe("recommended Vite+ config", () => {
         specifier: "@danieljvdm/dev-kit/oxlint-plugin-style",
       },
     ]);
+    expect(config.lint?.rules["anti-slop/no-runtime-typeof"]).toBe("error");
     expect(config.lint?.rules["stylistic/padding-line-between-statements"]).toBeDefined();
     expect(config.lint).not.toHaveProperty("extends");
   });

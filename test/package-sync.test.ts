@@ -21,7 +21,7 @@ const writeManifest = Effect.fn("writePackageSyncManifest")(function* (
           agents: {
             enabled: true,
             mode,
-            ...(targetPath === undefined ? {} : { path: targetPath }),
+            path: targetPath,
           },
         },
       },
