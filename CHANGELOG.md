@@ -1,5 +1,11 @@
 # @danieljvdm/dev-kit
 
+## 0.17.0
+
+### Minor Changes
+
+- 96a7d40: Approve Sentry's official agent skills from `getsentry/agent-plugin` in the external skill catalog.
+
 ## 0.16.0
 
 ### Minor Changes
