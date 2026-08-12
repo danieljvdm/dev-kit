@@ -243,6 +243,54 @@
         "expo-web-to-native": "sha256:360359742d72d0a8ed9926d53f19bae7603fb788f6e897a14208bbb35c2ed618"
       },
       "licensePath": "LICENSE"
+    },
+    {
+      "id": "getsentry-agent-plugin",
+      "repository": "https://github.com/getsentry/agent-plugin.git",
+      "ref": "main",
+      "resolved": "9f9156966be43f1bf4797bd9785a0644bf181d01",
+      "skillsPath": "skills",
+      "include": [
+        "sentry-create-alert",
+        "sentry-debug-issue",
+        "sentry-fix-stack-traces",
+        "sentry-get-started",
+        "sentry-instrument",
+        "sentry-otel-exporter-setup",
+        "sentry-setup-releases",
+        "sentry-snapshots-cocoa"
+      ],
+      "skills": [
+        "sentry-create-alert",
+        "sentry-debug-issue",
+        "sentry-fix-stack-traces",
+        "sentry-get-started",
+        "sentry-instrument",
+        "sentry-otel-exporter-setup",
+        "sentry-setup-releases",
+        "sentry-snapshots-cocoa"
+      ],
+      "descriptions": {
+        "sentry-create-alert": "Create Sentry alerts using the workflow engine API. Use when asked to create alerts, set up notifications, configure issue priority alerts, or build workflow automations. Supports email, Slack, PagerDuty, Discord, and other notification actions.",
+        "sentry-debug-issue": "Debug and fix a Sentry issue — find it (by link, ID, or search), pull full context (stack trace, breadcrumbs, trace, logs), optionally run Seer root-cause / autofix, apply the code fix, and resolve it via a `Fixes PROJECT-NAME-12A` commit/PR. Use when working a known error or hunting one down to fix.",
+        "sentry-fix-stack-traces": "Make Sentry stack traces readable — upload source maps for JavaScript/TypeScript, or debug files for native and mobile (dSYM, ProGuard/R8, NDK symbols, Dart obfuscation maps, .NET PDBs). Use when frames in Sentry show minified names, bundled paths, hex addresses, \"unknown\", or method names with no file/line, instead of your original source.",
+        "sentry-get-started": "Guided entry point for using Sentry through your agent. Orients you to your current setup and, for a new project, sets up Sentry end to end with sane defaults — provision a project, install the SDK (errors, tracing, and whatever it enables by default), and confirm real telemetry reaches Sentry. Routes other intents (adding more signals, fixing issues) to the right skill.",
+        "sentry-instrument": "Instrument an application with Sentry — detect the platform, install and initialize the SDK if needed, and wire up any signal — error monitoring, tracing/performance, logging, metrics, profiling, session replay, user feedback, cron check-ins, and AI/LLM monitoring (agent runs, token cost, and conversations for OpenAI, Anthropic, Vercel AI, LangChain, Google GenAI, Pydantic AI, and Laravel AI). Use to add Sentry to a project or to capture more than errors.",
+        "sentry-otel-exporter-setup": "Configure the OpenTelemetry Collector with Sentry Exporter for multi-project routing and automatic project creation. Use when setting up OTel with Sentry, configuring collector pipelines for traces and logs, or routing telemetry from multiple services to Sentry projects.",
+        "sentry-setup-releases": "Set up Sentry releases and deploy tracking — tag events with a version and environment, create the release in CI with its commits, and wire up suspect commits and code mappings, so Sentry can show which release introduced an issue, which commit is responsible, and release health. Use when asked to set up releases, track deploys, see what changed, or when issues show an unknown release or no suspect commit.",
+        "sentry-snapshots-cocoa": "Full Sentry Snapshots setup for Apple/Cocoa projects. Use when asked to \"setup SnapshotPreviews\", \"setup Apple snapshot testing\", \"upload Apple snapshots to Sentry\", \"setup Apple snapshot GitHub Actions\", or \"setup Apple selective snapshot testing\"."
+      },
+      "digests": {
+        "sentry-create-alert": "sha256:a2d4011d28593abd8148c95d3f3188bc68db02d8d9c8ae444723d5548f4e9f1f",
+        "sentry-debug-issue": "sha256:ee3b1bc93dddab007e54332bc39521e49221528f5350e7af5e0f0e962393c9f1",
+        "sentry-fix-stack-traces": "sha256:f66199cfe616abf2ff39b9e953cb30d1e5634f83fcffa8cce1da54b66ae4ad67",
+        "sentry-get-started": "sha256:68ae5780ab6713d2fbbcb553df6dbfa67db28589ee467f4e14524ab8c51046df",
+        "sentry-instrument": "sha256:2c97fe5dc8aae274ed0657de7bc8dd1c59bd454b44ed00b6bf98f1d010e1e885",
+        "sentry-otel-exporter-setup": "sha256:9c8ba54f7ec1b52beb24b0225b5836edcd61971619474d7eee3cd48d27a8d1a5",
+        "sentry-setup-releases": "sha256:3a13401662f32806d56b63765be846f6c4305190b2a4f184a1146b71eb373aa4",
+        "sentry-snapshots-cocoa": "sha256:9eeee7bc649475f2d8c00cb2725edcf07d9a6ce2784b4fbaf24ba0bd6de8f44b"
+      },
+      "licensePath": "LICENSE"
     }
   ]
 }
