@@ -7,6 +7,7 @@ const recommended = createRecommendedVitePlusConfig({
 
 export default defineConfig({
   ...recommended,
+  staged: recommended.staged,
   run: {
     ...recommended.run,
     tasks: {
