@@ -1,3 +1,5 @@
+import type { ESTree } from "@oxlint/plugins";
+
 interface EffectOxlintRule {
   readonly meta: {
     readonly type: "problem";
@@ -5,8 +7,8 @@ interface EffectOxlintRule {
     readonly messages: Readonly<Record<string, string>>;
   };
   readonly create: (context: {
-    report(descriptor: { node: unknown; messageId: string }): void;
-  }) => Readonly<Record<string, (node: unknown) => void>>;
+    report(descriptor: { node: ESTree.Node; messageId: string }): void;
+  }) => Readonly<Record<string, (node: ESTree.Node) => void>>;
 }
 
 declare const effectOxlintPlugin: {

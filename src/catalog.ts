@@ -185,7 +185,7 @@ export const loadSkillCatalog = Effect.fn("loadSkillCatalog")(function* (
       message: `duplicate catalog family: ${duplicateFamily[0]}`,
     });
   }
-  const families: Readonly<Record<string, ReadonlyArray<string>>> = {
+  const families = {
     effect: [
       "effect-ts",
       "effect-architecture-audit",
@@ -194,13 +194,16 @@ export const loadSkillCatalog = Effect.fn("loadSkillCatalog")(function* (
       "build-effect-clis",
     ],
     ...Object.fromEntries(externalFamilies),
-  };
+  } satisfies Readonly<Record<string, ReadonlyArray<string>>>;
 
-  return {
+  const catalog: SkillCatalog = {
     skills: skills.sort((left, right) => left.selector.localeCompare(right.selector)),
     families,
-    ...(lock ? { lock } : {}),
-  } satisfies SkillCatalog;
+  };
+
+  if (lock) Object.assign(catalog, { lock });
+
+  return catalog;
 });
 
 const stripFrontmatterKeys = (text: string, keys: ReadonlyArray<string>): string => {

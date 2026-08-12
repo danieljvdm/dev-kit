@@ -19,12 +19,15 @@ export const runCommand = Effect.fn("runTestCommand")(function* (
   args: ReadonlyArray<string>,
   env?: Readonly<Record<string, string>>,
 ) {
-  const child = yield* ChildProcess.make(command, args, {
-    cwd,
-    ...(env === undefined ? {} : { env, extendEnv: true }),
-    stderr: "pipe",
-    stdout: "pipe",
-  });
+  const child = yield* env === undefined
+    ? ChildProcess.make(command, args, { cwd, stderr: "pipe", stdout: "pipe" })
+    : ChildProcess.make(command, args, {
+        cwd,
+        env,
+        extendEnv: true,
+        stderr: "pipe",
+        stdout: "pipe",
+      });
   const [output, exitCode] = yield* Effect.all([
     Stream.mkString(Stream.decodeText(child.all)),
     child.exitCode,

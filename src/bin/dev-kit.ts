@@ -283,8 +283,8 @@ const catalogAddCommand = CliCommand.make(
     lockfile,
     repoDir,
     sources,
-  }) =>
-    addCatalogSource({
+  }) => {
+    const options = {
       repository,
       all,
       dryRun,
@@ -293,11 +293,15 @@ const catalogAddCommand = CliCommand.make(
       lockfilePath: lockfile,
       repoDir,
       sourcesPath: sources,
-      ...(id ? { id } : {}),
-      ...(license ? { licensePath: license } : {}),
-      ...(ref ? { ref } : {}),
-      ...(skillsPath ? { skillsPath } : {}),
-    }),
+    };
+
+    if (id) Object.assign(options, { id });
+    if (license) Object.assign(options, { licensePath: license });
+    if (ref) Object.assign(options, { ref });
+    if (skillsPath) Object.assign(options, { skillsPath });
+
+    return addCatalogSource(options);
+  },
 ).pipe(CliCommand.withDescription("Inspect a repository and approve selected skills."));
 
 const catalogListCommand = CliCommand.make(

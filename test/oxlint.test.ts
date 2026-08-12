@@ -18,6 +18,10 @@ describe("recommended Oxlint config", () => {
     expect(recommendedOxlintConfig.options).toEqual({ typeAware: true });
     expect(recommendedOxlintConfig.jsPlugins).toEqual([
       {
+        name: "anti-slop",
+        specifier: "@danieljvdm/dev-kit/oxlint-plugin-anti-slop",
+      },
+      {
         name: "effect",
         specifier: "@danieljvdm/dev-kit/oxlint-plugin-effect",
       },
@@ -26,6 +30,11 @@ describe("recommended Oxlint config", () => {
         specifier: "@danieljvdm/dev-kit/oxlint-plugin-style",
       },
     ]);
+    expect(recommendedOxlintConfig.rules["anti-slop/no-known-value-widening"]).toBe("error");
+    expect(recommendedOxlintConfig.rules["anti-slop/no-module-mocking"]).toBe("error");
+    expect(
+      recommendedOxlintConfig.rules["anti-slop/require-safety-comment-for-type-assertion"],
+    ).toBe("error");
     expect(recommendedOxlintConfig.plugins).toEqual(["import", "react", "vitest"]);
     expect(recommendedOxlintConfig.rules["import/no-duplicates"]).toEqual([
       "error",

@@ -47,14 +47,16 @@ export const PACKAGE_MANAGER_COMMANDS = {
   yarn: { install: "yarn install", label: "Yarn" },
 } as const;
 
-export type PackageManagerName = keyof typeof PACKAGE_MANAGER_COMMANDS;
+const PackageManagerNameSchema = Schema.Literals(["bun", "npm", "pnpm", "yarn"]);
+
+export type PackageManagerName = typeof PackageManagerNameSchema.Type;
+
+const decodePackageManagerName = Schema.decodeUnknownOption(PackageManagerNameSchema);
 
 const packageManagerName = (declaration: string | undefined): PackageManagerName | undefined => {
   const name = declaration?.split("@", 1)[0];
 
-  return name !== undefined && name in PACKAGE_MANAGER_COMMANDS
-    ? (name as PackageManagerName)
-    : undefined;
+  return name === undefined ? undefined : Option.getOrUndefined(decodePackageManagerName(name));
 };
 
 export const detectPackageManager = Effect.fn("detectPackageManager")(function* (
@@ -129,13 +131,9 @@ const WorkspacePatternsSchema = Schema.Union([
 // this is a genuinely untyped boundary.
 const decodeWorkspacePatterns = Schema.decodeUnknownOption(WorkspacePatternsSchema);
 
-const workspacePatterns = (workspaces: unknown): ReadonlyArray<string> => {
-  const decoded = decodeWorkspacePatterns(workspaces);
-
-  if (Option.isNone(decoded)) return [];
-
-  return "packages" in decoded.value ? decoded.value.packages : decoded.value;
-};
+const workspacePatterns = (
+  workspaces: typeof WorkspacePatternsSchema.Type,
+): ReadonlyArray<string> => ("packages" in workspaces ? workspaces.packages : workspaces);
 
 /**
  * Direct dependency names of the project package plus every workspace member
@@ -149,8 +147,12 @@ export const readWorkspaceDependencyNames = Effect.fn("readWorkspaceDependencyNa
   const path = yield* Path.Path;
   const manifest = yield* readOptionalProjectPackage(projectDir);
   const names = new Set(manifestDependencyNames(manifest));
+  const decodedWorkspaces = decodeWorkspacePatterns(manifest?.workspaces);
+  const patterns = Option.isSome(decodedWorkspaces)
+    ? workspacePatterns(decodedWorkspaces.value)
+    : [];
 
-  for (const pattern of workspacePatterns(manifest?.workspaces)) {
+  for (const pattern of patterns) {
     if (pattern.startsWith("!")) continue;
     const star = pattern.indexOf("*");
     let memberDirs: ReadonlyArray<string> = [];

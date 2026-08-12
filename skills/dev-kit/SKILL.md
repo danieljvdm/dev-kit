@@ -113,11 +113,10 @@ separate `check` and pure `typecheck` tasks; standalone Oxc projects import
 `recommendedOxlintConfig`/`recommendedOxfmtConfig` directly.
 
 Run the Effect-patched compiler separately with `vp run typecheck`; neither
-Oxlint's bundled `tsgolint` nor Vite+'s native lint path uses the Effect patch,
-and Vite+ 0.2.6 does not execute the preset's JavaScript-plugin rules — use
-standalone Oxlint when `effect/*` or
-`stylistic/padding-line-between-statements` must be enforced. The `effect`
-plugin's scope-sensitive rules stay consumer-scoped: enable them per path in
+Oxlint's bundled `tsgolint` nor Vite+'s native lint path uses the Effect patch.
+Keep Oxlint and `@oxlint/plugins` on the matching version expected by the
+preset so Vite+ can execute its JavaScript plugins. The `effect` plugin's
+scope-sensitive rules stay consumer-scoped: enable them per path in
 Effect-owned code, with exceptions for tests and host boundaries.
 
 `setup.vitePlus.hooks` converges the Git-ignored `.vite-hooks/_` dispatcher by

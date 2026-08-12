@@ -55,6 +55,7 @@ describe("shared Oxlint and Oxfmt configuration", () => {
         ]);
 
         assert.strictEqual(vitePlusConfig.exitCode, 0, vitePlusConfig.output);
+        assert.include(vitePlusConfig.output, '"name": "anti-slop"');
         assert.include(vitePlusConfig.output, '"name": "effect"');
         assert.include(vitePlusConfig.output, '"name": "stylistic"');
 
@@ -123,7 +124,7 @@ describe("shared Oxlint and Oxfmt configuration", () => {
         );
         yield* fs.writeFileString(
           importsFile,
-          'import { RuntimeValue, TypeOnly } from "./types.ts";\n\nconst value = new RuntimeValue();\ntype Shape = TypeOnly;\n\nvoid value;\nvoid (null as unknown as Shape);\n',
+          'import { RuntimeValue, TypeOnly } from "./types.ts";\n\nconst value = new RuntimeValue();\ntype ImportedType = TypeOnly;\ndeclare const typedValue: ImportedType;\n\nvoid value;\nvoid typedValue;\n',
         );
 
         const fixedImports = yield* runCommand(

@@ -12,12 +12,12 @@ const ANSI = {
 
 type StatusKind = "success" | "info" | "plan" | "error";
 
-const statusAppearance: Readonly<Record<StatusKind, readonly [string, string]>> = {
+const statusAppearance = {
   success: ["✓", ANSI.green],
   info: ["•", ANSI.cyan],
   plan: ["→", ANSI.yellow],
   error: ["✗", ANSI.red],
-};
+} satisfies Readonly<Record<StatusKind, readonly [string, string]>>;
 
 const terminalCapabilities = Effect.fn("terminalCapabilities")(function* () {
   const terminal = yield* Terminal.Terminal;

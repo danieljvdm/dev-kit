@@ -122,11 +122,15 @@ const selectSkills = Effect.fn("selectCatalogSkills")(function* (
   }
   const selected = yield* Prompt.multiSelect({
     message: `Approve skills from ${inspection.id}`,
-    choices: inspection.skills.map((skill) => ({
-      title: skill.name,
-      value: skill.name,
-      ...(skill.description ? { description: compactDescription(skill.description) } : {}),
-    })),
+    choices: inspection.skills.map((skill) => {
+      const choice = { title: skill.name, value: skill.name };
+
+      if (skill.description) {
+        Object.assign(choice, { description: compactDescription(skill.description) });
+      }
+
+      return choice;
+    }),
     min: 1,
   });
 
@@ -196,13 +200,16 @@ export const addCatalogSource = Effect.fn("addCatalogSource")(function* (
     return yield* CatalogManagerError.make({ message: "use either --all or --skill, not both" });
   }
   const state = yield* readState(options);
-  const inspection = yield* inspectCatalogRepository({
+  const inspectOptions = {
     repository: options.repository,
     repoDir: state.repoDir,
-    ...(options.id ? { id: options.id } : {}),
-    ...(options.ref ? { ref: options.ref } : {}),
-    ...(options.skillsPath ? { skillsPath: options.skillsPath } : {}),
-  });
+  };
+
+  if (options.id) Object.assign(inspectOptions, { id: options.id });
+  if (options.ref) Object.assign(inspectOptions, { ref: options.ref });
+  if (options.skillsPath) Object.assign(inspectOptions, { skillsPath: options.skillsPath });
+
+  const inspection = yield* inspectCatalogRepository(inspectOptions);
   const selection = yield* selectSkills(inspection, options.skills ?? [], options.all ?? false);
   const sources = state.sources.value.sources;
   const byId = sources.findIndex((source) => source.id === inspection.id);
@@ -256,15 +263,13 @@ export const addCatalogSource = Effect.fn("addCatalogSource")(function* (
       ref: inspection.ref,
       skillsPath: inspection.skillsPath,
       include: selection.include,
-      ...(options.licensePath
-        ? { licensePath: options.licensePath }
-        : inspection.licensePath
-          ? { licensePath: inspection.licensePath }
-          : {}),
-      ...(options.stripFrontmatter?.length
-        ? { stripFrontmatter: [...new Set(options.stripFrontmatter)] }
-        : {}),
     };
+    const licensePath = options.licensePath || inspection.licensePath;
+
+    if (licensePath) Object.assign(source, { licensePath });
+    if (options.stripFrontmatter?.length) {
+      Object.assign(source, { stripFrontmatter: [...new Set(options.stripFrontmatter)] });
+    }
 
     next = applyEdits(
       next,

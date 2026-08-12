@@ -267,7 +267,7 @@ const encodeOutputOwnershipIdentityJson = Schema.encodeSync(
 const encodePlanSnapshotJson = Schema.encodeSync(Schema.fromJsonString(Schema.Unknown));
 const encodeAppliedStatePrettyJson = Schema.encodeSync(fromJsonString(AppliedStateSchema, 2));
 
-const SKILL_FAMILIES: SkillCatalog = {
+const SKILL_FAMILIES = {
   effect: [
     "effect-ts",
     "effect-architecture-audit",
@@ -275,7 +275,7 @@ const SKILL_FAMILIES: SkillCatalog = {
     "effect-atom-state",
     "build-effect-clis",
   ],
-};
+} satisfies SkillCatalog;
 
 export const DEFAULT_MANIFEST = "dev-kit.jsonc";
 const DEFAULT_LOCKFILE = "dev-kit.lock.json";
@@ -356,12 +356,12 @@ const inspectManagedInstructionSections = (content: string): ManagedInstructionI
     }
   }
 
+  if (ranges.length === 0) return { kind: "valid", ranges };
+
   return {
     kind: "valid",
     ranges,
-    ...(ranges.length === 0
-      ? {}
-      : { content: `${ranges.map((range) => range.content.trim()).join("\n\n")}\n` }),
+    content: `${ranges.map((range) => range.content.trim()).join("\n\n")}\n`,
   };
 };
 
@@ -460,6 +460,8 @@ const renderPackageScriptCommandPolicy = (
   const additionalCommands = Object.keys(scripts)
     .filter(
       (script) =>
+        // SAFETY: `script` is only asserted to the set's string-literal union for a
+        // runtime membership check; the assertion does not narrow any returned value.
         !knownScripts.has(script as (typeof entries)[number][0]) &&
         /^(?:check|validate|fmt|format|lint|test|type-?check)(?::|$)/.test(script),
     )
@@ -955,7 +957,7 @@ const buildDesiredOutputs = Effect.fn("buildDesiredSkillOutputs")(function* (
       const managed = yield* resolveManagedPath(projectDir, path.join(target.path, skill.name));
 
       if (target.mode === "copy") {
-        outputs.push({
+        const output: DesiredSkillOutput = {
           resourceId: `skill:${skill.selector}@${targetName}`,
           path: managed.relative,
           skill: skill.name,
@@ -963,10 +965,12 @@ const buildDesiredOutputs = Effect.fn("buildDesiredSkillOutputs")(function* (
           mode: "copy",
           kind: "directory",
           digest: sourceObservation.digest,
-          ...(resolvedSource.catalog ? { catalog: resolvedSource.catalog } : {}),
           source,
           destination: managed.absolute,
-        });
+        };
+
+        if (resolvedSource.catalog) Object.assign(output, { catalog: resolvedSource.catalog });
+        outputs.push(output);
         continue;
       }
       const linkSource =
@@ -977,7 +981,7 @@ const buildDesiredOutputs = Effect.fn("buildDesiredSkillOutputs")(function* (
       const linkTarget = path.relative(path.dirname(managed.absolute), linkSource);
       const linkDigest = yield* digestSymlinkTarget(linkTarget);
 
-      outputs.push({
+      const output: DesiredSkillOutput = {
         resourceId: `skill:${skill.selector}@${targetName}`,
         path: managed.relative,
         skill: skill.name,
@@ -985,11 +989,13 @@ const buildDesiredOutputs = Effect.fn("buildDesiredSkillOutputs")(function* (
         mode: "symlink",
         kind: "symlink",
         digest: linkDigest,
-        ...(resolvedSource.catalog ? { catalog: resolvedSource.catalog } : {}),
         source,
         destination: managed.absolute,
         linkTarget,
-      });
+      };
+
+      if (resolvedSource.catalog) Object.assign(output, { catalog: resolvedSource.catalog });
+      outputs.push(output);
     }
   }
   yield* validateInventory(projectDir, outputs, "desired outputs");
@@ -1175,14 +1181,15 @@ const planDesiredOutputs = Effect.fn("planDesiredSkillOutputs")(function* (
 
       if (managedDigest === receipt.digest || observed.digest === receipt.digest) {
         const remaining = removeManagedInstructionSections(existingContent, inspection.ranges);
-
-        actions.push({
+        const action: SkillPlanAction = {
           action: "remove",
           previous: receipt,
           destination: managed.absolute,
           observed,
-          ...(remaining.trim().length === 0 ? {} : { stagedContent: remaining }),
-        });
+        };
+
+        if (remaining.trim().length > 0) Object.assign(action, { stagedContent: remaining });
+        actions.push(action);
       } else {
         actions.push({
           action: "conflict",
@@ -1363,35 +1370,36 @@ export const planProjectSkills = Effect.fn("planProjectSkills")(function* (optio
     manifest.setup,
     manifest.targets,
   );
+  const nextSetup: NonNullable<DevKitLock["setup"]> = {};
+
+  if (effectSource !== undefined) {
+    Object.assign(nextSetup, {
+      effectSource: {
+        packageName: effectSource.packageName,
+        packageVersion: effectSource.packageVersion,
+        path: effectSource.path,
+        repository: effectSource.repository,
+        tag: effectSource.tag,
+      },
+    });
+  }
+  if (effectTsgo !== undefined) {
+    Object.assign(nextSetup, {
+      effectTsgo: {
+        effectTsgoVersion: effectTsgo.effectTsgoVersion,
+        typescriptPackage: effectTsgo.typescriptPackage,
+        typescriptVersion: effectTsgo.typescriptVersion,
+      },
+    });
+  }
   const nextLock: DevKitLock = {
     version: 1,
     toolVersion: DEV_KIT_VERSION,
     manifestDigest: yield* digestText(encodeManifestJson(manifest)),
-    setup: {
-      ...(effectSource === undefined
-        ? {}
-        : {
-            effectSource: {
-              packageName: effectSource.packageName,
-              packageVersion: effectSource.packageVersion,
-              path: effectSource.path,
-              repository: effectSource.repository,
-              tag: effectSource.tag,
-            },
-          }),
-      ...(effectTsgo === undefined
-        ? {}
-        : {
-            effectTsgo: {
-              effectTsgoVersion: effectTsgo.effectTsgoVersion,
-              typescriptPackage: effectTsgo.typescriptPackage,
-              typescriptVersion: effectTsgo.typescriptVersion,
-            },
-          }),
-    },
+    setup: nextSetup,
     outputs: desired.map((output): ManagedOutput => {
       if ("skill" in output) {
-        return {
+        const managedOutput: ManagedSkillOutput = {
           resourceId: output.resourceId,
           path: output.path,
           skill: output.skill,
@@ -1399,8 +1407,11 @@ export const planProjectSkills = Effect.fn("planProjectSkills")(function* (optio
           mode: output.mode,
           kind: output.kind,
           digest: output.digest,
-          ...(output.catalog ? { catalog: output.catalog } : {}),
         };
+
+        if (output.catalog) Object.assign(managedOutput, { catalog: output.catalog });
+
+        return managedOutput;
       }
       if (output.resourceId === "setup:agent-instructions") {
         return {
@@ -1488,16 +1499,11 @@ export const planProjectSkills = Effect.fn("planProjectSkills")(function* (optio
     });
   }
 
-  return {
+  const plan: SkillPlan = {
     projectDir,
     lockfilePath: lockManaged.absolute,
     statePath: stateManaged.absolute,
     actions: planned.actions,
-    ...(effectSource === undefined ? {} : { effectSource }),
-    ...(effectTsgo === undefined ? {} : { effectTsgo }),
-    ...(vitePlusHooks === undefined ? {} : { vitePlusHooks }),
-    ...(vitePlusWorkflow === undefined ? {} : { vitePlusWorkflow }),
-    ...(worktrunkConfig === undefined ? {} : { worktrunkConfig }),
     nextLock,
     nextState: planned.nextState,
     metadataChanged:
@@ -1505,7 +1511,15 @@ export const planProjectSkills = Effect.fn("planProjectSkills")(function* (optio
       encodeDevKitLockJson(currentLock) !== encodeDevKitLockJson(nextLock) ||
       currentState === undefined ||
       encodeAppliedStateJson(currentState) !== encodeAppliedStateJson(planned.nextState),
-  } satisfies SkillPlan;
+  };
+
+  if (effectSource !== undefined) Object.assign(plan, { effectSource });
+  if (effectTsgo !== undefined) Object.assign(plan, { effectTsgo });
+  if (vitePlusHooks !== undefined) Object.assign(plan, { vitePlusHooks });
+  if (vitePlusWorkflow !== undefined) Object.assign(plan, { vitePlusWorkflow });
+  if (worktrunkConfig !== undefined) Object.assign(plan, { worktrunkConfig });
+
+  return plan;
 });
 
 const formatAction = (action: SkillPlanAction): string => {
@@ -1761,13 +1775,15 @@ const applyPlannedSkillChanges = Effect.fn("applyPlannedSkillChanges")(function*
         }`,
       });
     }
-    replacements.push({
+    const replacement: Replacement = {
       destination: action.action === "remove" ? action.destination : action.desired.destination,
       backup: path.join(backupDir, String(replacementIndex++)),
       expected: action.observed,
       path: action.action === "remove" ? action.previous.path : action.desired.path,
-      ...(staged === undefined ? {} : { staged }),
-    });
+    };
+
+    if (staged !== undefined) Object.assign(replacement, { staged });
+    replacements.push(replacement);
   }
   replacements.push(
     {

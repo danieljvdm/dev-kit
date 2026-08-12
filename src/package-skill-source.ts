@@ -1,4 +1,4 @@
-import { Effect, FileSystem, Path, Result, Schema } from "effect";
+import { Effect, FileSystem, Option, Path, Result, Schema } from "effect";
 
 import { observeSymbolicLink } from "./node-symbolic-link.ts";
 import { readDirectDependencyNames } from "./project-package.ts";
@@ -34,33 +34,25 @@ const PackageMetadataSchema = Schema.fromJsonString(
   }),
 );
 
-const nonEmptyString = (value: unknown): value is string =>
-  typeof value === "string" && value.trim().length > 0;
+const DiscoveryLocationSchema = Schema.String.check(Schema.isPattern(/\S/));
+const IntentDiscoveryMetadataSchema = Schema.Struct({
+  version: Schema.Literal(1),
+  repo: DiscoveryLocationSchema,
+  docs: DiscoveryLocationSchema,
+});
+const RepositoryDiscoveryMetadataSchema = Schema.Union([
+  DiscoveryLocationSchema,
+  Schema.Struct({ url: DiscoveryLocationSchema }),
+]);
+const decodeIntentDiscoveryMetadata = Schema.decodeUnknownOption(IntentDiscoveryMetadataSchema);
+const decodeRepositoryDiscoveryMetadata = Schema.decodeUnknownOption(
+  RepositoryDiscoveryMetadataSchema,
+);
 
 const hasIntentDiscoveryMetadata = (metadata: typeof PackageMetadataSchema.Type): boolean => {
-  const intent = metadata.intent;
+  if (Option.isSome(decodeIntentDiscoveryMetadata(metadata.intent))) return true;
 
-  if (
-    typeof intent === "object" &&
-    intent !== null &&
-    "version" in intent &&
-    intent.version === 1 &&
-    "repo" in intent &&
-    nonEmptyString(intent.repo) &&
-    "docs" in intent &&
-    nonEmptyString(intent.docs)
-  ) {
-    return true;
-  }
-  const repository = metadata.repository;
-
-  return (
-    nonEmptyString(repository) ||
-    (typeof repository === "object" &&
-      repository !== null &&
-      "url" in repository &&
-      nonEmptyString(repository.url))
-  );
+  return Option.isSome(decodeRepositoryDiscoveryMetadata(metadata.repository));
 };
 
 const isSafePackageVersion = (value: string): boolean =>
