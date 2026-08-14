@@ -493,7 +493,7 @@ Pin the compatible packages in the consuming project:
 {
   "devDependencies": {
     "@danieljvdm/dev-kit": "^0.2.0",
-    "@effect/tsgo": "0.33.0",
+    "@effect/tsgo": "0.36.4",
     "typescript": "7.0.2",
   },
 }
