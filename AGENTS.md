@@ -1,10 +1,16 @@
-<!-- DEV KIT START -->
-
 # Dev Kit
 
-This project uses `@danieljvdm/dev-kit` to manage portable agent skills and reproducible setup from `dev-kit.jsonc` and `dev-kit.lock.json`.
+This package is a transient repository-setup toolbox and curated skill catalog.
+Its primary setup behavior lives in `skills/dev-kit/SKILL.md` and its disclosed
+references. Generated repository files are always repo-owned; new features must
+not introduce a consumer manifest, lock, ownership state, lifecycle manager, or
+runtime dependency on Dev Kit.
 
-For dev-kit operations, use the `dev-kit` skill and read `skills/dev-kit/SKILL.md` before changing managed outputs.
+Before changing repository setup or skill-sync behavior, read
+`skills/dev-kit/SKILL.md` completely and follow its applicable references.
+
+The v1 project decoder exists only behind `dev-kit eject`. Keep that code scoped
+to the explicitly supported migration and do not expose the old manager surface.
 
 # Learning more about the Effect
 
@@ -35,8 +41,6 @@ Use these repository commands:
 - Toolchain or runtime troubleshooting: run `vp env doctor` and include its output when asking for help.
 
 Do not use `bun run`, `npm run`, `pnpm run`, or `yarn run` in this repository. Do not invoke underlying tools such as `tsc`, `vitest`, `oxlint`, or `oxfmt` directly; use the Vite+ entry points above.
-
-<!-- DEV KIT END -->
 
 # Testing policy
 

@@ -153,6 +153,66 @@ export const observePath = Effect.fn("observeManagedPath")(function* (absolutePa
   );
 });
 
+export const observeDirectoryWithoutEntry = Effect.fn("observeDirectoryWithoutEntry")(function* (
+  absolutePath: string,
+  excludedEntry: string,
+) {
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+
+  if (
+    excludedEntry.length === 0 ||
+    excludedEntry === "." ||
+    excludedEntry === ".." ||
+    excludedEntry.includes("/") ||
+    excludedEntry.includes("\\")
+  ) {
+    return yield* PathInspectionError.make({
+      path: absolutePath,
+      operation: "exclude a direct directory entry",
+      cause: excludedEntry,
+    });
+  }
+  const observed = yield* observeSymbolicLink(absolutePath);
+
+  if (observed.kind === "missing") return { kind: "missing" } as const;
+  if (observed.kind === "symlink") {
+    return yield* PathInspectionError.make({
+      path: absolutePath,
+      operation: "inspect a regular directory",
+      cause: "path is a symlink",
+    });
+  }
+  const info = yield* fs.stat(absolutePath);
+
+  if (info.type !== "Directory") {
+    return yield* PathInspectionError.make({
+      path: absolutePath,
+      operation: "inspect a regular directory",
+      cause: info.type,
+    });
+  }
+  const entries = (yield* fs.readDirectory(absolutePath))
+    .filter((entry) => entry !== excludedEntry)
+    .sort(compareUtf8);
+  const frames: Array<string | Uint8Array> = ["directory-v1"];
+
+  for (const entry of entries) {
+    const child = yield* digestFileSystemPath(path.join(absolutePath, entry), canonicalFileMode);
+
+    if (child.kind === "missing") {
+      return yield* PathInspectionError.make({
+        path: path.join(absolutePath, entry),
+        operation: "inspect a stable directory tree",
+        cause: "path disappeared during inspection",
+      });
+    }
+    frames.push(entry, child.kind, child.digest);
+  }
+
+  return { kind: "directory", digest: yield* digestFrames(frames) } as const;
+});
+
 export const digestText = Effect.fn("digestText")(function* (value: string) {
   return yield* digestFrames(["text-v1", value]);
 });

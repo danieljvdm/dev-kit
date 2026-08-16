@@ -1,5 +1,6 @@
-import { createRecommendedVitePlusConfig } from "@danieljvdm/dev-kit/vite-plus";
 import { defineConfig } from "vite-plus";
+
+import { createRecommendedVitePlusConfig } from "./src/vite-plus.ts";
 
 const recommended = createRecommendedVitePlusConfig({
   ignorePatterns: ["src/oxlint-plugin-anti-slop/runtime.js"],
@@ -7,6 +8,11 @@ const recommended = createRecommendedVitePlusConfig({
 
 export default defineConfig({
   ...recommended,
+  pack: {
+    deps: {
+      neverBundle: ["@oxlint/plugins"],
+    },
+  },
   staged: recommended.staged,
   run: {
     ...recommended.run,

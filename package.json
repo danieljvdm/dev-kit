@@ -2,7 +2,7 @@
   "name": "@danieljvdm/dev-kit",
   "version": "0.18.0",
   "private": false,
-  "description": "Declarative project development toolkit with portable agent skills.",
+  "description": "Agent-led TypeScript repository setup and curated portable skills.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -12,59 +12,21 @@
     "dev-kit": "bin/dev-kit.mjs"
   },
   "files": [
-    "dev-kit.example.jsonc",
     "bin/",
-    "schema/",
     "skills/",
     "skill-sources.jsonc",
     "skill-sources.lock.json",
-    "src/",
-    "scripts/",
-    "templates/"
+    "src/"
   ],
   "type": "module",
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    },
-    "./schema": "./schema/dev-kit.schema.json",
-    "./schema/dev-kit.schema.json": "./schema/dev-kit.schema.json",
-    "./schema/skill-sources.schema.json": "./schema/skill-sources.schema.json",
-    "./oxlint": {
-      "types": "./src/oxlint.ts",
-      "default": "./src/oxlint.js"
-    },
-    "./oxfmt": {
-      "types": "./src/oxfmt.ts",
-      "default": "./src/oxfmt.js"
-    },
-    "./vite-plus": {
-      "types": "./src/vite-plus.ts",
-      "default": "./src/vite-plus.js"
-    },
-    "./oxlint-plugin-effect": {
-      "types": "./src/oxlint-plugin-effect.d.ts",
-      "default": "./src/oxlint-plugin-effect.js"
-    },
-    "./oxlint-plugin-anti-slop": {
-      "types": "./src/oxlint-plugin-anti-slop/runtime.d.ts",
-      "default": "./src/oxlint-plugin-anti-slop/runtime.js"
-    },
-    "./oxlint-plugin-style": {
-      "types": "./src/oxlint-plugin-style.d.ts",
-      "default": "./src/oxlint-plugin-style.js"
-    }
-  },
+  "exports": {},
   "scripts": {
-    "prepare": "./bin/dev-kit.mjs apply --locked",
+    "prepare": "./bin/dev-kit.mjs effect sync && ./bin/dev-kit.mjs tsgo patch && vp config --no-agent",
     "dev-kit": "./bin/dev-kit.mjs",
     "changeset": "changeset",
-    "version-packages": "changeset version && ./bin/dev-kit.mjs apply",
+    "version-packages": "changeset version",
     "release": "changeset publish",
     "lint": "vp lint",
-    "plan": "./bin/dev-kit.mjs plan",
-    "apply": "./bin/dev-kit.mjs apply",
     "gitignore": "./bin/dev-kit.mjs gitignore",
     "effect:sync": "./bin/dev-kit.mjs effect sync",
     "test": "vp test",
@@ -77,8 +39,6 @@
   },
   "dependencies": {
     "@effect/platform-bun": "4.0.0-beta.107",
-    "@oxlint/plugins": "1.78.0",
-    "@stylistic/eslint-plugin": "5.10.0",
     "effect": "4.0.0-beta.107",
     "jsonc-parser": "3.3.1",
     "semver": "7.8.5"
@@ -88,6 +48,8 @@
     "@effect/platform-node": "4.0.0-beta.107",
     "@effect/tsgo": "0.36.4",
     "@effect/vitest": "4.0.0-beta.107",
+    "@oxlint/plugins": "1.78.0",
+    "@stylistic/eslint-plugin": "5.10.0",
     "@types/node": "25.9.1",
     "@types/semver": "7.8.0",
     "oxfmt": "0.60.0",
@@ -95,22 +57,6 @@
     "typescript": "7.0.2",
     "vite-plus": "0.2.6",
     "vitest": "4.1.10"
-  },
-  "peerDependencies": {
-    "oxfmt": ">=0.60.0 <0.61.0",
-    "oxlint": ">=1.78.0 <2.0.0",
-    "vite-plus": ">=0.2.6 <0.3.0"
-  },
-  "peerDependenciesMeta": {
-    "oxfmt": {
-      "optional": true
-    },
-    "oxlint": {
-      "optional": true
-    },
-    "vite-plus": {
-      "optional": true
-    }
   },
   "overrides": {
     "@effect/platform-node-shared": "4.0.0-beta.107"

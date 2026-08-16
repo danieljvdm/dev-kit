@@ -12,8 +12,7 @@ export type AbsoluteImportsOptions = {
 /**
  * Build an Oxlint override that forbids `../` imports inside the given globs,
  * so those files import through tsconfig path aliases such as `@/*`. Append it
- * to a standalone Oxlint config's `overrides`, or opt in through
- * `createRecommendedVitePlusConfig({ absoluteImports })`.
+ * to this repository's Oxlint overrides.
  */
 export const createAbsoluteImportsOxlintOverride = (options: AbsoluteImportsOptions) => {
   if (options.files.length === 0) {
@@ -39,11 +38,7 @@ export const createAbsoluteImportsOxlintOverride = (options: AbsoluteImportsOpti
 };
 
 /**
- * High-signal Oxlint defaults for TypeScript projects.
- *
- * Extend this object from standalone Oxlint's `extends`, or from Vite+'s
- * `lint.extends`, so project-local plugins, rules, and overrides compose
- * without losing nested configuration.
+ * High-signal Oxlint defaults for this repository.
  */
 export const recommendedOxlintConfig = {
   ignorePatterns: [...devKitToolIgnorePatterns],
@@ -53,15 +48,15 @@ export const recommendedOxlintConfig = {
   jsPlugins: [
     {
       name: "anti-slop",
-      specifier: "@danieljvdm/dev-kit/oxlint-plugin-anti-slop",
+      specifier: "./src/oxlint-plugin-anti-slop/runtime.js",
     },
     {
       name: "effect",
-      specifier: "@danieljvdm/dev-kit/oxlint-plugin-effect",
+      specifier: "./src/oxlint-plugin-effect.js",
     },
     {
       name: "stylistic",
-      specifier: "@danieljvdm/dev-kit/oxlint-plugin-style",
+      specifier: "./src/oxlint-plugin-style.js",
     },
   ],
   plugins: ["import", "react", "vitest"],
