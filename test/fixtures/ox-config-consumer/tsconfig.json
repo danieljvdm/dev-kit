@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": true,
-    "target": "ES2024"
-  },
-  "include": ["*.ts"]
-}

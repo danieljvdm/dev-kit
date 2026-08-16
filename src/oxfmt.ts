@@ -5,10 +5,7 @@ import { devKitToolIgnorePatterns } from "./tool-ignore-patterns.ts";
 export { devKitToolIgnorePatterns } from "./tool-ignore-patterns.ts";
 
 /**
- * Canonical formatting defaults for standalone Oxfmt and Vite+ projects.
- *
- * Oxfmt does not support config inheritance. Spread this object into a
- * standalone Oxfmt config or Vite+'s `fmt` block before local overrides.
+ * Formatting defaults for this repository's Vite+ config.
  */
 export const recommendedOxfmtConfig = {
   arrowParens: "always",

@@ -11,153 +11,179 @@ import {
 import { printError } from "../cli-ui.ts";
 import { syncEffectSource } from "../effect-source.ts";
 import { patchEffectTsgo } from "../effect-tsgo.ts";
+import { runEject } from "../eject.ts";
 import { patchProjectGitignore } from "../gitignore.ts";
 import { CACHE_PRUNE_AGE_DAYS, runCachePrune } from "../global-cache.ts";
 import {
-  addSkills,
-  chooseSkillsToAdd,
-  chooseSkillsToRemove,
-  initProject,
-  listSkills,
-  removeSkills,
-  showDashboard,
-  showSkill,
-} from "../skill-manager.ts";
-import { DEFAULT_MANIFEST, runProjectSkillPlan } from "../sync.ts";
+  addProjectSkills,
+  detachProjectSkills,
+  diffProjectSkill,
+  listProjectSkills,
+  setupProject,
+  showProjectSkill,
+  showProjectSkillsDashboard,
+  statusProjectSkills,
+  updateProjectSkills,
+} from "../project-skills.ts";
 import { DEV_KIT_VERSION } from "../tool-metadata.ts";
 import { refreshSkillCatalog } from "../vendor.ts";
 
-const projectFlags = {
-  manifest: Flag.string("manifest").pipe(
-    Flag.withDefault(DEFAULT_MANIFEST),
-    Flag.withDescription("Project-relative manifest path."),
-  ),
+const repositorySkillFlags = {
   projectDir: Flag.string("project-dir").pipe(
     Flag.withDefault("."),
     Flag.withDescription("Project directory (defaults to the current directory)."),
   ),
+  target: Flag.string("target").pipe(
+    Flag.withDefault(".agents/skills"),
+    Flag.withDescription("Project-relative skills directory."),
+  ),
 };
 
-const initCommand = CliCommand.make("init", projectFlags, ({ manifest, projectDir }) =>
-  initProject({ manifestPath: manifest, projectDir }),
-).pipe(CliCommand.withDescription("Initialize skill management in this project."));
+const setupCommand = CliCommand.make(
+  "setup",
+  {
+    dryRun: Flag.boolean("dry-run").pipe(Flag.withDescription("Preview without writing.")),
+    ...repositorySkillFlags,
+  },
+  ({ dryRun, projectDir, target }) => setupProject({ dryRun, projectDir, target }),
+).pipe(
+  CliCommand.withDescription(
+    "Copy the agent-led Dev Kit setup skill into a repository without adding a dependency.",
+  ),
+);
 
-const addCommand = CliCommand.make(
+const ejectCommand = CliCommand.make(
+  "eject",
+  {
+    dryRun: Flag.boolean("dry-run").pipe(Flag.withDescription("Preview without writing.")),
+    lockfile: Flag.string("lockfile").pipe(
+      Flag.withDefault("dev-kit.lock.json"),
+      Flag.withDescription("Project-relative legacy lock path."),
+    ),
+    manifest: Flag.string("manifest").pipe(
+      Flag.withDefault("dev-kit.jsonc"),
+      Flag.withDescription("Project-relative legacy manifest path."),
+    ),
+    projectDir: Flag.string("project-dir").pipe(
+      Flag.withDefault("."),
+      Flag.withDescription("Legacy project directory."),
+    ),
+    state: Flag.string("state").pipe(
+      Flag.withDefault(".dev-kit/state.json"),
+      Flag.withDescription("Project-relative legacy ownership receipt."),
+    ),
+    target: Flag.string("target").pipe(
+      Flag.withDefault(".agents/skills"),
+      Flag.withDescription("Project-relative destination for ejected skills."),
+    ),
+  },
+  ({ dryRun, lockfile, manifest, projectDir, state, target }) =>
+    runEject({
+      dryRun,
+      lockfilePath: lockfile,
+      manifestPath: manifest,
+      projectDir,
+      statePath: state,
+      target,
+    }),
+).pipe(
+  CliCommand.withDescription(
+    "Release a legacy managed project into repo-owned files after persistent helpers are materialized.",
+  ),
+);
+
+const projectSkillsAddCommand = CliCommand.make(
   "add",
   {
-    skills: Argument.string("skills").pipe(Argument.variadic()),
-    noApply: Flag.boolean("no-apply").pipe(
-      Flag.withDescription("Update the manifest without installing yet."),
-    ),
-    ...projectFlags,
+    skills: Argument.string("skills").pipe(Argument.variadic({ min: 1 })),
+    dryRun: Flag.boolean("dry-run").pipe(Flag.withDescription("Preview without writing.")),
+    ...repositorySkillFlags,
   },
-  ({ skills, noApply, manifest, projectDir }) =>
-    skills.length === 0
-      ? chooseSkillsToAdd({ apply: !noApply, manifestPath: manifest, projectDir })
-      : addSkills(skills, { apply: !noApply, manifestPath: manifest, projectDir }),
-).pipe(CliCommand.withDescription("Select and install one or more available skills."));
+  ({ skills, dryRun, projectDir, target }) =>
+    addProjectSkills(skills, { dryRun, projectDir, target }),
+).pipe(CliCommand.withDescription("Copy repo-owned skills from the approved catalog."));
 
-const removeCommand = CliCommand.make(
-  "remove",
-  {
-    skills: Argument.string("skills").pipe(Argument.variadic()),
-    noApply: Flag.boolean("no-apply").pipe(
-      Flag.withDescription("Update the manifest without uninstalling yet."),
-    ),
-    ...projectFlags,
-  },
-  ({ skills, noApply, manifest, projectDir }) =>
-    skills.length === 0
-      ? chooseSkillsToRemove({ apply: !noApply, manifestPath: manifest, projectDir })
-      : removeSkills(skills, { apply: !noApply, manifestPath: manifest, projectDir }),
-).pipe(CliCommand.withDescription("Deselect and uninstall one or more skills."));
-
-const listCommand = CliCommand.make(
+const projectSkillsListCommand = CliCommand.make(
   "list",
   {
-    all: Flag.boolean("all").pipe(Flag.withDescription("Include unselected skills.")),
-    ...projectFlags,
+    all: Flag.boolean("all").pipe(Flag.withDescription("Include uninstalled skills.")),
+    ...repositorySkillFlags,
   },
-  ({ all, manifest, projectDir }) => listSkills({ all, manifestPath: manifest, projectDir }),
-).pipe(CliCommand.withDescription("List selected skills; use --all to browse the catalog."));
+  ({ all, projectDir, target }) => listProjectSkills({ all, projectDir, target }),
+).pipe(CliCommand.withDescription("List installed skills or browse the catalog."));
 
-const searchCommand = CliCommand.make(
+const projectSkillsSearchCommand = CliCommand.make(
   "search",
-  { query: Argument.string("query").pipe(Argument.variadic({ min: 1 })), ...projectFlags },
-  ({ query, manifest, projectDir }) =>
-    listSkills({ all: true, query: query.join(" "), manifestPath: manifest, projectDir }),
-).pipe(CliCommand.withDescription("Search available skill names and descriptions."));
+  {
+    query: Argument.string("query").pipe(Argument.variadic({ min: 1 })),
+    ...repositorySkillFlags,
+  },
+  ({ query, projectDir, target }) =>
+    listProjectSkills({ all: true, projectDir, query: query.join(" "), target }),
+).pipe(CliCommand.withDescription("Search the approved skill catalog."));
 
-const infoCommand = CliCommand.make(
+const projectSkillsInfoCommand = CliCommand.make(
   "info",
-  { skill: Argument.string("skill"), ...projectFlags },
-  ({ skill, manifest, projectDir }) => showSkill(skill, { manifestPath: manifest, projectDir }),
-).pipe(CliCommand.withDescription("Show provenance and details for an available skill."));
+  { skill: Argument.string("skill"), ...repositorySkillFlags },
+  ({ skill, projectDir, target }) => showProjectSkill(skill, { projectDir, target }),
+).pipe(CliCommand.withDescription("Show one skill's description and provenance."));
 
-const planCommand = CliCommand.make(
-  "plan",
-  {
-    locked: Flag.boolean("locked"),
-    lockfile: Flag.string("lockfile").pipe(Flag.withDefault("dev-kit.lock.json")),
-    manifest: Flag.string("manifest").pipe(Flag.withDefault(DEFAULT_MANIFEST)),
-    projectDir: Flag.string("project-dir").pipe(Flag.withDefault(".")),
-  },
-  ({ locked, lockfile, manifest, projectDir }) =>
-    runProjectSkillPlan({
-      dryRun: true,
-      locked,
-      lockfilePath: lockfile,
-      manifestPath: manifest,
-      projectDir,
-    }),
-).pipe(
-  CliCommand.withDescription("Plan ownership-safe project skill changes without writing files."),
-);
-
-const applyCommand = CliCommand.make(
-  "apply",
-  {
-    locked: Flag.boolean("locked"),
-    lockfile: Flag.string("lockfile").pipe(Flag.withDefault("dev-kit.lock.json")),
-    manifest: Flag.string("manifest").pipe(Flag.withDefault(DEFAULT_MANIFEST)),
-    projectDir: Flag.string("project-dir").pipe(Flag.withDefault(".")),
-  },
-  ({ locked, lockfile, manifest, projectDir }) =>
-    runProjectSkillPlan({
-      locked,
-      lockfilePath: lockfile,
-      manifestPath: manifest,
-      projectDir,
-    }),
-).pipe(
-  CliCommand.withDescription("Apply ownership-safe project skill changes and update the lock."),
-);
-
-const syncCommand = CliCommand.make(
-  "sync",
-  {
-    locked: Flag.boolean("locked"),
-    lockfile: Flag.string("lockfile").pipe(Flag.withDefault("dev-kit.lock.json")),
-    ...projectFlags,
-  },
-  ({ locked, lockfile, manifest, projectDir }) =>
-    runProjectSkillPlan({ locked, lockfilePath: lockfile, manifestPath: manifest, projectDir }),
-).pipe(CliCommand.withDescription("Install the skills selected in dev-kit.jsonc."));
-
-const statusCommand = CliCommand.make(
+const projectSkillsStatusCommand = CliCommand.make(
   "status",
+  repositorySkillFlags,
+  ({ projectDir, target }) => statusProjectSkills({ projectDir, target }),
+).pipe(CliCommand.withDescription("Compare tracked skills with their approved upstream copies."));
+
+const projectSkillsUpdateCommand = CliCommand.make(
+  "update",
   {
-    lockfile: Flag.string("lockfile").pipe(Flag.withDefault("dev-kit.lock.json")),
-    ...projectFlags,
+    skills: Argument.string("skills").pipe(Argument.variadic()),
+    acceptLocal: Flag.boolean("accept-local").pipe(
+      Flag.withDescription(
+        "After an agent merge, keep local content and accept the latest upstream base.",
+      ),
+    ),
+    dryRun: Flag.boolean("dry-run").pipe(Flag.withDescription("Preview without writing.")),
+    ...repositorySkillFlags,
   },
-  ({ lockfile, manifest, projectDir }) =>
-    runProjectSkillPlan({
-      dryRun: true,
-      lockfilePath: lockfile,
-      manifestPath: manifest,
-      projectDir,
-    }),
-).pipe(CliCommand.withDescription("Check whether selected skills match the project."));
+  ({ skills, acceptLocal, dryRun, projectDir, target }) =>
+    updateProjectSkills(skills, { acceptLocal, dryRun, projectDir, target }),
+).pipe(
+  CliCommand.withDescription(
+    "Fast-forward unmodified tracked skills; preserve locally edited copies for an agent merge.",
+  ),
+);
+
+const projectSkillsDiffCommand = CliCommand.make(
+  "diff",
+  { skill: Argument.string("skill"), ...repositorySkillFlags },
+  ({ skill, projectDir, target }) => diffProjectSkill(skill, { projectDir, target }),
+).pipe(CliCommand.withDescription("Diff a tracked skill against its approved upstream copy."));
+
+const projectSkillsDetachCommand = CliCommand.make(
+  "detach",
+  {
+    skills: Argument.string("skills").pipe(Argument.variadic({ min: 1 })),
+    dryRun: Flag.boolean("dry-run").pipe(Flag.withDescription("Preview without writing.")),
+    ...repositorySkillFlags,
+  },
+  ({ skills, dryRun, projectDir, target }) =>
+    detachProjectSkills(skills, { dryRun, projectDir, target }),
+).pipe(CliCommand.withDescription("Remove upstream receipts while leaving skill content intact."));
+
+const projectSkillsCommand = CliCommand.make("skills").pipe(
+  CliCommand.withDescription("Copy and optionally refresh repo-owned agent skills."),
+  CliCommand.withSubcommands([
+    projectSkillsAddCommand,
+    projectSkillsListCommand,
+    projectSkillsSearchCommand,
+    projectSkillsInfoCommand,
+    projectSkillsStatusCommand,
+    projectSkillsUpdateCommand,
+    projectSkillsDiffCommand,
+    projectSkillsDetachCommand,
+  ] as const),
+);
 
 const gitignoreCommand = CliCommand.make(
   "gitignore",
@@ -387,27 +413,16 @@ const catalogCommand = CliCommand.make("catalog").pipe(
   ] as const),
 );
 
-const command = CliCommand.make("dev-kit", projectFlags, ({ manifest, projectDir }) =>
-  showDashboard({ manifestPath: manifest, projectDir }),
-).pipe(
-  CliCommand.withDescription("Your approved skill catalog for coding agents."),
+const command = CliCommand.make("dev-kit", {}, () => showProjectSkillsDashboard()).pipe(
+  CliCommand.withDescription("Agent-led repository setup and an approved skill catalog."),
   CliCommand.withSubcommands([
     {
-      group: "Skills",
-      commands: [initCommand, addCommand, removeCommand, listCommand, searchCommand, infoCommand],
+      group: "Repository",
+      commands: [setupCommand, projectSkillsCommand, ejectCommand],
     },
-    { group: "Project", commands: [statusCommand, syncCommand] },
     {
-      group: "Advanced",
-      commands: [
-        planCommand,
-        applyCommand,
-        gitignoreCommand,
-        effectCommand,
-        tsgoCommand,
-        catalogCommand,
-        cacheCommand,
-      ],
+      group: "Toolbox",
+      commands: [gitignoreCommand, effectCommand, tsgoCommand, catalogCommand, cacheCommand],
     },
   ] as const),
 );

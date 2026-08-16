@@ -80,9 +80,7 @@ const createTypecheckTask = (options: VitePlusTypecheckOptions | undefined) => {
 };
 
 /**
- * Build Dev Kit's recommended Vite+ quality defaults without owning the
- * consuming repository's `vite.config.ts`. Spread the result before local
- * project configuration.
+ * Build this repository's Vite+ quality defaults.
  */
 export const createRecommendedVitePlusConfig = (options: RecommendedVitePlusConfigOptions = {}) => {
   const ignorePatterns = [...devKitToolIgnorePatterns, ...(options.ignorePatterns ?? [])];

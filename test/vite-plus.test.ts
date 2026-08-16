@@ -1,12 +1,10 @@
-import {
-  createRecommendedVitePlusConfig as createPackagedConfig,
-  devKitToolIgnorePatterns,
-} from "@danieljvdm/dev-kit/vite-plus";
 import { describe, expect, it } from "vitest";
+
+import { createRecommendedVitePlusConfig, devKitToolIgnorePatterns } from "../src/vite-plus.ts";
 
 describe("recommended Vite+ config", () => {
   it("composes quality tasks and matching tool ignores", () => {
-    const config = createPackagedConfig();
+    const config = createRecommendedVitePlusConfig();
 
     expect(config).toMatchObject({
       staged: { "*": "vp check --fix" },
@@ -22,15 +20,15 @@ describe("recommended Vite+ config", () => {
     expect(config.lint?.jsPlugins).toEqual([
       {
         name: "anti-slop",
-        specifier: "@danieljvdm/dev-kit/oxlint-plugin-anti-slop",
+        specifier: "./src/oxlint-plugin-anti-slop/runtime.js",
       },
       {
         name: "effect",
-        specifier: "@danieljvdm/dev-kit/oxlint-plugin-effect",
+        specifier: "./src/oxlint-plugin-effect.js",
       },
       {
         name: "stylistic",
-        specifier: "@danieljvdm/dev-kit/oxlint-plugin-style",
+        specifier: "./src/oxlint-plugin-style.js",
       },
     ]);
     expect(config.lint?.rules["anti-slop/no-runtime-typeof"]).toBe("error");

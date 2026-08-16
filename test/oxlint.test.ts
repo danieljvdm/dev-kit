@@ -1,9 +1,6 @@
-import { recommendedOxlintConfig as packagedOxlintConfig } from "@danieljvdm/dev-kit/oxlint";
 import { describe, expect, it } from "vitest";
 
-import { recommendedOxlintConfig as sourceOxlintConfig } from "../src/oxlint.ts";
-
-const recommendedOxlintConfig = packagedOxlintConfig;
+import { recommendedOxlintConfig } from "../src/oxlint.ts";
 
 describe("recommended Oxlint config", () => {
   it("enables the Vite+ plugins and type-aware rules", () => {
@@ -19,15 +16,15 @@ describe("recommended Oxlint config", () => {
     expect(recommendedOxlintConfig.jsPlugins).toEqual([
       {
         name: "anti-slop",
-        specifier: "@danieljvdm/dev-kit/oxlint-plugin-anti-slop",
+        specifier: "./src/oxlint-plugin-anti-slop/runtime.js",
       },
       {
         name: "effect",
-        specifier: "@danieljvdm/dev-kit/oxlint-plugin-effect",
+        specifier: "./src/oxlint-plugin-effect.js",
       },
       {
         name: "stylistic",
-        specifier: "@danieljvdm/dev-kit/oxlint-plugin-style",
+        specifier: "./src/oxlint-plugin-style.js",
       },
     ]);
     expect(recommendedOxlintConfig.rules["anti-slop/no-known-value-widening"]).toBe("error");
@@ -61,9 +58,5 @@ describe("recommended Oxlint config", () => {
     expect(recommendedOxlintConfig.overrides[0]?.rules["typescript/no-non-null-assertion"]).toBe(
       "off",
     );
-  });
-
-  it("keeps the JavaScript runtime export aligned with the typed source", () => {
-    expect(packagedOxlintConfig).toEqual(sourceOxlintConfig);
   });
 });

@@ -22,8 +22,6 @@ export type CatalogRefreshOptions = {
   readonly updateSourceIds?: ReadonlyArray<string>;
   readonly pinSourceIds?: ReadonlyArray<string>;
 };
-/** @deprecated Use CatalogRefreshOptions. */
-export type VendorOptions = CatalogRefreshOptions;
 
 export type CatalogInspection = {
   readonly id: string;
@@ -955,6 +953,3 @@ export const refreshSkillCatalog = Effect.fn("refreshSkillCatalog")(function* (
   yield* fs.rename(nextLockPath, lockfilePath);
   yield* printStatus("success", "Catalog refreshed", summary);
 });
-
-/** @deprecated Use refreshSkillCatalog. */
-export const vendorExternalSkills = refreshSkillCatalog;
