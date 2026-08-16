@@ -1,5 +1,15 @@
 # @danieljvdm/dev-kit
 
+## 0.18.0
+
+### Minor Changes
+
+- f953091: Vendor anti-slop, export its Oxlint plugin, and enable its low-evidence rules in the recommended lint preset.
+
+### Patch Changes
+
+- 946ef3b: Update the Effect v4 beta family to beta.107 and Effect TypeScript-Go to 0.36.4 while preserving its commit-matched TypeScript 7.0.2 compiler.
+
 ## 0.17.0
 
 ### Minor Changes
