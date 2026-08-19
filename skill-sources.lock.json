@@ -5,9 +5,10 @@
       "id": "emilkowalski-skills",
       "repository": "https://github.com/emilkowalski/skills.git",
       "ref": "main",
-      "resolved": "70744e3816f1d93eafb697161a8b880a7384c5ff",
+      "resolved": "e879241fab3cdb22e8d95587cdbf40b57a88d7da",
       "skillsPath": "skills",
       "include": [
+        "animate-expo",
         "animation-vocabulary",
         "apple-design",
         "emil-design-eng",
@@ -18,6 +19,7 @@
         "review-animations"
       ],
       "skills": [
+        "animate-expo",
         "animation-vocabulary",
         "apple-design",
         "emil-design-eng",
@@ -28,6 +30,7 @@
         "review-animations"
       ],
       "descriptions": {
+        "animate-expo": "Build animations in React Native and Expo, making the decisions in the order that determines whether they feel right — should it animate, which thread it runs on, which properties, spring or timing, how the gesture hands off, how it degrades. Writes the implementation with Reanimated, Gesture Handler, Expo Router and expo-haptics. Use when animating anything in an Expo app, adding gestures, sheets, screen transitions, press feedback or haptics, or fixing motion that stutters on device. For web animation use `animate`.",
         "animation-vocabulary": "Reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term (\"the bouncy thing when a popover opens\" → Pop in; \"the iOS rubber-band scroll\" → Rubber-banding). Use when the user asks \"what's it called when…\", or describes a motion effect without knowing its name and wants the right word to prompt an AI or designer with. For naming an effect, not designing or building one.",
         "apple-design": "Apple's approach to interface design and fluid, physical motion, translated for the web. Use when building or reviewing gesture-driven UI, spring animations, drag/swipe/sheet interactions, momentum and interruptible transitions, translucent materials and depth, typography (optical sizing, tracking, leading), reduced-motion, or the design foundations (feedback, spatial consistency, restraint) behind Apple-style interfaces.",
         "emil-design-eng": "This skill encodes Emil Kowalski's philosophy on UI polish, component design, animation decisions, and the invisible details that make software feel great.",
@@ -38,6 +41,7 @@
         "review-animations": "Reviews animation and motion code against a high craft bar derived from Emil Kowalski's design engineering philosophy. Default to flagging; approval is earned."
       },
       "digests": {
+        "animate-expo": "sha256:c9ad6c07908409ed2fa9fecf288196e77325be2cf29e5a03b8aaaecb451709a2",
         "animation-vocabulary": "sha256:d270769a8a19c8ff48489c118e19d5f86113c6acfdd0e981116ffd74b01b9e6b",
         "apple-design": "sha256:dabc421a391bd6b2ba0d004a8f4d4a1b632fc003a45d4676ab9f2ade8099fc7b",
         "emil-design-eng": "sha256:cedac6e0b7ff8ca471d5d2b35dc7d91f13b57ff57c4395822e677f0df7ecebc8",
