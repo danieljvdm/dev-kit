@@ -1,5 +1,11 @@
 # @danieljvdm/dev-kit
 
+## 1.0.1
+
+### Patch Changes
+
+- 320cffd: Refresh Emil Kowalski's approved skill catalog and add `animate-expo` for building polished animations and gestures in Expo apps.
+
 ## 1.0.0
 
 ### Major Changes
