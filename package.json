@@ -1,6 +1,6 @@
 {
   "name": "@danieljvdm/dev-kit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": false,
   "description": "Agent-led TypeScript repository setup and curated portable skills.",
   "license": "MIT",
