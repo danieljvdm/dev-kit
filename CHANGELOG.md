@@ -1,5 +1,11 @@
 # @danieljvdm/dev-kit
 
+## 1.0.2
+
+### Patch Changes
+
+- fd2729b: Add HumanLayer's `show-me` to the approved skill catalog and update the pull request skill to favor brief summaries, focused architecture diagrams, and concrete API examples.
+
 ## 1.0.1
 
 ### Patch Changes
