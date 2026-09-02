@@ -103,5 +103,13 @@
       ],
       "licensePath": "LICENSE",
     },
+    {
+      "id": "humanlayer-skills",
+      "repository": "https://github.com/humanlayer/skills.git",
+      "ref": "main",
+      "skillsPath": "plugins/show-me/skills",
+      "include": ["show-me"],
+      "licensePath": "LICENSE",
+    },
   ],
 }

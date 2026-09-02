@@ -295,6 +295,22 @@
         "sentry-snapshots-cocoa": "sha256:9eeee7bc649475f2d8c00cb2725edcf07d9a6ce2784b4fbaf24ba0bd6de8f44b"
       },
       "licensePath": "LICENSE"
+    },
+    {
+      "id": "humanlayer-skills",
+      "repository": "https://github.com/humanlayer/skills.git",
+      "ref": "main",
+      "resolved": "3c2629142c5d437428269b1b722b08c0b87f574d",
+      "skillsPath": "plugins/show-me/skills",
+      "include": ["show-me"],
+      "skills": ["show-me"],
+      "descriptions": {
+        "show-me": "Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts."
+      },
+      "digests": {
+        "show-me": "sha256:be24b98422f4e577f95eff91b1a46c82b7b063356923c466c11f596a920ed51b"
+      },
+      "licensePath": "LICENSE"
     }
   ]
 }
