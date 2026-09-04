@@ -1,13 +1,22 @@
 ---
-"@danieljvdm/dev-kit": minor
+"@danieljvdm/dev-kit": major
 ---
 
-Bundle maintained forks of the UI-library, web design, Cloudflare, TDD, and Sentry
-setup skills. Replace the three separate motion review, improvement, and
-opportunity skills with `animate`. Existing installed copies remain repo-owned;
-adopt `animate` explicitly when replacing those skills.
+Consolidate owned skills into eight task entrypoints with conditional references.
+Replace retired selectors explicitly when adopting this release:
 
-Shorten owned descriptions, route conditional guidance into references, preserve
-the user's task scope, and defer verification policy to the target repository.
-Use Effect Atom for shared React state and select theme handling from the
-application's actual SSR and persistence setup.
+- `animate`: motion improvement, review, opportunities, and animation vocabulary.
+- `design-ui`: Apple/design-engineering guidance, prototypes, and UI library selection.
+- `cloudflare-workers`: Worker practices, Durable Objects, Wrangler, and Sandbox SDK.
+- `effect-development`: Effect setup, architecture, HTTP APIs, CLIs, and Atom state.
+- `sentry`: all eight Sentry workflows, sharing platform and signal references.
+- `testing`: test selection and explicitly requested TDD.
+
+`dev-kit` and `open-pull-request` remain separate task entrypoints. The `effect`
+family now selects `effect-development`. Existing consumer files are repo-owned;
+install the replacements, preserve local guidance, and remove retired copies
+when adopting. Old individual selectors are no longer in the catalog.
+
+Use Effect Atom for shared React state, choose theme handling from the existing
+SSR and persistence setup, preserve user scope, and follow repository testing
+policy. Retain upstream licenses and pinned provenance for maintained forks.

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Build Effect Scripts and CLIs"
-  short_description: "Build Effect scripts and command-line apps"
-  default_prompt: "Use $build-effect-clis to implement this script or CLI change within the repository's conventions."

@@ -4,7 +4,5 @@ Copyright (c) 2026 Emil Kowalski. MIT license retained in LICENSE.
 
 Modified by Dev Kit to preserve task scope, share motion workflows, use
 progressive disclosure, and follow repository-owned tools and state policy.
-The animate skill combines improve-animations, review-animations, and
-find-animation-opportunities, plus animation-vocabulary from that revision.
-Relevant direct-manipulation guidance from apple-design and motion decisions
-from emil-design-eng are also consolidated here.
+Combines apple-design, emil-design-eng, prototype, and pick-ui-library.
+Motion mechanics are consolidated in animate.

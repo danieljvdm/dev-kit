@@ -89,8 +89,8 @@ Search the catalog before copying:
 
 ```bash
 bunx @danieljvdm/dev-kit@latest skills search cloudflare
-bunx @danieljvdm/dev-kit@latest skills info workers-best-practices
-bunx @danieljvdm/dev-kit@latest skills add workers-best-practices wrangler
+bunx @danieljvdm/dev-kit@latest skills info cloudflare-workers
+bunx @danieljvdm/dev-kit@latest skills add cloudflare-workers
 ```
 
 Source families select every approved skill from one source and are intentionally
@@ -110,7 +110,7 @@ downloads a missing package or executes package-provided discovery code.
 Each copied skill contains `.dev-kit-origin.json`:
 
 ```text
-.agents/skills/workers-best-practices/
+.agents/skills/cloudflare-workers/
 ├── SKILL.md
 ├── references/
 └── .dev-kit-origin.json
@@ -130,20 +130,20 @@ bunx @danieljvdm/dev-kit@latest skills update
 When both the repository and upstream changed, Dev Kit preserves the local copy:
 
 ```bash
-bunx @danieljvdm/dev-kit@latest skills diff workers-best-practices
+bunx @danieljvdm/dev-kit@latest skills diff cloudflare-workers
 ```
 
 Ask the agent to merge applicable upstream intent. After reviewing the merged
 skill, advance its recorded base without overwriting it:
 
 ```bash
-bunx @danieljvdm/dev-kit@latest skills update workers-best-practices --accept-local
+bunx @danieljvdm/dev-kit@latest skills update cloudflare-workers --accept-local
 ```
 
 To sever the upstream relationship entirely:
 
 ```bash
-bunx @danieljvdm/dev-kit@latest skills detach workers-best-practices
+bunx @danieljvdm/dev-kit@latest skills detach cloudflare-workers
 ```
 
 Only the receipt is removed. The skill remains ordinary repository content.

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Effect Atom State"
-  short_description: "Manage Effect Atom client state and React integration"
-  default_prompt: "Use $effect-atom-state to implement this client-state change within the application's existing Effect Atom ownership."

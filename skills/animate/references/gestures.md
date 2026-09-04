@@ -20,3 +20,8 @@ Exercise fast reversals, slow drags, release near a threshold, cancellation,
 multiple pointers, and reduced motion when relevant to the changed behavior.
 Use the target device to judge touch feel; state when only mouse behavior was
 verified. Favor existing platform or library gesture handling over recreating it.
+
+Use spatially coherent paths and origins. Directional hints should point toward
+the action they teach. Add sound or haptics only when useful and supported by the
+target platform. Apple's [motion guidance](https://developer.apple.com/design/human-interface-guidelines/motion)
+provides the platform rationale.

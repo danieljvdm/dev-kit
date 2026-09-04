@@ -1,9 +1,0 @@
-Dev Kit adaptation of https://github.com/getsentry/agent-plugin
-Source revision: 9f9156966be43f1bf4797bd9785a0644bf181d01
-Copyright (c) 2025 Sentry (https://sentry.io) and contributors.
-
-The upstream repository's MIT notice is retained in LICENSE-UPSTREAM.
-The skills declare Apache-2.0; that license is retained in LICENSE.
-Modified by Dev Kit: concise entrypoints, conditional platform references,
-existing-scope verification, and evidence-based platform selection without
-redundant user confirmation. Platform and signal references are retained.

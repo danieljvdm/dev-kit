@@ -1,4 +1,0 @@
-interface:
-  display_name: "Build Effect APIs"
-  short_description: "Build shared contracts and Effect HTTP servers"
-  default_prompt: "Use $build-effect-apis to implement this shared HTTP contract or server change."

@@ -73,20 +73,6 @@
       "licensePath": "LICENSE",
     },
     {
-      "id": "getsentry-agent-plugin",
-      "repository": "https://github.com/getsentry/agent-plugin.git",
-      "ref": "main",
-      "skillsPath": "skills",
-      "include": [
-        "sentry-create-alert",
-        "sentry-debug-issue",
-        "sentry-get-started",
-        "sentry-otel-exporter-setup",
-        "sentry-snapshots-cocoa",
-      ],
-      "licensePath": "LICENSE",
-    },
-    {
       "id": "humanlayer-skills",
       "repository": "https://github.com/humanlayer/skills.git",
       "ref": "main",

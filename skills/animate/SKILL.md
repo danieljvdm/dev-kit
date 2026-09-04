@@ -1,6 +1,6 @@
 ---
 name: animate
-description: Implement, review, or improve web UI motion, including finding useful animation opportunities.
+description: Implement, review, or improve web UI motion, and identify animation terminology.
 license: MIT
 ---
 
@@ -12,6 +12,7 @@ written plan is optional, not a prerequisite to fixing one interaction.
 
 Read only the references needed for the work:
 
+- Naming an effect described by the user: [animation vocabulary](references/glossary.md).
 - Adding or fixing motion: [implementation](references/implementation.md).
 - Reviewing a diff or auditing existing motion: [review](references/review.md).
 - Finding places that would benefit from motion:
@@ -29,5 +30,5 @@ choice or evidence from the running interface.
 Verify changed motion in the running UI when possible. Record any visual or
 device behavior that could not be checked. Preserve useful evidence for review.
 
-Dev Kit combines the upstream improve, review, and opportunity workflows here.
+Dev Kit combines the upstream motion workflows and vocabulary here.
 Attribution and fork details are in [NOTICE](NOTICE); terms are in [LICENSE](LICENSE).
