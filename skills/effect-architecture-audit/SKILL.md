@@ -1,6 +1,6 @@
 ---
 name: effect-architecture-audit
-description: Audit an Effect TypeScript codebase's services, Layers, dependency ownership, hidden requirements, test substitutes, Schema boundaries, assertions, unknown values, and typed error channels. Use for architecture reviews, service refactors, dependency-injection audits, and type-boundary investigations; do not use as a general Effect API reference.
+description: Audit Effect service ownership, dependency composition, and type boundaries during architecture reviews or refactors.
 ---
 
 # Audit Effect Architecture

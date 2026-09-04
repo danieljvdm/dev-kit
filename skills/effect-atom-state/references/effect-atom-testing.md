@@ -1,8 +1,13 @@
 # Deterministic Effect Atom testing
 
+Use this reference only when a test is requested or warranted by repository
+policy. Select the cases that reproduce the relevant failure; this is not a
+required suite for every changed atom. Existing tests and app verification may
+already cover the behavior.
+
 Test cache policy below React first with `AtomRegistry.make()`. Add a React
-integration test for provider placement, hook behavior, browser-only SSR
-boundaries, hydration, or Strict Mode ownership.
+integration test only when the failure involves provider placement, hook
+behavior, browser-only SSR boundaries, hydration, or Strict Mode ownership.
 
 Use fake timers, a request counter, controllable Effects, and explicit mounts:
 

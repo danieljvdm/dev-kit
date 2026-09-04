@@ -1,6 +1,6 @@
 ---
 name: testing
-description: Set an extremely high bar for automated tests. Use whenever software work raises the question of adding, changing, retaining, or removing tests.
+description: Decide whether to add, change, or retain committed tests under the repository's testing policy.
 ---
 
 # Testing

@@ -34,14 +34,18 @@ Use `BunRuntime` and `BunServices` together when Bun owns the executable. Let
 If expected errors need custom presentation, catch and render them immediately
 before `runMain` while preserving CLI control-flow errors such as help output.
 
-## Test at three seams
+## Choose a verification boundary
+
+Follow repository testing policy before adding a committed test. Use existing
+checks or direct command execution when sufficient. The options below are
+alternatives selected by the changed behavior, not a required three-part suite.
 
 1. Test application services directly with deterministic Layers. Cover domain
    success, expected failure, interruption, and plan/apply separation without
    involving argument parsing.
 2. Test thin command handlers through their services when CLI input mapping or
    output-mode selection contains meaningful logic.
-3. Spawn the real executable for boundary behavior. At minimum cover:
+3. Spawn the real executable for boundary behavior. Select relevant cases:
    - root and changed-command `--help`;
    - representative valid arguments and flags;
    - missing or invalid input and a non-zero exit;

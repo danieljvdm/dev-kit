@@ -1,5 +1,10 @@
 # Verification
 
+Follow repository testing policy. Use existing checks and direct requests when
+sufficient; add committed tests only for an authorized or evidenced regression.
+Choose from the scenarios below based on the changed boundary, rather than
+creating a test suite for every endpoint edit.
+
 Test the contract spine at its seams. Use the repository's established Effect
 test integration and command authority.
 
@@ -48,7 +53,7 @@ decoding are skipped.
   `HttpApiMiddleware.layerClient` and assert that it transforms the request.
 - Assert params, query, headers, payload, and expected errors at least once for
   every changed request shape.
-- For Atom clients, complete every applicable scenario in the
+- For Atom clients, select the relevant scenarios from the
   `$effect-atom-state` skill's testing reference; use a deterministic HTTP
   layer so request encoding, invalidation, and lifecycle remain observable.
 
@@ -60,6 +65,6 @@ Account for every changed endpoint across these columns:
 | ------------------------------------------------ | -------------------------------- | -------------------------------- | ---------------------------------------------- | -------------------------------- |
 | Params, query, headers, payload, success, errors | Scope, provided services, errors | Identifier, invariants, workflow | Typed call shape, identity, cache/invalidation | Round-trip and boundary behavior |
 
-Completion means every changed endpoint has an entry in every applicable
-column, every unknown codec call has a concrete boundary justification, and the
-repository's formatter, linter, typechecker, and tests pass.
+Use the matrix when it helps trace a cross-boundary change. Completion means
+the changed behavior is verified, untyped boundaries are justified, and the
+repository's required checks pass. Empty test cells do not mandate new tests.

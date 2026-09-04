@@ -1,35 +1,20 @@
 ---
 name: effect-ts
-description: Use this skill when setting up a repository that uses the Effect Typescript library.
+description: Set up Effect dependencies and agent guidance in a TypeScript repository.
 ---
 
-# Step 1: Install effect
+# Set up Effect
 
-Use the users preferred package manager:
+Inspect the package boundaries and existing Effect version first. Use the
+repository's package manager and version policy to add Effect where it is
+needed. In a monorepo, make its source and instructions available at the root
+when that is how agents inspect installed APIs. Avoid an unrelated upgrade or
+copying a package-manager command from a different project.
 
-```
-pnpm add effect@beta
-```
+Ensure repository agent instructions direct Effect work to the installed
+`node_modules/effect/AGENTS.md`, require reading it completely before writing
+Effect code, and follow its relevant links. For APIs not covered there, consult
+`node_modules/effect/src`.
 
-If in a monorepo, install it as a dev dependency at the root, so you can access
-the source code from `node_modules/effect/src`.
-
-```
-pnpm add -D effect@beta
-```
-
-# Step 2: Update AGENTS.md / CLAUDE.md
-
-Ensure that the agent instructions contain the following:
-
-```md
-# Learning more about the Effect
-
-This repository uses the Effect Typescript library.
-
-Before writing any Effect code, first read `node_modules/effect/AGENTS.md`
-**completely**, and follow the links in the file when required.
-
-If you need to learn more about particular Effect apis and concepts that the
-guide doesn't cover, search through the source code in `node_modules/effect/src`.
-```
+Preserve existing agent guidance and keep one pointer to the installed source
+instead of copying library instructions into the repository.
