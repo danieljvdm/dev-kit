@@ -7,49 +7,13 @@
       "ref": "main",
       "resolved": "e879241fab3cdb22e8d95587cdbf40b57a88d7da",
       "skillsPath": "skills",
-      "include": [
-        "animate-expo",
-        "animation-vocabulary",
-        "apple-design",
-        "emil-design-eng",
-        "find-animation-opportunities",
-        "improve-animations",
-        "pick-ui-library",
-        "prototype",
-        "review-animations"
-      ],
-      "skills": [
-        "animate-expo",
-        "animation-vocabulary",
-        "apple-design",
-        "emil-design-eng",
-        "find-animation-opportunities",
-        "improve-animations",
-        "pick-ui-library",
-        "prototype",
-        "review-animations"
-      ],
+      "include": ["animate-expo"],
+      "skills": ["animate-expo"],
       "descriptions": {
-        "animate-expo": "Build animations in React Native and Expo, making the decisions in the order that determines whether they feel right — should it animate, which thread it runs on, which properties, spring or timing, how the gesture hands off, how it degrades. Writes the implementation with Reanimated, Gesture Handler, Expo Router and expo-haptics. Use when animating anything in an Expo app, adding gestures, sheets, screen transitions, press feedback or haptics, or fixing motion that stutters on device. For web animation use `animate`.",
-        "animation-vocabulary": "Reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term (\"the bouncy thing when a popover opens\" → Pop in; \"the iOS rubber-band scroll\" → Rubber-banding). Use when the user asks \"what's it called when…\", or describes a motion effect without knowing its name and wants the right word to prompt an AI or designer with. For naming an effect, not designing or building one.",
-        "apple-design": "Apple's approach to interface design and fluid, physical motion, translated for the web. Use when building or reviewing gesture-driven UI, spring animations, drag/swipe/sheet interactions, momentum and interruptible transitions, translucent materials and depth, typography (optical sizing, tracking, leading), reduced-motion, or the design foundations (feedback, spatial consistency, restraint) behind Apple-style interfaces.",
-        "emil-design-eng": "This skill encodes Emil Kowalski's philosophy on UI polish, component design, animation decisions, and the invisible details that make software feel great.",
-        "find-animation-opportunities": "Search a codebase or UI for places that don't animate but should, and reject everything that shouldn't. Read-only; it proposes motion with exact values, it does not implement it. Use when the user asks \"what could be animated here?\" or wants to \"make this feel more alive\". For fixing existing animations, use improve-animations or review-animations instead.",
-        "improve-animations": "Survey a codebase's animation and motion code as a senior motion advisor, then produce a prioritized audit and self-contained implementation plans for other agents (or cheaper models) to execute. Read-only on source code — it plans improvements, it does not apply them. Use when the user asks to \"improve the animations\", \"audit the motion\", \"make this app feel better\", or wants a roadmap of animation fixes rather than a review of a single diff.",
-        "pick-ui-library": "Pick the right library for a given frontend task from a curated, opinionated list — numbers, OTP inputs, charts, command menus, virtualization, drag and drop, toasts, state, styling, and more. Only runs when explicitly invoked; it does not trigger on its own.",
-        "prototype": "Build multiple genuinely different versions of a UI piece you describe, rendered behind a visual picker so you can flip through them live and promote the one that feels right. Only runs when explicitly invoked; it does not trigger on its own.",
-        "review-animations": "Reviews animation and motion code against a high craft bar derived from Emil Kowalski's design engineering philosophy. Default to flagging; approval is earned."
+        "animate-expo": "Build animations in React Native and Expo, making the decisions in the order that determines whether they feel right \u2014 should it animate, which thread it runs on, which properties, spring or timing, how the gesture hands off, how it degrades. Writes the implementation with Reanimated, Gesture Handler, Expo Router and expo-haptics. Use when animating anything in an Expo app, adding gestures, sheets, screen transitions, press feedback or haptics, or fixing motion that stutters on device. For web animation use `animate`."
       },
       "digests": {
-        "animate-expo": "sha256:c9ad6c07908409ed2fa9fecf288196e77325be2cf29e5a03b8aaaecb451709a2",
-        "animation-vocabulary": "sha256:d270769a8a19c8ff48489c118e19d5f86113c6acfdd0e981116ffd74b01b9e6b",
-        "apple-design": "sha256:dabc421a391bd6b2ba0d004a8f4d4a1b632fc003a45d4676ab9f2ade8099fc7b",
-        "emil-design-eng": "sha256:cedac6e0b7ff8ca471d5d2b35dc7d91f13b57ff57c4395822e677f0df7ecebc8",
-        "find-animation-opportunities": "sha256:0c6f5d397c01cb02b4fc06f45836825d5cb576c006e1a4d6eaa721f9f126835e",
-        "improve-animations": "sha256:b02183838b096282eef43bbcbdb85fd76cf0687dac188eff5174a3010f2b86ba",
-        "pick-ui-library": "sha256:f507c1caaff077d6c7f0aedf56a888ea0248894ad80b5bac4f279924db5f44a3",
-        "prototype": "sha256:564efd1ce0ee72520058eccb5f47d2f77b1ece27ae9b399edb7c121c8f9f2dd5",
-        "review-animations": "sha256:d78c312f4102c0243fb524f85d1fd999e8c413a5afbef9ac3c7fe054fbb84570"
+        "animate-expo": "sha256:c9ad6c07908409ed2fa9fecf288196e77325be2cf29e5a03b8aaaecb451709a2"
       },
       "licensePath": "LICENSE",
       "stripFrontmatter": ["disable-model-invocation"]
@@ -66,12 +30,8 @@
         "cloudflare-email-service",
         "cloudflare-one",
         "cloudflare-one-migrations",
-        "durable-objects",
-        "sandbox-sdk",
         "turnstile-spin",
-        "web-perf",
-        "workers-best-practices",
-        "wrangler"
+        "web-perf"
       ],
       "skills": [
         "agents-sdk",
@@ -79,25 +39,17 @@
         "cloudflare-email-service",
         "cloudflare-one",
         "cloudflare-one-migrations",
-        "durable-objects",
-        "sandbox-sdk",
         "turnstile-spin",
-        "web-perf",
-        "workers-best-practices",
-        "wrangler"
+        "web-perf"
       ],
       "descriptions": {
         "agents-sdk": "Build AI agents on Cloudflare Workers using the Agents SDK. Load when creating stateful agents, durable workflows, real-time WebSocket apps, scheduled tasks, MCP servers, chat applications, voice agents, or browser automation. Covers Agent class, state management, callable RPC, Workflows, durable execution, queues, retries, observability, and React hooks. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
         "cloudflare": "Comprehensive Cloudflare platform skill covering Workers, Pages, storage (KV, D1, R2), AI (Workers AI, Vectorize, Agents SDK), feature flags (Flagship), networking (Tunnel, Spectrum), security (WAF, DDoS), and infrastructure-as-code (Terraform, Pulumi). Use for any Cloudflare development task. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
-        "cloudflare-email-service": "Send and receive transactional emails with Cloudflare Email Service (Email Sending + Email Routing). Use when building email sending (Workers binding or REST API), email routing, Agents SDK email handling, or integrating email into any app — Workers, Node.js, Python, Go, etc. Also use for email deliverability, SPF/DKIM/DMARC, wrangler email setup, MCP email tools, or when a coding agent needs to send emails. Even for simple requests like \"add email to my Worker\" — this skill has critical config details.",
+        "cloudflare-email-service": "Send and receive transactional emails with Cloudflare Email Service (Email Sending + Email Routing). Use when building email sending (Workers binding or REST API), email routing, Agents SDK email handling, or integrating email into any app \u2014 Workers, Node.js, Python, Go, etc. Also use for email deliverability, SPF/DKIM/DMARC, wrangler email setup, MCP email tools, or when a coding agent needs to send emails. Even for simple requests like \"add email to my Worker\" \u2014 this skill has critical config details.",
         "cloudflare-one": "Guides Cloudflare One Zero Trust and SASE work across Access, Gateway, WARP, Tunnel, Cloudflare WAN, DLP, CASB, device posture, and identity. Use when designing, configuring, troubleshooting, or reviewing Cloudflare One deployments. Retrieval-first: use current Cloudflare docs/API schemas instead of embedded product docs.",
         "cloudflare-one-migrations": "Plans migrations from Zscaler ZIA/ZPA, Palo Alto, legacy VPN, SWG, or SASE stacks to Cloudflare One. Use for migration assessments, policy mapping, rollout plans, and parity/gap analysis.",
-        "durable-objects": "Create and review Cloudflare Durable Objects. Use when building stateful coordination (chat rooms, multiplayer games, booking systems), implementing RPC methods, SQLite storage, alarms, WebSockets, or reviewing DO code for best practices. Covers Workers integration, wrangler config, and testing with Vitest. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
-        "sandbox-sdk": "Build sandboxed applications for secure code execution. Load when building AI code execution, code interpreters, CI/CD systems, interactive dev environments, or executing untrusted code. Covers Sandbox SDK lifecycle, commands, files, code interpreter, and preview URLs. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
         "turnstile-spin": "Set up Cloudflare Turnstile end-to-end in a project. Scan the codebase, create the widget via the Cloudflare API, embed it where user requests need bot verification (form submissions, SPA actions, API endpoints, download links, comment or vote submissions, etc.), wire canonical server-side siteverify in the customer's existing backend, validate, and persist the skill. Load this when a user asks to add Turnstile, set up CAPTCHA, protect a form or endpoint from bots, or fix a Turnstile integration. Mirrors developers.cloudflare.com/turnstile/spin.",
-        "web-perf": "Analyzes web performance using Chrome DevTools MCP. Measures Core Web Vitals (LCP, INP, CLS) and supplementary metrics (FCP, TBT, Speed Index), identifies render-blocking resources, network dependency chains, layout shifts, caching issues, and accessibility gaps. Use when asked to audit, profile, debug, or optimize page load performance, Lighthouse scores, or site speed. Biases towards retrieval from current documentation over pre-trained knowledge.",
-        "workers-best-practices": "Reviews and authors Cloudflare Workers code against production best practices. Load when writing new Workers, reviewing Worker code, configuring wrangler.jsonc, or checking for common Workers anti-patterns (streaming, floating promises, global state, secrets, bindings, observability). Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
-        "wrangler": "Cloudflare Workers CLI for deploying, developing, and managing Workers, KV, R2, D1, Vectorize, Hyperdrive, Workers AI, Containers, Queues, Workflows, Pipelines, and Secrets Store. Load before running wrangler commands to ensure correct syntax and best practices. Biases towards retrieval from Cloudflare docs over pre-trained knowledge."
+        "web-perf": "Analyzes web performance using Chrome DevTools MCP. Measures Core Web Vitals (LCP, INP, CLS) and supplementary metrics (FCP, TBT, Speed Index), identifies render-blocking resources, network dependency chains, layout shifts, caching issues, and accessibility gaps. Use when asked to audit, profile, debug, or optimize page load performance, Lighthouse scores, or site speed. Biases towards retrieval from current documentation over pre-trained knowledge."
       },
       "digests": {
         "agents-sdk": "sha256:721bd3f54bf45ce35827d90a1886ed92d644fe2bfff2e80c21bcd1777079dc54",
@@ -105,12 +57,8 @@
         "cloudflare-email-service": "sha256:c74226f6ce9226640193a30142a2d5348cc276baefb91913db9dc44e97d971c0",
         "cloudflare-one": "sha256:44c1455ac02448fab391795a7d84205387c3cdae457e3d17d5549207ff466bfa",
         "cloudflare-one-migrations": "sha256:9b1e197c3cf33fd7061d5f7c2e654a9b72257ed2169d57b704bca4122a51febc",
-        "durable-objects": "sha256:533bfa75d2074cf6ac30ab77854a665465318dd0540ff4bdbb9c5f4ef8acfb38",
-        "sandbox-sdk": "sha256:e1ec676cfa5e9638f62673097850ec0e8e7f7e42dfd0606cc217b5854df0132b",
         "turnstile-spin": "sha256:c6095261a7f69b2321729604a8f57b36456146fa6e544bfc54d764d206c1037a",
-        "web-perf": "sha256:4d6d66e3d36bee3f592a8ac76ec633c6a96c688c0c9767ef26c164f2509726a8",
-        "workers-best-practices": "sha256:f8925cccde1682df5e6c9aba8e3ee125355fc73761ba6581107d88adb8b44f47",
-        "wrangler": "sha256:217184cf167933b565466cf0d846e8085e8a985d6b7ff828316757d3fc4932cb"
+        "web-perf": "sha256:4d6d66e3d36bee3f592a8ac76ec633c6a96c688c0c9767ef26c164f2509726a8"
       },
       "licensePath": "LICENSE"
     },
@@ -136,15 +84,13 @@
       "ref": "main",
       "resolved": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
       "skillsPath": "skills/engineering",
-      "include": ["tdd", "improve-codebase-architecture"],
-      "skills": ["improve-codebase-architecture", "tdd"],
+      "include": ["improve-codebase-architecture"],
+      "skills": ["improve-codebase-architecture"],
       "descriptions": {
-        "improve-codebase-architecture": "Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.",
-        "tdd": "Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions \"red-green-refactor\", or wants integration tests."
+        "improve-codebase-architecture": "Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick."
       },
       "digests": {
-        "improve-codebase-architecture": "sha256:43721b6125a4c703810414e649fbbab252f1f85a62385cdb23f313e0e06ba26a",
-        "tdd": "sha256:ea2d26eda005b10a2de4bdb7de44d33072f2a8e82dbf670952ce30a9c2d7c475"
+        "improve-codebase-architecture": "sha256:43721b6125a4c703810414e649fbbab252f1f85a62385cdb23f313e0e06ba26a"
       },
       "licensePath": "LICENSE"
     },
@@ -215,9 +161,9 @@
         "expo-examples": "Framework (OSS). Expo's official example projects - the expo/examples repo of ~70 `with-*` integrations (Stripe, Clerk, Supabase, OpenAI, maps, Reanimated, SQLite, Skia, NativeWind, and more). Use when integrating a third-party library or service into an existing Expo app and you want the canonical, version-matched pattern to adapt, or when scaffolding a new project from one with `npx create-expo --example`.",
         "expo-module": "Framework (OSS). Guide for creating and writing Expo native modules and views using the Expo Modules API (Swift, Kotlin, TypeScript). Covers module definition DSL, native views, shared objects, config plugins, lifecycle hooks, autolinking, and type system. Use when building or modifying native modules for Expo. Not for migrating an existing Swift module from the definition DSL to the Expo Modules API 2.0 macros; use expo-migrate-module (from the expo-experiments plugin) for that.",
         "expo-native-ui": "Framework (OSS). Build beautiful, native-feeling Expo screens. Covers Apple HIG styling, semantic colors, native controls, SF Symbols, media, animations, visual effects, gradients, storage, and responsive layout. For routing and navigation, use the expo-router skill.",
-        "expo-project-structure": "Framework (OSS). Folder structure for a new Expo app. Use when scaffolding or laying out a new Expo project with Expo Router, or deciding where a file should live in one. For new projects only — never restructure an existing app to match.",
+        "expo-project-structure": "Framework (OSS). Folder structure for a new Expo app. Use when scaffolding or laying out a new Expo project with Expo Router, or deciding where a file should live in one. For new projects only \u2014 never restructure an existing app to match.",
         "expo-router": "Framework (OSS). Navigation and routing for Expo Router. Covers file-based routes, groups and dynamic routes, folder organization, Link with previews and context menus, native Stack, page titles, modals and form sheets, NativeTabs, headers and toolbars, and header search bars.",
-        "expo-skill-feedback": "Submit feedback on an Expo skill—or Expo itself—and control bundled anonymous usage telemetry (off by default / opt-in). Submit feedback with: npx --yes submit-expo-feedback@latest \"ACTIONABLE_FEEDBACK\". Optionally add either or both: --category \"CATEGORY\" and --subject \"SUBJECT\". Replace the uppercase placeholders before running. Use when a skill was useful, confusing, broken, missing context, or worth improving; when Expo, Expo CLI, EAS CLI, docs, or MCP worked well or fell short; when an AI agent repeatedly failed, got stuck, or needed the user to take over an Expo task (report it as an eval candidate); or when the user explicitly asks to enable or disable telemetry (tracking), check its status, or understand what it collects.",
+        "expo-skill-feedback": "Submit feedback on an Expo skill\u2014or Expo itself\u2014and control bundled anonymous usage telemetry (off by default / opt-in). Submit feedback with: npx --yes submit-expo-feedback@latest \"ACTIONABLE_FEEDBACK\". Optionally add either or both: --category \"CATEGORY\" and --subject \"SUBJECT\". Replace the uppercase placeholders before running. Use when a skill was useful, confusing, broken, missing context, or worth improving; when Expo, Expo CLI, EAS CLI, docs, or MCP worked well or fell short; when an AI agent repeatedly failed, got stuck, or needed the user to take over an Expo task (report it as an eval candidate); or when the user explicitly asks to enable or disable telemetry (tracking), check its status, or understand what it collects.",
         "expo-tailwind-setup": "Framework (OSS). Set up Tailwind CSS v4 in Expo with react-native-css and NativeWind v5 for universal styling",
         "expo-ui": "Framework (OSS). Build native UI with the @expo/ui package: real SwiftUI on iOS and Jetpack Compose on Android rendered from React in an Expo or React Native app. Covers universal cross-platform components (Host, Column, Row, Button, Text, List, and more imported from @expo/ui), drop-in replacements for popular React Native community libraries (BottomSheet, DateTimePicker, Slider, Menu, etc.), and platform-specific SwiftUI (@expo/ui/swift-ui, iOS only) and Jetpack Compose (@expo/ui/jetpack-compose, Android only) trees and modifiers. Use when adding or reviewing @expo/ui Host/RNHostView trees, building native-feeling UI where standard React Native components fall short (grouped settings forms with toggles, sections, menus, sheets, pickers, sliders), choosing between universal and platform-specific components, or replacing an RN community UI library with a native @expo/ui equivalent. Not for custom native modules, Expo Router navigation, Reanimated, or data fetching.",
         "expo-upgrade": "Framework (OSS). Guidelines for upgrading Expo SDK versions and fixing dependency issues",
@@ -245,54 +191,6 @@
         "expo-ui": "sha256:b6773a56b0f9bf4cc3dc9cb1858ab50bdfcc3dc9b2d4e500990ab5d24e28d1ca",
         "expo-upgrade": "sha256:6c65f94c60f8127a36ca2d9402b610756314388de42200a2a120bbbea77f131b",
         "expo-web-to-native": "sha256:360359742d72d0a8ed9926d53f19bae7603fb788f6e897a14208bbb35c2ed618"
-      },
-      "licensePath": "LICENSE"
-    },
-    {
-      "id": "getsentry-agent-plugin",
-      "repository": "https://github.com/getsentry/agent-plugin.git",
-      "ref": "main",
-      "resolved": "9f9156966be43f1bf4797bd9785a0644bf181d01",
-      "skillsPath": "skills",
-      "include": [
-        "sentry-create-alert",
-        "sentry-debug-issue",
-        "sentry-fix-stack-traces",
-        "sentry-get-started",
-        "sentry-instrument",
-        "sentry-otel-exporter-setup",
-        "sentry-setup-releases",
-        "sentry-snapshots-cocoa"
-      ],
-      "skills": [
-        "sentry-create-alert",
-        "sentry-debug-issue",
-        "sentry-fix-stack-traces",
-        "sentry-get-started",
-        "sentry-instrument",
-        "sentry-otel-exporter-setup",
-        "sentry-setup-releases",
-        "sentry-snapshots-cocoa"
-      ],
-      "descriptions": {
-        "sentry-create-alert": "Create Sentry alerts using the workflow engine API. Use when asked to create alerts, set up notifications, configure issue priority alerts, or build workflow automations. Supports email, Slack, PagerDuty, Discord, and other notification actions.",
-        "sentry-debug-issue": "Debug and fix a Sentry issue — find it (by link, ID, or search), pull full context (stack trace, breadcrumbs, trace, logs), optionally run Seer root-cause / autofix, apply the code fix, and resolve it via a `Fixes PROJECT-NAME-12A` commit/PR. Use when working a known error or hunting one down to fix.",
-        "sentry-fix-stack-traces": "Make Sentry stack traces readable — upload source maps for JavaScript/TypeScript, or debug files for native and mobile (dSYM, ProGuard/R8, NDK symbols, Dart obfuscation maps, .NET PDBs). Use when frames in Sentry show minified names, bundled paths, hex addresses, \"unknown\", or method names with no file/line, instead of your original source.",
-        "sentry-get-started": "Guided entry point for using Sentry through your agent. Orients you to your current setup and, for a new project, sets up Sentry end to end with sane defaults — provision a project, install the SDK (errors, tracing, and whatever it enables by default), and confirm real telemetry reaches Sentry. Routes other intents (adding more signals, fixing issues) to the right skill.",
-        "sentry-instrument": "Instrument an application with Sentry — detect the platform, install and initialize the SDK if needed, and wire up any signal — error monitoring, tracing/performance, logging, metrics, profiling, session replay, user feedback, cron check-ins, and AI/LLM monitoring (agent runs, token cost, and conversations for OpenAI, Anthropic, Vercel AI, LangChain, Google GenAI, Pydantic AI, and Laravel AI). Use to add Sentry to a project or to capture more than errors.",
-        "sentry-otel-exporter-setup": "Configure the OpenTelemetry Collector with Sentry Exporter for multi-project routing and automatic project creation. Use when setting up OTel with Sentry, configuring collector pipelines for traces and logs, or routing telemetry from multiple services to Sentry projects.",
-        "sentry-setup-releases": "Set up Sentry releases and deploy tracking — tag events with a version and environment, create the release in CI with its commits, and wire up suspect commits and code mappings, so Sentry can show which release introduced an issue, which commit is responsible, and release health. Use when asked to set up releases, track deploys, see what changed, or when issues show an unknown release or no suspect commit.",
-        "sentry-snapshots-cocoa": "Full Sentry Snapshots setup for Apple/Cocoa projects. Use when asked to \"setup SnapshotPreviews\", \"setup Apple snapshot testing\", \"upload Apple snapshots to Sentry\", \"setup Apple snapshot GitHub Actions\", or \"setup Apple selective snapshot testing\"."
-      },
-      "digests": {
-        "sentry-create-alert": "sha256:a2d4011d28593abd8148c95d3f3188bc68db02d8d9c8ae444723d5548f4e9f1f",
-        "sentry-debug-issue": "sha256:ee3b1bc93dddab007e54332bc39521e49221528f5350e7af5e0f0e962393c9f1",
-        "sentry-fix-stack-traces": "sha256:f66199cfe616abf2ff39b9e953cb30d1e5634f83fcffa8cce1da54b66ae4ad67",
-        "sentry-get-started": "sha256:68ae5780ab6713d2fbbcb553df6dbfa67db28589ee467f4e14524ab8c51046df",
-        "sentry-instrument": "sha256:2c97fe5dc8aae274ed0657de7bc8dd1c59bd454b44ed00b6bf98f1d010e1e885",
-        "sentry-otel-exporter-setup": "sha256:9c8ba54f7ec1b52beb24b0225b5836edcd61971619474d7eee3cd48d27a8d1a5",
-        "sentry-setup-releases": "sha256:3a13401662f32806d56b63765be846f6c4305190b2a4f184a1146b71eb373aa4",
-        "sentry-snapshots-cocoa": "sha256:9eeee7bc649475f2d8c00cb2725edcf07d9a6ce2784b4fbaf24ba0bd6de8f44b"
       },
       "licensePath": "LICENSE"
     },
