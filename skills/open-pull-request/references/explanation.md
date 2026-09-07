@@ -19,3 +19,11 @@ and examples to the final implementation, use safe fixture data, and distinguish
 illustrative or expected output from output actually observed during validation.
 Include both a chart and an API example when they answer different review
 questions, not just to fill sections.
+
+## Performance claims
+
+Support performance claims with a before/after table comparing the target-branch
+baseline and PR candidate. Identify the revisions, workload, measurement
+conditions, units, and relevant variability so reviewers can interpret the
+comparison. Report measured results; label estimates and avoid claiming gains
+without a comparable baseline.

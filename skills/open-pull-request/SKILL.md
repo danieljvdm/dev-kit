@@ -5,12 +5,19 @@ description: Prepare, open, update, or land pull requests with concise explanati
 
 # Pull requests
 
-Lead with the concrete problem and resulting behavior. Give reviewers the
-context needed to assess the final change; simple changes need only a brief
-summary and relevant validation.
+Lead with the concrete problem and resulting behavior. Describe the final
+aggregate diff, omitting intermediate commits, abandoned approaches, and work
+session history unless they explain a relevant tradeoff. Simple changes need
+only a brief summary; complex or high-risk changes can justify more context.
+
+Keep test and validation reporting out of PR bodies: no dedicated sections,
+checklists, or lists of commands run. Still perform required checks and disclose
+material risks or limitations; include validation details only when required by
+higher-priority instructions.
 
 - Ownership, data flow, or API changes: [diagrams and examples](references/explanation.md).
 - UI or other visible behavior: [capture and publish evidence](references/evidence.md).
+- Performance claims: [baseline and candidate comparisons](references/explanation.md#performance-claims).
 - Commits, publication, readiness, or landing: [PR workflow](references/publication.md).
 
 Reuse verification and captures for unchanged inputs. Include limitations or
