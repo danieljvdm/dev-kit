@@ -1,5 +1,11 @@
 # @danieljvdm/dev-kit
 
+## 2.0.1
+
+### Patch Changes
+
+- 1789a5e: Refine the pull request skill to focus on the final change, omit routine test and validation reporting, and use before/after visual and performance comparisons where useful.
+
 ## 2.0.0
 
 ### Major Changes
