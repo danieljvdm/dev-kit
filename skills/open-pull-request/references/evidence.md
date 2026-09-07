@@ -5,6 +5,11 @@ verification and reuse it for the PR. A screenshot is the default; use a short
 video when the sequence matters, such as an agent exchange or animation. Both
 are rarely needed. Nonvisual changes need no screenshots or recordings.
 
+For changes to existing visible behavior, prefer a before/after table with
+published captures when the comparison helps reviewers see the change. Use the
+same viewport, fixture data, and interaction state for both captures. A new
+feature can use a final-state capture without a contrived before image.
+
 Use existing capture tools; load `playwright-cli` for browser capture. Keep
 recordings focused, usually under 30 seconds, without changing product timing.
 Use safe fixture data and review the image or whole clip once for correctness
