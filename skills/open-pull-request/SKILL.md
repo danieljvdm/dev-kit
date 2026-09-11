@@ -117,6 +117,11 @@ information beyond routine CI.
 ## Open and verify
 
 Open the PR against the intended base with the conventional title and prepared
-body. Then read back the rendered PR and verify the base/head branches, title,
-description, links, screenshots, and check results. Finish only when the PR is
-reviewable as rendered and return its URL.
+body. Open it ready for review by default — never as a draft unless the user
+explicitly asks for a draft. With `gh`, omit `--draft`. With Origin, pass
+`--status open`. If a PR tool defaults to draft (common for cloud-agent create
+APIs), set `draft: false` or mark the PR ready immediately after creation.
+Then read back the rendered PR and verify the base/head branches, title,
+description, links, screenshots, check results, and that it is not still a
+draft unless requested. Finish only when the PR is reviewable as rendered and
+return its URL.
