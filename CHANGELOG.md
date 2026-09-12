@@ -1,5 +1,12 @@
 # @danieljvdm/dev-kit
 
+## 2.0.2
+
+### Patch Changes
+
+- 6f1a001: Upgrade the Effect TypeScript-Go compiler baseline to 0.45.0 and enable typed Schema decoder and focused Effect simplification warnings in the recommended TypeScript setup.
+  Pin the compatible platform runtime so fresh CLI installs keep a consistent Effect version.
+
 ## 2.0.1
 
 ### Patch Changes
