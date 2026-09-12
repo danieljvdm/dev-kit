@@ -5,7 +5,7 @@ import { printStatus, withSpinner } from "./cli-ui.ts";
 import { acquireProjectProcessLock } from "./project-process-lock.ts";
 import { isTypeScriptPackageName } from "./typescript-package-name.ts";
 
-export const EFFECT_TSGO_VERSION = "0.36.4";
+export const EFFECT_TSGO_VERSION = "0.45.0";
 export const EFFECT_TSGO_TYPESCRIPT_VERSION = "7.0.2";
 export const EFFECT_TSGO_PLUGIN_NAME = "@effect/language-service";
 
@@ -31,6 +31,15 @@ export const recommendedEffectTsgoPlugin = {
     nestedEffectGenYield: "suggestion",
     newSchemaClass: "suggestion",
     preferSchemaTypeProperty: "suggestion",
+    preferTypedSchemaDecoder: "warning",
+    catchAllTagDispatchToCatchTag: "warning",
+    catchConditionalRefailToCatchIf: "warning",
+    provideLayerSucceedToProvideService: "warning",
+    allOfMapToForEach: "warning",
+    flatMapConditionalToFilterOrFail: "warning",
+    optionMatchToFromOption: "warning",
+    timeoutCatchTagToTimeoutOrElse: "warning",
+    runOfExitToRunExit: "warning",
     unsafeEffectTypeAssertion: "warning",
   },
   overrides: [

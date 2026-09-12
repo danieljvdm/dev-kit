@@ -100,6 +100,15 @@ describe("Effect tsgo patch", () => {
           nestedEffectGenYield: "suggestion",
           newSchemaClass: "suggestion",
           preferSchemaTypeProperty: "suggestion",
+          preferTypedSchemaDecoder: "warning",
+          catchAllTagDispatchToCatchTag: "warning",
+          catchConditionalRefailToCatchIf: "warning",
+          provideLayerSucceedToProvideService: "warning",
+          allOfMapToForEach: "warning",
+          flatMapConditionalToFilterOrFail: "warning",
+          optionMatchToFromOption: "warning",
+          timeoutCatchTagToTimeoutOrElse: "warning",
+          runOfExitToRunExit: "warning",
           unsafeEffectTypeAssertion: "warning",
         });
         assert.deepEqual(recommendedEffectTsgoPlugin.overrides, [

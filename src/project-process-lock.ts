@@ -74,11 +74,7 @@ export const acquireProjectProcessLock = Effect.fn("acquireProjectProcessLock")(
       Effect.gen(function* () {
         const currentOwner = yield* fs
           .readFileString(ownerPath)
-          .pipe(
-            Effect.catch((error) =>
-              error.reason._tag === "NotFound" ? Effect.void : Effect.fail(error),
-            ),
-          );
+          .pipe(Effect.catchReason("PlatformError", "NotFound", () => Effect.void));
 
         if (currentOwner === ownerContents) {
           yield* fs.remove(acquiredLockDir, { recursive: true, force: true });
