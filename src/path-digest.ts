@@ -96,11 +96,7 @@ const digestFileSystemPath = Effect.fn("digestFileSystemPath")(function* (
 
   const info = yield* fs
     .stat(absolutePath)
-    .pipe(
-      Effect.catch((error) =>
-        error.reason._tag === "NotFound" ? Effect.void : Effect.fail(error),
-      ),
-    );
+    .pipe(Effect.catchReason("PlatformError", "NotFound", () => Effect.void));
 
   if (info === undefined) return { kind: "missing" };
 

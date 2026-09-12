@@ -218,6 +218,9 @@ vp run check
 The package's own `prepare` script explicitly syncs its Effect source checkout,
 patches Effect TypeScript-Go, and configures Vite+ Git hooks. Those are local
 development operations for Dev Kit itself, not a consumer management model.
+Keep `effect`, `@effect/platform-bun`, and `@effect/platform-node-shared` pinned to
+the same version in runtime dependencies. The shared platform pin also applies to
+fresh CLI installs; package-level overrides do not constrain consumer installs.
 
 The v1 decoder exists only behind `eject`. Repository-setup behavior belongs in
 `skills/dev-kit` as concise agent instructions and progressively disclosed
