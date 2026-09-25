@@ -1,5 +1,11 @@
 # @danieljvdm/dev-kit
 
+## 2.0.3
+
+### Patch Changes
+
+- af81aa2: Add mobile web and Expo animation guidance to the bundled animate skill.
+
 ## 2.0.2
 
 ### Patch Changes
