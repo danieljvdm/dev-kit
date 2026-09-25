@@ -1,6 +1,6 @@
 ---
 name: animate
-description: Implement, review, or improve web UI motion, and identify animation terminology.
+description: Implement, review, or improve UI motion for web and Expo/React Native, and identify animation terminology.
 license: MIT
 ---
 
@@ -10,7 +10,9 @@ Match the user's task. Implement requested changes; keep a review or opportunity
 search read-only unless implementation is also requested. A broader audit or
 written plan is optional, not a prerequisite to fixing one interaction.
 
-Read only the references needed for the work:
+For Expo or React Native animation, read [animate Expo](references/animate-expo.md).
+It covers native motion tools, gestures, accessibility, and device verification.
+For websites and PWAs, read only the web references needed for the work:
 
 - Naming an effect described by the user: [animation vocabulary](references/glossary.md).
 - Adding or fixing motion: [implementation](references/implementation.md).
@@ -21,6 +23,10 @@ Read only the references needed for the work:
   [motion principles](references/principles.md).
 - Gesture tracking, velocity, springs, or interruption:
   [gestures](references/gestures.md).
+- Motion in a mobile website or PWA, especially press feedback, sheets, or
+  carousels: [mobile native](references/mobile-native.md).
+
+The mobile-native reference covers mobile websites and PWAs, not Expo apps.
 
 Use the product's existing tokens and motion tools. Judge animation by its
 purpose, response, accessibility, and observed behavior. Named curves, durations,

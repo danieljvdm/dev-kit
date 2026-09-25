@@ -8,3 +8,9 @@ The animate skill combines improve-animations, review-animations, and
 find-animation-opportunities, plus animation-vocabulary from that revision.
 Relevant direct-manipulation guidance from apple-design and motion decisions
 from emil-design-eng are also consolidated here.
+Mobile-web guidance in references/mobile-native.md is adapted from
+https://github.com/emilkowalski/skills/tree/main/skills/mobile-native
+(accessed 2026-09-25).
+Expo and React Native guidance in references/animate-expo.md is adapted from
+https://github.com/emilkowalski/skills/tree/main/skills/animate-expo
+(accessed 2026-09-25).
