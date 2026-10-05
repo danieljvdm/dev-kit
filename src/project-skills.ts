@@ -621,11 +621,7 @@ export const updateProjectSkills = Effect.fn("updateProjectSkills")(function* (
     yield* fs.rename(installed.path, backup);
     yield* fs
       .rename(staged, installed.path)
-      .pipe(
-        Effect.catch((error) =>
-          fs.rename(backup, installed.path).pipe(Effect.andThen(Effect.fail(error))),
-        ),
-      );
+      .pipe(Effect.tapError(() => fs.rename(backup, installed.path)));
     yield* printStatus("success", `Updated ${installed.name}`);
   }
   if (conflicts > 0) {

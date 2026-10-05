@@ -29,18 +29,23 @@ language service according to the installed Effect guidance. Materialize any
 required patch helper into a repository-owned script so installs never depend on
 Dev Kit. Enable `preferTypedSchemaDecoder` at `warning` severity in the Effect
 language-service diagnostics so already-typed inputs use the typed Schema decoder.
-The current Dev Kit compiler baseline is `@effect/tsgo@0.45.0` with
+The current Dev Kit compiler baseline is `@effect/tsgo@0.48.1` with
 `typescript@7.0.2`.
 
-Set these Effect language-service diagnostics to `"warning"` as well:
+Set `unknownRuleName` to `"error"` and these simplification diagnostics to
+`"warning"` (warnings block the compiler check by default):
 
 ```json
 {
+  "unknownRuleName": "error",
   "catchAllTagDispatchToCatchTag": "warning",
   "catchConditionalRefailToCatchIf": "warning",
+  "catchIfTagToCatchTag": "warning",
+  "catchRefailToTapError": "warning",
   "provideLayerSucceedToProvideService": "warning",
   "allOfMapToForEach": "warning",
   "flatMapConditionalToFilterOrFail": "warning",
+  "flatMapIgnoredParamToAndThen": "warning",
   "optionMatchToFromOption": "warning",
   "timeoutCatchTagToTimeoutOrElse": "warning",
   "runOfExitToRunExit": "warning"
@@ -48,8 +53,15 @@ Set these Effect language-service diagnostics to `"warning"` as well:
 ```
 
 Keep the smaller simplification rules at their default suggestion severity and
-`schemaSync` off. Retain `unsafeEffectTypeAssertion` as a warning. Apply suggested
-rewrites only when they preserve failure, interruption, and resource behavior.
+`schemaSync` off; do not enable the global strict diagnostic preset. Retain
+`unsafeEffectTypeAssertion` as a warning. Apply suggested rewrites only when
+they preserve failure, interruption, and resource behavior.
+
+Keep `unstableApiUsage` and `experimentalApiUsage` at their default warning
+severity. Review reported APIs before adding project-specific exceptions through
+`allowedUnstableApis` or `allowedExperimentalApis`: allow only an intentional
+module/subtree or `package/module#export` API. Keep these lists empty in shared
+defaults so each consuming project explicitly chooses its unstable dependencies.
 
 ## Workspaces
 

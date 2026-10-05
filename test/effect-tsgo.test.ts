@@ -95,6 +95,7 @@ describe("Effect tsgo patch", () => {
     it.effect("exports the recommended diagnostic profile", () =>
       Effect.sync(() => {
         assert.deepEqual(recommendedEffectTsgoPlugin.diagnosticSeverity, {
+          unknownRuleName: "error",
           anyUnknownInErrorContext: "warning",
           instanceOfSchema: "suggestion",
           nestedEffectGenYield: "suggestion",
@@ -103,9 +104,12 @@ describe("Effect tsgo patch", () => {
           preferTypedSchemaDecoder: "warning",
           catchAllTagDispatchToCatchTag: "warning",
           catchConditionalRefailToCatchIf: "warning",
+          catchIfTagToCatchTag: "warning",
+          catchRefailToTapError: "warning",
           provideLayerSucceedToProvideService: "warning",
           allOfMapToForEach: "warning",
           flatMapConditionalToFilterOrFail: "warning",
+          flatMapIgnoredParamToAndThen: "warning",
           optionMatchToFromOption: "warning",
           timeoutCatchTagToTimeoutOrElse: "warning",
           runOfExitToRunExit: "warning",
