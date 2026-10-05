@@ -5,7 +5,7 @@ import { printStatus, withSpinner } from "./cli-ui.ts";
 import { acquireProjectProcessLock } from "./project-process-lock.ts";
 import { isTypeScriptPackageName } from "./typescript-package-name.ts";
 
-export const EFFECT_TSGO_VERSION = "0.45.0";
+export const EFFECT_TSGO_VERSION = "0.48.1";
 export const EFFECT_TSGO_TYPESCRIPT_VERSION = "7.0.2";
 export const EFFECT_TSGO_PLUGIN_NAME = "@effect/language-service";
 
@@ -26,6 +26,7 @@ export type EffectTsgoPluginConfig = {
 export const recommendedEffectTsgoPlugin = {
   name: EFFECT_TSGO_PLUGIN_NAME,
   diagnosticSeverity: {
+    unknownRuleName: "error",
     anyUnknownInErrorContext: "warning",
     instanceOfSchema: "suggestion",
     nestedEffectGenYield: "suggestion",
@@ -34,9 +35,12 @@ export const recommendedEffectTsgoPlugin = {
     preferTypedSchemaDecoder: "warning",
     catchAllTagDispatchToCatchTag: "warning",
     catchConditionalRefailToCatchIf: "warning",
+    catchIfTagToCatchTag: "warning",
+    catchRefailToTapError: "warning",
     provideLayerSucceedToProvideService: "warning",
     allOfMapToForEach: "warning",
     flatMapConditionalToFilterOrFail: "warning",
+    flatMapIgnoredParamToAndThen: "warning",
     optionMatchToFromOption: "warning",
     timeoutCatchTagToTimeoutOrElse: "warning",
     runOfExitToRunExit: "warning",
