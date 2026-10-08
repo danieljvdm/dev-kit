@@ -29,6 +29,14 @@ After a manual merge, preserve the merged content and advance its base with
 `skills update <name> --accept-local`. A future CLI may automate three-way
 merges; current conflicts remain agent-owned rather than being overwritten.
 
+## Renames
+
+A renamed bundled skill keeps its previous selector. `skills add` with the old
+name installs the current skill. `skills status` and `skills diff` follow an
+existing origin receipt to the current skill. `skills update` moves an
+unmodified copy into the current directory and rewrites the receipt.
+`open-pull-request` is now `pull-requests`.
+
 ## Detach
 
 Run `skills detach <name>` to remove only the origin receipt. The skill content

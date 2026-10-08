@@ -13,9 +13,12 @@ Use the existing branch and review workflow. For an already verified change:
 4. Read back base/head, title, and body once with `gh pr view`, then return the
    URL. No GitHub browser inspection or wait for CI is required to open it.
 
-Follow `AGENTS.md` for merge approval and required checks; opening a PR does
-not authorize merging it.
-
 When an existing draft PR is the subject, interpret "open it" or "ready it"
 as making it ready for review unless the user asks to view it. State the intended
 transition before acting; use `gh pr ready` rather than opening a browser.
+
+## Address review feedback
+
+Make the requested change, reread the revised diff, and rerun relevant checks.
+Rewrite the title and body if the scope moved. Keep review replies as
+self-contained as the PR itself.

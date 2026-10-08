@@ -148,6 +148,12 @@ bunx @danieljvdm/dev-kit@latest skills detach cloudflare-workers
 
 Only the receipt is removed. The skill remains ordinary repository content.
 
+`open-pull-request` is now `pull-requests`. The previous selector still resolves.
+`skills add open-pull-request` installs `pull-requests`. `skills status` and
+`skills diff` compare an existing receipt with the current skill, and
+`skills update` moves an unmodified copy to `pull-requests` and rewrites the
+origin receipt.
+
 ## Eject a legacy managed project
 
 Projects from the previous Dev Kit model may contain:

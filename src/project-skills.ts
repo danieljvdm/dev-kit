@@ -16,7 +16,12 @@ import {
   observePath,
   type Digest,
 } from "./path-digest.ts";
-import { isSkillName, SKILL_SELECTOR_PATTERN } from "./skill-selector.ts";
+import {
+  isSkillName,
+  previousBundledSelectors,
+  renamedBundledSelector,
+  SKILL_SELECTOR_PATTERN,
+} from "./skill-selector.ts";
 import { DEV_KIT_VERSION } from "./tool-metadata.ts";
 
 export const SKILL_ORIGIN_FILE = ".dev-kit-origin.json";
@@ -201,6 +206,31 @@ const summary = (description: string, fallback: string): string => {
   return firstSentence.length > 96 ? `${firstSentence.slice(0, 93).trimEnd()}…` : firstSentence;
 };
 
+const catalogSkillBySelector = (
+  catalog: SkillCatalog,
+  selector: string,
+): CatalogSkill | undefined => catalog.skills.find((skill) => skill.selector === selector);
+
+const requestedSkillSelector = (catalog: SkillCatalog, name: string): string => {
+  if (catalogSkillBySelector(catalog, name) !== undefined) return name;
+
+  return renamedBundledSelector(name) ?? name;
+};
+
+const catalogSkillForOrigin = (
+  catalog: SkillCatalog,
+  origin: SkillOrigin,
+): CatalogSkill | undefined => {
+  if (origin.source.type === "bundled") {
+    const renamed = renamedBundledSelector(origin.selector);
+    const skill = renamed === undefined ? undefined : catalogSkillBySelector(catalog, renamed);
+
+    if (skill !== undefined) return skill;
+  }
+
+  return catalogSkillBySelector(catalog, origin.selector);
+};
+
 const selectSkills = (
   catalog: SkillCatalog,
   names: ReadonlyArray<string>,
@@ -213,7 +243,7 @@ const selectSkills = (
     if (family !== undefined) {
       for (const selector of family) selectors.add(selector);
     } else {
-      selectors.add(name);
+      selectors.add(requestedSkillSelector(catalog, name));
     }
   }
   const catalogBySelector = new Map(catalog.skills.map((skill) => [skill.selector, skill]));
@@ -289,6 +319,13 @@ export const addProjectSkills = Effect.fn("addProjectSkills")(function* (
     catch: (error) =>
       ProjectSkillError.make({ message: error instanceof Error ? error.message : String(error) }),
   });
+
+  for (const name of names) {
+    if (catalog.families[name] !== undefined) continue;
+    const resolved = requestedSkillSelector(catalog, name);
+
+    if (resolved !== name) yield* printDetail(`${name} was renamed to ${resolved}`);
+  }
   const duplicateName = skills.find(
     (skill, index) => skills.findIndex((candidate) => candidate.name === skill.name) !== index,
   );
@@ -372,16 +409,28 @@ export const listProjectSkills = Effect.fn("listProjectSkills")(function* (
   const paths = yield* resolveProjectPaths(options);
   const catalog = yield* loadSkillCatalog(yield* packageRoot(), paths.projectDir);
   const installed = yield* inspectInstalledSkills(paths.target);
-  const installedBySelector = new Map(
-    installed.flatMap((skill) => (skill.origin ? [[skill.origin.selector, skill] as const] : [])),
-  );
+  const installedBySelector = new Map<string, InstalledSkill>();
+
+  for (const skill of installed) {
+    if (skill.origin === undefined) continue;
+    installedBySelector.set(skill.origin.selector, skill);
+    if (skill.origin.source.type !== "bundled") continue;
+    const renamed = renamedBundledSelector(skill.origin.selector);
+
+    if (renamed !== undefined) installedBySelector.set(renamed, skill);
+  }
   const query = options.query?.toLowerCase();
-  const visible = catalog.skills.filter(
-    (skill) =>
+  const visible = catalog.skills.filter((skill) => {
+    const previous = previousBundledSelectors(skill.selector).join(" ");
+
+    return (
       (options.all || installedBySelector.has(skill.selector)) &&
       (!query ||
-        `${skill.selector} ${skill.description} ${skill.source}`.toLowerCase().includes(query)),
-  );
+        `${skill.selector} ${previous} ${skill.description} ${skill.source}`
+          .toLowerCase()
+          .includes(query))
+    );
+  });
 
   for (const skill of visible) {
     const marker = installedBySelector.has(skill.selector) ? "✓" : " ";
@@ -419,12 +468,13 @@ export const showProjectSkill = Effect.fn("showProjectSkill")(function* (
 ) {
   const paths = yield* resolveProjectPaths(options);
   const catalog = yield* loadSkillCatalog(yield* packageRoot(), paths.projectDir);
-  const skill = catalog.skills.find((candidate) => candidate.selector === selector);
+  const skill = catalogSkillBySelector(catalog, requestedSkillSelector(catalog, selector));
 
   if (skill === undefined) {
     return yield* ProjectSkillError.make({ message: `unknown skill: ${selector}` });
   }
   yield* printLine(skill.selector);
+  if (selector !== skill.selector) yield* printLine(`Renamed from: ${selector}`);
   if (skill.description) yield* printLine(displayValue(skill.description));
   yield* printLine(`Source: ${skill.bundled ? "Dev Kit" : skill.source}`);
   if (skill.package) yield* printLine(`Package: ${skill.package.name}@${skill.package.version}`);
@@ -484,9 +534,8 @@ export const statusProjectSkills = Effect.fn("statusProjectSkills")(function* (
     return;
   }
   const catalog = yield* loadSkillCatalog(yield* packageRoot(), paths.projectDir);
-  const catalogBySelector = new Map(catalog.skills.map((skill) => [skill.selector, skill]));
   const available = tracked.flatMap((installed) => {
-    const skill = catalogBySelector.get(installed.origin.selector);
+    const skill = catalogSkillForOrigin(catalog, installed.origin);
 
     return skill === undefined ? [] : [{ installed, skill }];
   });
@@ -497,7 +546,7 @@ export const statusProjectSkills = Effect.fn("statusProjectSkills")(function* (
   );
 
   for (const trackedSkill of tracked) {
-    const catalogSkill = catalogBySelector.get(trackedSkill.origin.selector);
+    const catalogSkill = catalogSkillForOrigin(catalog, trackedSkill.origin);
 
     if (catalogSkill === undefined) {
       yield* printStatus("error", trackedSkill.name, "upstream unavailable");
@@ -517,8 +566,31 @@ export const statusProjectSkills = Effect.fn("statusProjectSkills")(function* (
       : status.upstreamChanged
         ? "update available"
         : "current";
+    const renamed =
+      trackedSkill.origin.selector === catalogSkill.selector
+        ? ""
+        : `; renamed to ${catalogSkill.name}`;
 
-    yield* printStatus(detail === "current" ? "success" : "info", trackedSkill.name, detail);
+    yield* printStatus(
+      detail === "current" && renamed === "" ? "success" : "info",
+      trackedSkill.name,
+      `${detail}${renamed}`,
+    );
+  }
+});
+
+const assertSkillRenameDestination = Effect.fn("assertSkillRenameDestination")(function* (
+  target: string,
+  from: string,
+  to: string,
+) {
+  if (from === to) return;
+  const path = yield* Path.Path;
+
+  if ((yield* observePath(path.join(target, to))).kind !== "missing") {
+    return yield* ProjectSkillError.make({
+      message: `cannot rename ${from} to ${to}: destination already exists`,
+    });
   }
 });
 
@@ -541,14 +613,13 @@ export const updateProjectSkills = Effect.fn("updateProjectSkills")(function* (
     return;
   }
   const catalog = yield* loadSkillCatalog(yield* packageRoot(), paths.projectDir);
-  const catalogBySelector = new Map(catalog.skills.map((skill) => [skill.selector, skill]));
   const available: Array<{
     readonly installed: (typeof tracked)[number];
     readonly skill: CatalogSkill;
   }> = [];
 
   for (const installed of tracked) {
-    const skill = catalogBySelector.get(installed.origin.selector);
+    const skill = catalogSkillForOrigin(catalog, installed.origin);
 
     if (skill === undefined) {
       return yield* ProjectSkillError.make({
@@ -572,7 +643,7 @@ export const updateProjectSkills = Effect.fn("updateProjectSkills")(function* (
     }
     const status = yield* inspectTrackedSkill(installed, source);
 
-    if (!status.upstreamChanged) {
+    if (!status.upstreamChanged && installed.name === skill.name) {
       yield* printStatus(
         "success",
         installed.name,
@@ -580,38 +651,79 @@ export const updateProjectSkills = Effect.fn("updateProjectSkills")(function* (
       );
       continue;
     }
+    if (!status.upstreamChanged) {
+      if (options.dryRun) {
+        yield* printStatus("plan", `Rename ${installed.name}`, skill.name);
+        continue;
+      }
+      yield* assertSkillRenameDestination(paths.target, installed.name, skill.name);
+      const destination = path.join(paths.target, skill.name);
+
+      yield* fs.rename(installed.path, destination);
+      yield* fs.writeFileString(
+        path.join(destination, SKILL_ORIGIN_FILE),
+        renderSkillOrigin(sourceOrigin(skill, source, status.upstreamDigest)),
+      );
+      yield* printStatus("success", `Renamed ${installed.name}`, skill.name);
+      continue;
+    }
     if (status.locallyModified) {
       if (options.acceptLocal) {
         if (options.dryRun) {
-          yield* printStatus("plan", `Keep local ${installed.name}`, "accept latest upstream base");
+          yield* printStatus(
+            "plan",
+            `Keep local ${installed.name}`,
+            installed.name === skill.name
+              ? "accept latest upstream base"
+              : `rename to ${skill.name} and accept latest upstream base`,
+          );
         } else {
+          yield* assertSkillRenameDestination(paths.target, installed.name, skill.name);
+          const destination =
+            installed.name === skill.name ? installed.path : path.join(paths.target, skill.name);
+
+          if (destination !== installed.path) yield* fs.rename(installed.path, destination);
           yield* fs.writeFileString(
-            path.join(installed.path, SKILL_ORIGIN_FILE),
+            path.join(destination, SKILL_ORIGIN_FILE),
             renderSkillOrigin(sourceOrigin(skill, source, status.upstreamDigest)),
           );
           yield* printStatus(
             "success",
-            `Kept local ${installed.name}`,
-            "accepted latest upstream base",
+            `Kept local ${skill.name}`,
+            installed.name === skill.name
+              ? "accepted latest upstream base"
+              : `renamed from ${installed.name}`,
           );
         }
         continue;
       }
       conflicts += 1;
-      yield* printStatus("error", installed.name, "local and upstream changes");
+      yield* printStatus(
+        "error",
+        installed.name,
+        installed.origin.selector === skill.selector
+          ? "local and upstream changes"
+          : `local and upstream changes; renamed to ${skill.name}`,
+      );
       yield* printDetail(`Inspect with: dev-kit skills diff ${installed.name}`);
       continue;
     }
+    yield* assertSkillRenameDestination(paths.target, installed.name, skill.name);
     if (options.dryRun) {
-      yield* printStatus("plan", `Update ${installed.name}`);
+      yield* printStatus(
+        "plan",
+        `Update ${installed.name}`,
+        installed.name === skill.name ? undefined : `rename to ${skill.name}`,
+      );
       continue;
     }
     const temp = yield* fs.makeTempDirectoryScoped({
       directory: paths.projectDir,
       prefix: ".dev-kit-skill-update-",
     });
-    const staged = path.join(temp, installed.name);
+    const staged = path.join(temp, skill.name);
     const backup = path.join(temp, `${installed.name}.previous`);
+    const destination = path.join(paths.target, skill.name);
 
     yield* fs.copy(source.path, staged, { overwrite: true });
     yield* fs.writeFileString(
@@ -620,9 +732,13 @@ export const updateProjectSkills = Effect.fn("updateProjectSkills")(function* (
     );
     yield* fs.rename(installed.path, backup);
     yield* fs
-      .rename(staged, installed.path)
+      .rename(staged, destination)
       .pipe(Effect.tapError(() => fs.rename(backup, installed.path)));
-    yield* printStatus("success", `Updated ${installed.name}`);
+    yield* printStatus(
+      "success",
+      `Updated ${skill.name}`,
+      installed.name === skill.name ? undefined : `renamed from ${installed.name}`,
+    );
   }
   if (conflicts > 0) {
     return yield* ProjectSkillError.make({
@@ -644,9 +760,7 @@ export const diffProjectSkill = Effect.fn("diffProjectSkill")(function* (
     return yield* ProjectSkillError.make({ message: `tracked skill not found: ${name}` });
   }
   const catalog = yield* loadSkillCatalog(yield* packageRoot(), paths.projectDir);
-  const skill = catalog.skills.find(
-    (candidate) => candidate.selector === installed.origin.selector,
-  );
+  const skill = catalogSkillForOrigin(catalog, installed.origin);
 
   if (skill === undefined) {
     return yield* ProjectSkillError.make({

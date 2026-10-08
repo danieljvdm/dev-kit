@@ -28,6 +28,21 @@ export const SKILL_SELECTOR_PATTERN =
 
 export const isSkillName = (value: string): boolean => SKILL_NAME_PATTERN.test(value);
 
+/** Old bundled selector → current selector. Origin receipts keep the old name. */
+const bundledSkillRenames: ReadonlyMap<string, string> = new Map([
+  ["open-pull-request", "pull-requests"],
+]);
+
+/** Previous selector for a bundled skill that moved, when one exists. */
+export const renamedBundledSelector = (selector: string): string | undefined =>
+  bundledSkillRenames.get(selector);
+
+/** Selectors that now resolve to this bundled skill. */
+export const previousBundledSelectors = (selector: string): ReadonlyArray<string> =>
+  [...bundledSkillRenames].flatMap(([previous, current]) =>
+    current === selector ? [previous] : [],
+  );
+
 /**
  * The package-qualified directory name for an installed package skill. The npm
  * package name keeps its identity in the flattened output: `@` is dropped,
