@@ -1,5 +1,15 @@
 # @danieljvdm/dev-kit
 
+## 2.1.0
+
+### Minor Changes
+
+- a335da9: Rename the bundled pull request skill from `open-pull-request` to `pull-requests`. Previous origin receipts still resolve: `skills add` accepts the old name, and `skills status`, `diff`, and `update` follow it to the current skill.
+
+### Patch Changes
+
+- d3adef7: Upgrade the Effect TypeScript-Go baseline to 0.48.1 while retaining TypeScript 7.0.2 compatibility. Enable unknown-rule errors and the new error-handling and sequencing warnings in the recommended profile, with project-specific guidance for stability exceptions.
+
 ## 2.0.3
 
 ### Patch Changes
