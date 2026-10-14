@@ -1,5 +1,11 @@
 # @danieljvdm/dev-kit
 
+## 2.1.1
+
+### Patch Changes
+
+- 477d91a: Keep shared skills source-aligned and use explicit personal fallbacks without duplicate discovery. Clarify PR readiness, proportionate diagrams, and recovery from partial attachment uploads.
+
 ## 2.1.0
 
 ### Minor Changes
