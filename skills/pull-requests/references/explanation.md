@@ -16,14 +16,17 @@ The `show-me` views fit PR bodies well. Shape each one to the change:
 GitHub renders Mermaid and fenced code, not HTML, so skip `show-me`'s HTML option
 in PRs.
 
-- For changes to component ownership, boundaries, or data flow, include a
-  focused Mermaid architecture chart. Name the actual components, label the
-  interactions, and make the changed responsibility or path clear without
-  mapping the whole system.
-- For new or changed APIs, show a concrete caller example: an HTTP request and
-  response, or a typed function/SDK call and its result. Include the inputs,
-  outputs, and error behavior relevant to the change. Use a small before/after
-  diff when callers must migrate; show the complete example when the API is new.
+- For meaningful changes to component ownership, boundaries, or data flow,
+  include a focused Mermaid chart when it explains the change more clearly than
+  short prose. Routine fixes and local branching need no diagram. Name the actual
+  components, label the interactions, and make the changed responsibility or path
+  clear without mapping the whole system.
+- For new or changed APIs, show a concrete caller example when it clarifies a
+  changed contract or subtle behavior: an HTTP request and response, or a typed
+  function/SDK call and its result. An obvious edit needs no sample. Include the
+  inputs, outputs, and error behavior relevant to the change. Use a small
+  before/after diff when callers must migrate; show the complete example when
+  the API is new.
 
 Match diagrams and examples to the final implementation, use safe fixture data,
 and distinguish illustrative or expected output from output actually observed

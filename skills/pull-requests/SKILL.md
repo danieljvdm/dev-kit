@@ -8,7 +8,9 @@ description: Prepare, open, review, update, or land pull requests in any reposit
 Make the change and its explanation useful to a reviewer who has not seen the
 conversation. Follow the target repository's contributor instructions,
 `AGENTS.md`, PR template, and current maintainer feedback. Scale the review and
-description to the change.
+description to the change. Repository guidance owns project commands, gates,
+and publication constraints; keep those rules there instead of forking this
+shared workflow.
 
 ## Review the change
 
