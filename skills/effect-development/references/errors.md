@@ -10,8 +10,8 @@ defects or interruption.
 
 ## Translate the whole Cause
 
-At a composed boundary, first-error recovery can lose sibling failures.
-Keep simple leaf mappings when their semantics suffice.
+Use this specialized pattern when a composed boundary must retain every
+failure reason. Keep ordinary `mapError` when its semantics suffice.
 
 ```ts
 // Avoid when mapError selects only the first typed failure.
@@ -21,8 +21,10 @@ work.pipe(Effect.mapError(toDomainError));
 work.pipe(Effect.catchCause((cause) => Effect.failCause(Cause.map(cause, toDomainError))));
 ```
 
-Keep `toDomainError` pure and non-throwing. Check `orDie` and tag-based recovery
-for the same first-error behavior; do not blanket-rewrite every catch.
+Effect's [`wrapEncoding`](https://github.com/Effect-TS/effect/blob/bc07bd4e86ac2b7336844040b2b11e8781b2dee3/packages/effect/src/internal/schema/interpreter.ts#L70-L81)
+uses this composition with `failCauseSync`. Keep `toDomainError` pure and
+non-throwing. Check installed `orDie` and tag-based recovery for first-error
+behavior; do not blanket-rewrite every catch.
 
 ## Recover only an entirely expected failure
 
