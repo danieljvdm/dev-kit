@@ -1,5 +1,11 @@
 # @danieljvdm/dev-kit
 
+## 2.1.2
+
+### Patch Changes
+
+- 18255e2: Add Effect error-handling guidance for preserving causes, deliberate recovery, safe reporting, and resource cleanup.
+
 ## 2.1.1
 
 ### Patch Changes
