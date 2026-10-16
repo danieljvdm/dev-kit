@@ -194,7 +194,7 @@
       "id": "dan-skills",
       "repository": "https://github.com/danieljvdm/skills.git",
       "ref": "main",
-      "resolved": "4ecfff729006a535c2fda3161eb8a2829ce77003",
+      "resolved": "29601d4fe4abd55334521959698e916ca1ed4214",
       "skillsPath": "skills",
       "include": ["*"],
       "skills": [
@@ -239,20 +239,20 @@
         "alchemy": "sha256:29966a3f6e2532aec4b514a9a5e455e1561a4cf8b3e804ffc1a11b2650c68464",
         "animate": "sha256:17e9dfc7e3f76bc418d73ba8d127daccea116167ba7b954611d8d60fca53cefc",
         "cloudflare": "sha256:a3a729c106dd7dd4bd1b811d4e6557055385ef7b9de9028edde90dfb90f26142",
-        "dan-mode": "sha256:d38313b16cf0edb6a1b6e64242ee05fc00baee49f4ea35949f44e7a718a60754",
+        "dan-mode": "sha256:f33527034499cd14854fe81c95f1c043e24a5efa112f75fe66ccd6178eb77d64",
         "debugging": "sha256:dca5b4f72d3f9d7702b3250e57215d591a5bdf4c3f5e3f10dfcee73522fc5428",
-        "design-ui": "sha256:575a914dca27af67698a84fe26e0e76a1b83dcf6bcdfa694bc6a19ffec78c80c",
-        "effect": "sha256:e1f560f7b37029fd1b24c06840eadfe81c3bfd7727c0e6b102969a16d33baf97",
-        "feedback-loops": "sha256:a78cdf86bb851afd6b757106cea02e033b762bb39e226d8a5979516d62108752",
-        "library-first": "sha256:b97b9284cdbc4c142fa9c395b833ded47a06ba4dd651920d84f86d7deeb4c5e1",
+        "design-ui": "sha256:cccedfa38a9ad20f40f39041d54015552e225eac02d07359116f1bc62810676c",
+        "effect": "sha256:4f500b03af178e211c415ee79e5ebfec3cc8808c0a7bc329adc79e66650ca555",
+        "feedback-loops": "sha256:4be554dd34bcca8a1f8d1a286a40fbe2d2c4dfc7d24a47f47f6b25053f8f48d1",
+        "library-first": "sha256:cfee219c8e78077b551ba231b36644799abbc1e54c60ff59f115e6a166f91d51",
         "measure-performance": "sha256:6c8d9f5ddc3cce14ed797ce58bf0abd8c4af8d65043daadaf0a154575b45f981",
-        "o11y": "sha256:4bd3e686c4b69cf640fee6122483ac7603e5012bb6dc952b165b8d45a20b26b3",
+        "o11y": "sha256:1f1fe250cccc71692c71b23b2f68dd4fb3d370b0057fe364f67db1f863dc01b5",
         "orchestrate": "sha256:d510791763e51b94849e9cbbb6a97daba49703fa9e9e292311772f5b1dc9af12",
         "project-setup": "sha256:0d73f04b9b23973d8958d9ca566a1cfb64232578d0b4d86cabe984f137a52ef6",
-        "pull-requests": "sha256:b8311442fef3b5b5814ff71bdcaee1ccfeae9ab3cd9f1850156446e3743bca14",
+        "pull-requests": "sha256:ef2e5fb8a8fb13694154c1fb608be2678dc2bce0b0200ea7f60af77b8d643695",
         "show-me": "sha256:e195e0f0c0dcff5edf07c3863036cd91eae7006e22d8c66d149934e710b4ee63",
-        "simplify": "sha256:b8fd193c0c3b5c2726b97b4df19d9909b7a95f19c19df59ac6c52382ad965e9f",
-        "testing": "sha256:586923882e049e83bd61cf6d31bf5455c718c329dc77b34b35843102234bebd8"
+        "simplify": "sha256:6b961c89cea6f6aa26478b260811aed1b7ca1eb81fdc5a8703c34b3878e3605c",
+        "testing": "sha256:1ca7a7f772bb588267478464306348ad6a0a4d5cc1f22be86153178f150a4dff"
       },
       "licensePath": "LICENSE"
     }
