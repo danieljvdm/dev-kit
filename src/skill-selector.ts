@@ -31,6 +31,8 @@ export const isSkillName = (value: string): boolean => SKILL_NAME_PATTERN.test(v
 /** Old bundled selector → current selector. Origin receipts keep the old name. */
 const bundledSkillRenames: ReadonlyMap<string, string> = new Map([
   ["open-pull-request", "pull-requests"],
+  ["effect-development", "effect"],
+  ["cloudflare-workers", "cloudflare"],
 ]);
 
 /** Previous selector for a bundled skill that moved, when one exists. */

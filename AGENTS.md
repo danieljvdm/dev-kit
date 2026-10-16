@@ -1,10 +1,6 @@
 # Dev Kit
 
-This package is a transient repository-setup toolbox and curated skill catalog.
-Its primary setup behavior lives in `skills/dev-kit/SKILL.md` and its disclosed
-references. Generated repository files are always repo-owned; new features must
-not introduce a consumer manifest, lock, ownership state, lifecycle manager, or
-runtime dependency on Dev Kit.
+This package is a transient repository-setup toolbox and curated skill catalog. Shared engineering guidance lives in `danieljvdm/skills` and is distributed through the pinned `dan-skills` catalog source. The local `skills/dev-kit` entrypoint owns toolbox and migration guidance and routes setup to the shared `project-setup` skill. Generated repository files are always repo-owned; new features must not introduce a consumer manifest, lock, ownership state, lifecycle manager, or runtime dependency on Dev Kit.
 
 Before changing repository setup or skill-sync behavior, read
 `skills/dev-kit/SKILL.md` completely and follow its applicable references.

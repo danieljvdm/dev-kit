@@ -389,14 +389,16 @@ export const setupProject = Effect.fn("setupProject")(function* (
 ) {
   const paths = yield* resolveProjectPaths(options);
   const installed = yield* inspectInstalledSkills(paths.target);
-  const existing = installed.find((skill) => skill.name === "dev-kit");
+  const missing = ["dev-kit", "project-setup"].filter(
+    (name) => !installed.some((skill) => skill.name === name && skill.origin?.selector === name),
+  );
 
-  if (existing?.origin?.selector === "dev-kit") {
-    yield* printStatus("success", "Dev Kit setup skill already present", paths.targetRelative);
+  if (missing.length === 0) {
+    yield* printStatus("success", "Dev Kit setup skills already present", paths.targetRelative);
 
     return;
   }
-  yield* addProjectSkills(["dev-kit"], options);
+  yield* addProjectSkills(missing, options);
 
   if (!options.dryRun) {
     yield* printDetail("Ask your agent: Use $dev-kit to set up this repository.");

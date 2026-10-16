@@ -13,6 +13,8 @@ it. Make reusable workflow improvements in the source skill, then refresh its
 installed copies. Repository copies keep fresh checkouts and cloud agents
 self-contained; do not replace them with links into a developer's home directory.
 
+The personal engineering stack is authored in [danieljvdm/skills](https://github.com/danieljvdm/skills) and distributed through the pinned `dan-skills` source. Make shared changes there, then refresh the approved catalog and installed copies. The Dev Kit repository owns its toolbox instructions and executable mechanics.
+
 Give genuinely different repository workflows distinct skill names. Codex can
 expose both repository and user skills with the same name; do not rely on scope
 to merge or override their instructions. Inspect the host's loaded skill catalog
@@ -59,7 +61,7 @@ A renamed bundled skill keeps its previous selector. `skills add` with the old
 name installs the current skill. `skills status` and `skills diff` follow an
 existing origin receipt to the current skill. `skills update` moves an
 unmodified copy into the current directory and rewrites the receipt.
-`open-pull-request` is now `pull-requests`.
+`open-pull-request` is now `pull-requests`, `effect-development` is now `effect`, and `cloudflare-workers` is now `cloudflare`. Existing bundled receipts can move to the shared Git source through the same update flow.
 
 ## Detach
 

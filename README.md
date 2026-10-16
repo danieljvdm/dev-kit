@@ -3,6 +3,8 @@
 Agent-led TypeScript repository setup and a curated catalog of portable coding
 skills.
 
+Shared engineering skills are authored in [danieljvdm/skills](https://github.com/danieljvdm/skills). Dev Kit distributes approved commits through its `dan-skills` catalog source. Make reusable instruction changes there; this repository owns the executable toolbox, catalog, provenance, and migration mechanics.
+
 Dev Kit is a transient toolbox. It copies guidance into a repository, helps an
 agent build the requested setup against the repository's real constraints, and
 then gets out of the way. Generated source, configuration, workflows, scripts,
@@ -22,8 +24,7 @@ From a new or existing repository, copy the Dev Kit setup skill:
 bunx @danieljvdm/dev-kit@latest setup
 ```
 
-This writes `.agents/skills/dev-kit` and a small origin receipt inside that skill.
-It does not edit `package.json` or create project-wide Dev Kit metadata.
+This writes `.agents/skills/dev-kit` and the shared `.agents/skills/project-setup`, with a small origin receipt inside each skill. It does not edit `package.json` or create project-wide Dev Kit metadata.
 
 Then ask the coding agent for the outcome:
 
@@ -54,22 +55,22 @@ shape of the repository and does not silently rewrite configuration after setup.
 
 ## Commands
 
-| Command                                        | Purpose                                                            |
-| ---------------------------------------------- | ------------------------------------------------------------------ |
-| `dev-kit setup`                                | Copy the agent-led Dev Kit skill into `.agents/skills`.            |
-| `dev-kit skills list --all`                    | Browse built-in, approved Git, and installed-package skills.       |
-| `dev-kit skills search <words...>`             | Search skill names, descriptions, and sources.                     |
-| `dev-kit skills info <skill>`                  | Show one skill's description and provenance.                       |
-| `dev-kit skills add <skill...>`                | Copy repo-owned skills without a manifest.                         |
-| `dev-kit skills status`                        | Compare tracked copies with their approved upstream content.       |
-| `dev-kit skills update [skill...]`             | Fast-forward tracked skills that have no local edits.              |
-| `dev-kit skills diff <skill>`                  | Diff a repository copy against the latest approved upstream.       |
-| `dev-kit skills update <skill> --accept-local` | Keep an agent-merged copy and advance its upstream base.           |
-| `dev-kit skills detach <skill...>`             | Remove origin receipts while preserving local content.             |
-| `dev-kit eject [--dry-run]`                    | Release a legacy managed project into repo ownership.              |
-| `dev-kit effect sync`                          | Explicitly sync an Effect source checkout to an installed version. |
-| `dev-kit tsgo patch`                           | Explicitly patch the installed Effect TypeScript-Go compiler.      |
-| `dev-kit cache prune`                          | Remove stale machine-global catalog checkouts.                     |
+| Command                                        | Purpose                                                                 |
+| ---------------------------------------------- | ----------------------------------------------------------------------- |
+| `dev-kit setup`                                | Copy the toolbox and shared project-setup skills into `.agents/skills`. |
+| `dev-kit skills list --all`                    | Browse built-in, approved Git, and installed-package skills.            |
+| `dev-kit skills search <words...>`             | Search skill names, descriptions, and sources.                          |
+| `dev-kit skills info <skill>`                  | Show one skill's description and provenance.                            |
+| `dev-kit skills add <skill...>`                | Copy repo-owned skills without a manifest.                              |
+| `dev-kit skills status`                        | Compare tracked copies with their approved upstream content.            |
+| `dev-kit skills update [skill...]`             | Fast-forward tracked skills that have no local edits.                   |
+| `dev-kit skills diff <skill>`                  | Diff a repository copy against the latest approved upstream.            |
+| `dev-kit skills update <skill> --accept-local` | Keep an agent-merged copy and advance its upstream base.                |
+| `dev-kit skills detach <skill...>`             | Remove origin receipts while preserving local content.                  |
+| `dev-kit eject [--dry-run]`                    | Release a legacy managed project into repo ownership.                   |
+| `dev-kit effect sync`                          | Explicitly sync an Effect source checkout to an installed version.      |
+| `dev-kit tsgo patch`                           | Explicitly patch the installed Effect TypeScript-Go compiler.           |
+| `dev-kit cache prune`                          | Remove stale machine-global catalog checkouts.                          |
 
 Commands that write project skills accept `--project-dir`, `--target`, and
 `--dry-run`. The default target is `.agents/skills`.
@@ -148,11 +149,9 @@ bunx @danieljvdm/dev-kit@latest skills detach cloudflare-workers
 
 Only the receipt is removed. The skill remains ordinary repository content.
 
-`open-pull-request` is now `pull-requests`. The previous selector still resolves.
-`skills add open-pull-request` installs `pull-requests`. `skills status` and
-`skills diff` compare an existing receipt with the current skill, and
-`skills update` moves an unmodified copy to `pull-requests` and rewrites the
-origin receipt.
+The previous selectors still resolve: `open-pull-request` → `pull-requests`, `effect-development` → `effect`, and `cloudflare-workers` → `cloudflare`. `skills add` uses the current name. `skills status` and `skills diff` follow existing bundled receipts, and `skills update` moves an unmodified copy to the current directory and rewrites its receipt with the approved Git source. Local edits remain protected.
+
+The `cloudflare` selector now uses the shared engineering stack's runtime and CLI guidance. The `cloudflare-skills` source continues to provide its other specialist skills. To install the entire personal engineering stack explicitly, use `dev-kit skills add dan-skills`; otherwise select only the needed skills. The first use fetches the pinned commit, and subsequent uses share the existing machine-global cache.
 
 ## Eject a legacy managed project
 
@@ -228,8 +227,4 @@ Keep `effect`, `@effect/platform-bun`, and `@effect/platform-node-shared` pinned
 the same version in runtime dependencies. The shared platform pin also applies to
 fresh CLI installs; package-level overrides do not constrain consumer installs.
 
-The v1 decoder exists only behind `eject`. Repository-setup behavior belongs in
-`skills/dev-kit` as concise agent instructions and progressively disclosed
-references. Deterministic CLI code is reserved for catalog, provenance,
-migration, validation, and other mechanics where a free-form agent edit would
-be unsafe.
+The v1 decoder exists only behind `eject`. Repository-setup behavior belongs in the shared `project-setup` skill; `skills/dev-kit` keeps the toolbox-specific entrypoint and migration references. Deterministic CLI code is reserved for catalog, provenance, migration, validation, and other mechanics where a free-form agent edit would be unsafe.
