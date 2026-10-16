@@ -856,6 +856,11 @@ export const refreshSkillCatalog = Effect.fn("refreshSkillCatalog")(function* (
     }
     sourceIds.add(source.id);
   }
+  for (const id of options.updateSourceIds ?? []) {
+    if (!sourceIds.has(id)) {
+      return yield* InvalidSourceError.make({ source: id, reason: "source is not in the catalog" });
+    }
+  }
   if (options.locked) {
     if (!currentLock) {
       return yield* SourceManifestError.make({

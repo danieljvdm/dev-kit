@@ -153,6 +153,8 @@ The previous selectors still resolve: `open-pull-request` → `pull-requests`, `
 
 The `cloudflare` selector now uses the shared engineering stack's runtime and CLI guidance. The `cloudflare-skills` source continues to provide its other specialist skills. `show-me` comes from the same shared stack, adapted from HumanLayer with attribution. To install the entire personal engineering stack explicitly, use `dev-kit skills add dan-skills`; otherwise select only the needed skills. The first use fetches the pinned commit, and subsequent uses share the existing machine-global cache.
 
+The shared source's GitHub workflow opens or updates a catalog PR when its skills change. It uses `dev-kit catalog refresh --source dan-skills` to advance that source while retaining the other sources' pins, and includes a patch changeset for the normal release process. Repeat `--source` to refresh several selected sources; omit it to refresh the whole catalog. Personal dotfiles can update directly from the shared source with `skills-update` without waiting for a package release.
+
 ## Eject a legacy managed project
 
 Projects from the previous Dev Kit model may contain:
