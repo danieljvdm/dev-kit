@@ -1,5 +1,16 @@
 # @danieljvdm/dev-kit
 
+## 2.2.0
+
+### Minor Changes
+
+- b290bb0: Distribute the shared engineering stack from pinned commits of `danieljvdm/skills`, preserving previous skill selectors and local edits. Install the shared project-setup skill alongside the Dev Kit toolbox entrypoint, and support `catalog refresh --source` for targeted catalog updates.
+
+### Patch Changes
+
+- 7c028b4: Install relevant repository skills with their linked support, and use exact repository paths for required workflows. Preserve intentional local changes when refreshing self-contained copies from the shared source.
+- 235b1b1: Refresh the shared engineering skills to the latest approved source.
+
 ## 2.1.2
 
 ### Patch Changes
