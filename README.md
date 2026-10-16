@@ -90,12 +90,15 @@ Search the catalog before copying:
 
 ```bash
 bunx @danieljvdm/dev-kit@latest skills search cloudflare
-bunx @danieljvdm/dev-kit@latest skills info cloudflare-workers
-bunx @danieljvdm/dev-kit@latest skills add cloudflare-workers
+bunx @danieljvdm/dev-kit@latest skills info cloudflare
+bunx @danieljvdm/dev-kit@latest skills add cloudflare
 ```
 
-Source families select every approved skill from one source and are intentionally
-broad. Prefer individual skills unless every family member applies.
+Install only the skills relevant to the repository, such as `effect`, `cloudflare`, or `pull-requests`, and the linked support needed by those workflows. Source families select every approved skill from one source and are intentionally broad. Prefer individual skills unless every family member applies; do not install the whole personal stack by default.
+
+Each selected skill directory is copied as-is. Follow its relative links through references, scripts, assets, and required companion skills, installing the needed support until those paths resolve within the checkout. Companion skills are not installed automatically. Keep repository copies self-contained for fresh checkouts and cloud agents.
+
+Global skills may legitimately share names with repository skills. Name exact repository paths in required workflows, for example `Read .agents/skills/pull-requests/SKILL.md before opening a pull request.` Do not assume a host deduplicates same-named skills or gives one scope precedence.
 
 Package skills use the exact `<package>#<skill>` selector:
 
@@ -111,7 +114,7 @@ downloads a missing package or executes package-provided discovery code.
 Each copied skill contains `.dev-kit-origin.json`:
 
 ```text
-.agents/skills/cloudflare-workers/
+.agents/skills/cloudflare/
 ├── SKILL.md
 ├── references/
 └── .dev-kit-origin.json
@@ -131,27 +134,27 @@ bunx @danieljvdm/dev-kit@latest skills update
 When both the repository and upstream changed, Dev Kit preserves the local copy:
 
 ```bash
-bunx @danieljvdm/dev-kit@latest skills diff cloudflare-workers
+bunx @danieljvdm/dev-kit@latest skills diff cloudflare
 ```
 
 Ask the agent to merge applicable upstream intent. After reviewing the merged
 skill, advance its recorded base without overwriting it:
 
 ```bash
-bunx @danieljvdm/dev-kit@latest skills update cloudflare-workers --accept-local
+bunx @danieljvdm/dev-kit@latest skills update cloudflare --accept-local
 ```
 
 To sever the upstream relationship entirely:
 
 ```bash
-bunx @danieljvdm/dev-kit@latest skills detach cloudflare-workers
+bunx @danieljvdm/dev-kit@latest skills detach cloudflare
 ```
 
 Only the receipt is removed. The skill remains ordinary repository content.
 
 The previous selectors still resolve: `open-pull-request` → `pull-requests`, `effect-development` → `effect`, and `cloudflare-workers` → `cloudflare`. `skills add` uses the current name. `skills status` and `skills diff` follow existing bundled receipts, and `skills update` moves an unmodified copy to the current directory and rewrites its receipt with the approved Git source. Local edits remain protected.
 
-The `cloudflare` selector now uses the shared engineering stack's runtime and CLI guidance. The `cloudflare-skills` source continues to provide its other specialist skills. `show-me` comes from the same shared stack, adapted from HumanLayer with attribution. To install the entire personal engineering stack explicitly, use `dev-kit skills add dan-skills`; otherwise select only the needed skills. The first use fetches the pinned commit, and subsequent uses share the existing machine-global cache.
+The `cloudflare` selector now uses the shared engineering stack's runtime and CLI guidance. The `cloudflare-skills` source continues to provide its other specialist skills. `show-me` comes from the same shared stack, adapted from HumanLayer with attribution. The first use fetches the pinned commit, and subsequent uses share the existing machine-global cache. Preserve intentional local deviations when refreshing copies and recheck their relative links after each update.
 
 The shared source's GitHub workflow opens or updates a catalog PR when its skills change. It uses `dev-kit catalog refresh --source dan-skills` to advance that source while retaining the other sources' pins, and includes a patch changeset for the normal release process. Repeat `--source` to refresh several selected sources; omit it to refresh the whole catalog. Personal dotfiles can update directly from the shared source with `skills-update` without waiting for a package release.
 
