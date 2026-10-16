@@ -194,7 +194,7 @@
       "id": "dan-skills",
       "repository": "https://github.com/danieljvdm/skills.git",
       "ref": "main",
-      "resolved": "ed3551c9f454ea19efa87440aa342221fe6e6d70",
+      "resolved": "4ecfff729006a535c2fda3161eb8a2829ce77003",
       "skillsPath": "skills",
       "include": ["*"],
       "skills": [
