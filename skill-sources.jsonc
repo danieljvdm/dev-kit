@@ -72,14 +72,6 @@
       "licensePath": "LICENSE",
     },
     {
-      "id": "humanlayer-skills",
-      "repository": "https://github.com/humanlayer/skills.git",
-      "ref": "main",
-      "skillsPath": "plugins/show-me/skills",
-      "include": ["show-me"],
-      "licensePath": "LICENSE",
-    },
-    {
       "id": "dan-skills",
       "repository": "https://github.com/danieljvdm/skills.git",
       "ref": "main",
@@ -99,6 +91,7 @@
         "orchestrate",
         "project-setup",
         "pull-requests",
+        "show-me",
         "simplify",
         "testing",
       ],

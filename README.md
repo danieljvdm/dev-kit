@@ -151,7 +151,7 @@ Only the receipt is removed. The skill remains ordinary repository content.
 
 The previous selectors still resolve: `open-pull-request` → `pull-requests`, `effect-development` → `effect`, and `cloudflare-workers` → `cloudflare`. `skills add` uses the current name. `skills status` and `skills diff` follow existing bundled receipts, and `skills update` moves an unmodified copy to the current directory and rewrites its receipt with the approved Git source. Local edits remain protected.
 
-The `cloudflare` selector now uses the shared engineering stack's runtime and CLI guidance. The `cloudflare-skills` source continues to provide its other specialist skills. To install the entire personal engineering stack explicitly, use `dev-kit skills add dan-skills`; otherwise select only the needed skills. The first use fetches the pinned commit, and subsequent uses share the existing machine-global cache.
+The `cloudflare` selector now uses the shared engineering stack's runtime and CLI guidance. The `cloudflare-skills` source continues to provide its other specialist skills. `show-me` comes from the same shared stack, adapted from HumanLayer with attribution. To install the entire personal engineering stack explicitly, use `dev-kit skills add dan-skills`; otherwise select only the needed skills. The first use fetches the pinned commit, and subsequent uses share the existing machine-global cache.
 
 ## Eject a legacy managed project
 

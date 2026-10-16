@@ -191,26 +191,10 @@
       "licensePath": "LICENSE"
     },
     {
-      "id": "humanlayer-skills",
-      "repository": "https://github.com/humanlayer/skills.git",
-      "ref": "main",
-      "resolved": "3c2629142c5d437428269b1b722b08c0b87f574d",
-      "skillsPath": "plugins/show-me/skills",
-      "include": ["show-me"],
-      "skills": ["show-me"],
-      "descriptions": {
-        "show-me": "Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts."
-      },
-      "digests": {
-        "show-me": "sha256:be24b98422f4e577f95eff91b1a46c82b7b063356923c466c11f596a920ed51b"
-      },
-      "licensePath": "LICENSE"
-    },
-    {
       "id": "dan-skills",
       "repository": "https://github.com/danieljvdm/skills.git",
       "ref": "main",
-      "resolved": "1a9cc94a299210c622e5739fc55b2feadcf3e7c1",
+      "resolved": "ed3551c9f454ea19efa87440aa342221fe6e6d70",
       "skillsPath": "skills",
       "include": [
         "alchemy",
@@ -227,6 +211,7 @@
         "orchestrate",
         "project-setup",
         "pull-requests",
+        "show-me",
         "simplify",
         "testing"
       ],
@@ -245,6 +230,7 @@
         "orchestrate",
         "project-setup",
         "pull-requests",
+        "show-me",
         "simplify",
         "testing"
       ],
@@ -263,6 +249,7 @@
         "orchestrate": "Coordinate independent work with subagents when delegation materially improves a substantial task.",
         "project-setup": "Set up TypeScript repositories or workspace packages and integrate their tooling, Effect services, and Cloudflare deployment boundaries.",
         "pull-requests": "Prepare, open, review, update, or land pull requests in any repository, including drafting titles and terse descriptions with diagrams or visual evidence, final diff review, and addressing review feedback.",
+        "show-me": "Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts.",
         "simplify": "Simplify code or workflows by removing unnecessary machinery while preserving required behavior.",
         "testing": "Decide whether committed tests are warranted, design regression tests, or follow explicitly requested TDD."
       },
@@ -270,7 +257,7 @@
         "alchemy": "sha256:29966a3f6e2532aec4b514a9a5e455e1561a4cf8b3e804ffc1a11b2650c68464",
         "animate": "sha256:17e9dfc7e3f76bc418d73ba8d127daccea116167ba7b954611d8d60fca53cefc",
         "cloudflare": "sha256:a3a729c106dd7dd4bd1b811d4e6557055385ef7b9de9028edde90dfb90f26142",
-        "dan-mode": "sha256:0449b4acbde6496014318e52f64c7c5777984e5b1b7ac4b756f56e67bd97ca0b",
+        "dan-mode": "sha256:d38313b16cf0edb6a1b6e64242ee05fc00baee49f4ea35949f44e7a718a60754",
         "debugging": "sha256:dca5b4f72d3f9d7702b3250e57215d591a5bdf4c3f5e3f10dfcee73522fc5428",
         "design-ui": "sha256:575a914dca27af67698a84fe26e0e76a1b83dcf6bcdfa694bc6a19ffec78c80c",
         "effect": "sha256:e1f560f7b37029fd1b24c06840eadfe81c3bfd7727c0e6b102969a16d33baf97",
@@ -280,7 +267,8 @@
         "o11y": "sha256:4bd3e686c4b69cf640fee6122483ac7603e5012bb6dc952b165b8d45a20b26b3",
         "orchestrate": "sha256:d510791763e51b94849e9cbbb6a97daba49703fa9e9e292311772f5b1dc9af12",
         "project-setup": "sha256:0d73f04b9b23973d8958d9ca566a1cfb64232578d0b4d86cabe984f137a52ef6",
-        "pull-requests": "sha256:62a4fc58028962f4b504e3688e84d9f8a9c3f46ee9840ed8bd7002d7f61691f9",
+        "pull-requests": "sha256:b8311442fef3b5b5814ff71bdcaee1ccfeae9ab3cd9f1850156446e3743bca14",
+        "show-me": "sha256:e195e0f0c0dcff5edf07c3863036cd91eae7006e22d8c66d149934e710b4ee63",
         "simplify": "sha256:b8fd193c0c3b5c2726b97b4df19d9909b7a95f19c19df59ac6c52382ad965e9f",
         "testing": "sha256:586923882e049e83bd61cf6d31bf5455c718c329dc77b34b35843102234bebd8"
       },
