@@ -186,7 +186,6 @@ export const loadSkillCatalog = Effect.fn("loadSkillCatalog")(function* (
     });
   }
   const families = {
-    effect: ["effect-development"],
     ...Object.fromEntries(externalFamilies),
   } satisfies Readonly<Record<string, ReadonlyArray<string>>>;
 

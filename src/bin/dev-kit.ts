@@ -367,10 +367,27 @@ const catalogRefreshCommand = CliCommand.make(
   {
     dryRun: Flag.boolean("dry-run").pipe(Flag.withDescription("Preview without writing.")),
     locked: Flag.boolean("locked").pipe(Flag.withHidden),
+    source: Flag.string("source").pipe(
+      Flag.atLeast(0),
+      Flag.withDescription(
+        "Refresh only this source; repeat for several. Keep other revisions pinned.",
+      ),
+    ),
     ...catalogFilesFlags,
   },
-  ({ dryRun, locked, lockfile, repoDir, sources }) =>
-    refreshSkillCatalog({ dryRun, locked, lockfilePath: lockfile, repoDir, sourcesPath: sources }),
+  ({ dryRun, locked, lockfile, repoDir, sources, source }) => {
+    const options = {
+      dryRun,
+      locked,
+      lockfilePath: lockfile,
+      repoDir,
+      sourcesPath: sources,
+    };
+
+    if (source.length > 0) Object.assign(options, { updateSourceIds: source });
+
+    return refreshSkillCatalog(options);
+  },
 ).pipe(
   CliCommand.withDescription("Approve the current upstream refs as an exact catalog snapshot."),
 );

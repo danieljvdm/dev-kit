@@ -10,7 +10,7 @@
       "include": ["animate-expo"],
       "skills": ["animate-expo"],
       "descriptions": {
-        "animate-expo": "Build animations in React Native and Expo, making the decisions in the order that determines whether they feel right \u2014 should it animate, which thread it runs on, which properties, spring or timing, how the gesture hands off, how it degrades. Writes the implementation with Reanimated, Gesture Handler, Expo Router and expo-haptics. Use when animating anything in an Expo app, adding gestures, sheets, screen transitions, press feedback or haptics, or fixing motion that stutters on device. For web animation use `animate`."
+        "animate-expo": "Build animations in React Native and Expo, making the decisions in the order that determines whether they feel right — should it animate, which thread it runs on, which properties, spring or timing, how the gesture hands off, how it degrades. Writes the implementation with Reanimated, Gesture Handler, Expo Router and expo-haptics. Use when animating anything in an Expo app, adding gestures, sheets, screen transitions, press feedback or haptics, or fixing motion that stutters on device. For web animation use `animate`."
       },
       "digests": {
         "animate-expo": "sha256:c9ad6c07908409ed2fa9fecf288196e77325be2cf29e5a03b8aaaecb451709a2"
@@ -26,7 +26,6 @@
       "skillsPath": "skills",
       "include": [
         "agents-sdk",
-        "cloudflare",
         "cloudflare-email-service",
         "cloudflare-one",
         "cloudflare-one-migrations",
@@ -35,7 +34,6 @@
       ],
       "skills": [
         "agents-sdk",
-        "cloudflare",
         "cloudflare-email-service",
         "cloudflare-one",
         "cloudflare-one-migrations",
@@ -44,8 +42,7 @@
       ],
       "descriptions": {
         "agents-sdk": "Build AI agents on Cloudflare Workers using the Agents SDK. Load when creating stateful agents, durable workflows, real-time WebSocket apps, scheduled tasks, MCP servers, chat applications, voice agents, or browser automation. Covers Agent class, state management, callable RPC, Workflows, durable execution, queues, retries, observability, and React hooks. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
-        "cloudflare": "Comprehensive Cloudflare platform skill covering Workers, Pages, storage (KV, D1, R2), AI (Workers AI, Vectorize, Agents SDK), feature flags (Flagship), networking (Tunnel, Spectrum), security (WAF, DDoS), and infrastructure-as-code (Terraform, Pulumi). Use for any Cloudflare development task. Biases towards retrieval from Cloudflare docs over pre-trained knowledge.",
-        "cloudflare-email-service": "Send and receive transactional emails with Cloudflare Email Service (Email Sending + Email Routing). Use when building email sending (Workers binding or REST API), email routing, Agents SDK email handling, or integrating email into any app \u2014 Workers, Node.js, Python, Go, etc. Also use for email deliverability, SPF/DKIM/DMARC, wrangler email setup, MCP email tools, or when a coding agent needs to send emails. Even for simple requests like \"add email to my Worker\" \u2014 this skill has critical config details.",
+        "cloudflare-email-service": "Send and receive transactional emails with Cloudflare Email Service (Email Sending + Email Routing). Use when building email sending (Workers binding or REST API), email routing, Agents SDK email handling, or integrating email into any app — Workers, Node.js, Python, Go, etc. Also use for email deliverability, SPF/DKIM/DMARC, wrangler email setup, MCP email tools, or when a coding agent needs to send emails. Even for simple requests like \"add email to my Worker\" — this skill has critical config details.",
         "cloudflare-one": "Guides Cloudflare One Zero Trust and SASE work across Access, Gateway, WARP, Tunnel, Cloudflare WAN, DLP, CASB, device posture, and identity. Use when designing, configuring, troubleshooting, or reviewing Cloudflare One deployments. Retrieval-first: use current Cloudflare docs/API schemas instead of embedded product docs.",
         "cloudflare-one-migrations": "Plans migrations from Zscaler ZIA/ZPA, Palo Alto, legacy VPN, SWG, or SASE stacks to Cloudflare One. Use for migration assessments, policy mapping, rollout plans, and parity/gap analysis.",
         "turnstile-spin": "Set up Cloudflare Turnstile end-to-end in a project. Scan the codebase, create the widget via the Cloudflare API, embed it where user requests need bot verification (form submissions, SPA actions, API endpoints, download links, comment or vote submissions, etc.), wire canonical server-side siteverify in the customer's existing backend, validate, and persist the skill. Load this when a user asks to add Turnstile, set up CAPTCHA, protect a form or endpoint from bots, or fix a Turnstile integration. Mirrors developers.cloudflare.com/turnstile/spin.",
@@ -53,7 +50,6 @@
       },
       "digests": {
         "agents-sdk": "sha256:721bd3f54bf45ce35827d90a1886ed92d644fe2bfff2e80c21bcd1777079dc54",
-        "cloudflare": "sha256:dfc92bac99350aa358617e0b8edd61fd7115cbf1a873ba01d32f93d967b9822e",
         "cloudflare-email-service": "sha256:c74226f6ce9226640193a30142a2d5348cc276baefb91913db9dc44e97d971c0",
         "cloudflare-one": "sha256:44c1455ac02448fab391795a7d84205387c3cdae457e3d17d5549207ff466bfa",
         "cloudflare-one-migrations": "sha256:9b1e197c3cf33fd7061d5f7c2e654a9b72257ed2169d57b704bca4122a51febc",
@@ -161,9 +157,9 @@
         "expo-examples": "Framework (OSS). Expo's official example projects - the expo/examples repo of ~70 `with-*` integrations (Stripe, Clerk, Supabase, OpenAI, maps, Reanimated, SQLite, Skia, NativeWind, and more). Use when integrating a third-party library or service into an existing Expo app and you want the canonical, version-matched pattern to adapt, or when scaffolding a new project from one with `npx create-expo --example`.",
         "expo-module": "Framework (OSS). Guide for creating and writing Expo native modules and views using the Expo Modules API (Swift, Kotlin, TypeScript). Covers module definition DSL, native views, shared objects, config plugins, lifecycle hooks, autolinking, and type system. Use when building or modifying native modules for Expo. Not for migrating an existing Swift module from the definition DSL to the Expo Modules API 2.0 macros; use expo-migrate-module (from the expo-experiments plugin) for that.",
         "expo-native-ui": "Framework (OSS). Build beautiful, native-feeling Expo screens. Covers Apple HIG styling, semantic colors, native controls, SF Symbols, media, animations, visual effects, gradients, storage, and responsive layout. For routing and navigation, use the expo-router skill.",
-        "expo-project-structure": "Framework (OSS). Folder structure for a new Expo app. Use when scaffolding or laying out a new Expo project with Expo Router, or deciding where a file should live in one. For new projects only \u2014 never restructure an existing app to match.",
+        "expo-project-structure": "Framework (OSS). Folder structure for a new Expo app. Use when scaffolding or laying out a new Expo project with Expo Router, or deciding where a file should live in one. For new projects only — never restructure an existing app to match.",
         "expo-router": "Framework (OSS). Navigation and routing for Expo Router. Covers file-based routes, groups and dynamic routes, folder organization, Link with previews and context menus, native Stack, page titles, modals and form sheets, NativeTabs, headers and toolbars, and header search bars.",
-        "expo-skill-feedback": "Submit feedback on an Expo skill\u2014or Expo itself\u2014and control bundled anonymous usage telemetry (off by default / opt-in). Submit feedback with: npx --yes submit-expo-feedback@latest \"ACTIONABLE_FEEDBACK\". Optionally add either or both: --category \"CATEGORY\" and --subject \"SUBJECT\". Replace the uppercase placeholders before running. Use when a skill was useful, confusing, broken, missing context, or worth improving; when Expo, Expo CLI, EAS CLI, docs, or MCP worked well or fell short; when an AI agent repeatedly failed, got stuck, or needed the user to take over an Expo task (report it as an eval candidate); or when the user explicitly asks to enable or disable telemetry (tracking), check its status, or understand what it collects.",
+        "expo-skill-feedback": "Submit feedback on an Expo skill—or Expo itself—and control bundled anonymous usage telemetry (off by default / opt-in). Submit feedback with: npx --yes submit-expo-feedback@latest \"ACTIONABLE_FEEDBACK\". Optionally add either or both: --category \"CATEGORY\" and --subject \"SUBJECT\". Replace the uppercase placeholders before running. Use when a skill was useful, confusing, broken, missing context, or worth improving; when Expo, Expo CLI, EAS CLI, docs, or MCP worked well or fell short; when an AI agent repeatedly failed, got stuck, or needed the user to take over an Expo task (report it as an eval candidate); or when the user explicitly asks to enable or disable telemetry (tracking), check its status, or understand what it collects.",
         "expo-tailwind-setup": "Framework (OSS). Set up Tailwind CSS v4 in Expo with react-native-css and NativeWind v5 for universal styling",
         "expo-ui": "Framework (OSS). Build native UI with the @expo/ui package: real SwiftUI on iOS and Jetpack Compose on Android rendered from React in an Expo or React Native app. Covers universal cross-platform components (Host, Column, Row, Button, Text, List, and more imported from @expo/ui), drop-in replacements for popular React Native community libraries (BottomSheet, DateTimePicker, Slider, Menu, etc.), and platform-specific SwiftUI (@expo/ui/swift-ui, iOS only) and Jetpack Compose (@expo/ui/jetpack-compose, Android only) trees and modifiers. Use when adding or reviewing @expo/ui Host/RNHostView trees, building native-feeling UI where standard React Native components fall short (grouped settings forms with toggles, sections, menus, sheets, pickers, sliders), choosing between universal and platform-specific components, or replacing an RN community UI library with a native @expo/ui equivalent. Not for custom native modules, Expo Router navigation, Reanimated, or data fetching.",
         "expo-upgrade": "Framework (OSS). Guidelines for upgrading Expo SDK versions and fixing dependency issues",
@@ -195,18 +191,68 @@
       "licensePath": "LICENSE"
     },
     {
-      "id": "humanlayer-skills",
-      "repository": "https://github.com/humanlayer/skills.git",
+      "id": "dan-skills",
+      "repository": "https://github.com/danieljvdm/skills.git",
       "ref": "main",
-      "resolved": "3c2629142c5d437428269b1b722b08c0b87f574d",
-      "skillsPath": "plugins/show-me/skills",
-      "include": ["show-me"],
-      "skills": ["show-me"],
+      "resolved": "ed3551c9f454ea19efa87440aa342221fe6e6d70",
+      "skillsPath": "skills",
+      "include": ["*"],
+      "skills": [
+        "alchemy",
+        "animate",
+        "cloudflare",
+        "dan-mode",
+        "debugging",
+        "design-ui",
+        "effect",
+        "feedback-loops",
+        "library-first",
+        "measure-performance",
+        "o11y",
+        "orchestrate",
+        "project-setup",
+        "pull-requests",
+        "show-me",
+        "simplify",
+        "testing"
+      ],
       "descriptions": {
-        "show-me": "Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts."
+        "alchemy": "Declare and operate infrastructure with Alchemy, including isolated temporary Cloudflare deployments for development, testing, and benchmarking.",
+        "animate": "Implement, review, or improve UI motion for web and Expo/React Native, and identify animation terminology.",
+        "cloudflare": "Build, review, or operate Cloudflare Workers, Durable Objects, and Sandbox SDK applications, including CLI operations and deployed observability.",
+        "dan-mode": "Apply Dan's working preferences when asked for dan-mode or to work in Dan's style.",
+        "debugging": "Diagnose bugs, regressions, and unexplained behavior, then implement and verify an authorized fix.",
+        "design-ui": "Build or refine web UI, explore design alternatives, or choose UI libraries and theme handling.",
+        "effect": "Set up Effect, implement Atom React state, HTTP APIs or CLIs, and review architecture and error handling.",
+        "feedback-loops": "Design or improve reusable development feedback loops, benchmark harnesses, and verification commands when checks are slow, duplicated, unreliable, or missing.",
+        "library-first": "Build or extract reusable libraries, including packages inside application repositories. Use when a capability is intended for reuse across projects or an existing shared library is changing.",
+        "measure-performance": "Measure and protect latency, throughput, CPU, and resource use. Use for changes on critical user paths such as APIs and agent loops, including prompt or tracing changes, and for performance investigations or optimization claims.",
+        "o11y": "Instrument and inspect application traces, logs, and metrics, including local Maple tracing, Cloudflare observability, and Effect OTLP export.",
+        "orchestrate": "Coordinate independent work with subagents when delegation materially improves a substantial task.",
+        "project-setup": "Set up TypeScript repositories or workspace packages and integrate their tooling, Effect services, and Cloudflare deployment boundaries.",
+        "pull-requests": "Prepare, open, review, update, or land pull requests in any repository, including drafting titles and terse descriptions with diagrams or visual evidence, final diff review, and addressing review feedback.",
+        "show-me": "Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts.",
+        "simplify": "Simplify code or workflows by removing unnecessary machinery while preserving required behavior.",
+        "testing": "Decide whether committed tests are warranted, design regression tests, or follow explicitly requested TDD."
       },
       "digests": {
-        "show-me": "sha256:be24b98422f4e577f95eff91b1a46c82b7b063356923c466c11f596a920ed51b"
+        "alchemy": "sha256:29966a3f6e2532aec4b514a9a5e455e1561a4cf8b3e804ffc1a11b2650c68464",
+        "animate": "sha256:17e9dfc7e3f76bc418d73ba8d127daccea116167ba7b954611d8d60fca53cefc",
+        "cloudflare": "sha256:a3a729c106dd7dd4bd1b811d4e6557055385ef7b9de9028edde90dfb90f26142",
+        "dan-mode": "sha256:d38313b16cf0edb6a1b6e64242ee05fc00baee49f4ea35949f44e7a718a60754",
+        "debugging": "sha256:dca5b4f72d3f9d7702b3250e57215d591a5bdf4c3f5e3f10dfcee73522fc5428",
+        "design-ui": "sha256:575a914dca27af67698a84fe26e0e76a1b83dcf6bcdfa694bc6a19ffec78c80c",
+        "effect": "sha256:e1f560f7b37029fd1b24c06840eadfe81c3bfd7727c0e6b102969a16d33baf97",
+        "feedback-loops": "sha256:a78cdf86bb851afd6b757106cea02e033b762bb39e226d8a5979516d62108752",
+        "library-first": "sha256:b97b9284cdbc4c142fa9c395b833ded47a06ba4dd651920d84f86d7deeb4c5e1",
+        "measure-performance": "sha256:6c8d9f5ddc3cce14ed797ce58bf0abd8c4af8d65043daadaf0a154575b45f981",
+        "o11y": "sha256:4bd3e686c4b69cf640fee6122483ac7603e5012bb6dc952b165b8d45a20b26b3",
+        "orchestrate": "sha256:d510791763e51b94849e9cbbb6a97daba49703fa9e9e292311772f5b1dc9af12",
+        "project-setup": "sha256:0d73f04b9b23973d8958d9ca566a1cfb64232578d0b4d86cabe984f137a52ef6",
+        "pull-requests": "sha256:b8311442fef3b5b5814ff71bdcaee1ccfeae9ab3cd9f1850156446e3743bca14",
+        "show-me": "sha256:e195e0f0c0dcff5edf07c3863036cd91eae7006e22d8c66d149934e710b4ee63",
+        "simplify": "sha256:b8fd193c0c3b5c2726b97b4df19d9909b7a95f19c19df59ac6c52382ad965e9f",
+        "testing": "sha256:586923882e049e83bd61cf6d31bf5455c718c329dc77b34b35843102234bebd8"
       },
       "licensePath": "LICENSE"
     }

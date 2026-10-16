@@ -98,7 +98,6 @@ const DEFAULT_SOURCES_PATH = "skill-sources.jsonc";
 const DEFAULT_LOCKFILE_PATH = "skill-sources.lock.json";
 const SKILL_NAME_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const SOURCE_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const RESERVED_SOURCE_IDS = new Set(["effect"]);
 
 const inferSourceId = (repository: string): string => {
   const cleaned = repository.replace(/[\\/]+$/, "").replace(/\.git$/i, "");
@@ -394,12 +393,6 @@ const prepareSource = Effect.fn("prepareSkillSource")(function* (
       reason: "id must use lowercase letters, numbers, and hyphens",
     });
   }
-  if (RESERVED_SOURCE_IDS.has(source.id)) {
-    return yield* InvalidSourceError.make({
-      source: source.id,
-      reason: "id conflicts with a built-in skill family",
-    });
-  }
   if (source.repository.length === 0 || source.ref.length === 0) {
     return yield* InvalidSourceError.make({
       source: source.id,
@@ -525,7 +518,7 @@ const validateCurrentLock = Effect.fn("validateCurrentSkillSourcesLock")(functio
   const skills = new Set<string>();
 
   for (const source of lock.sources) {
-    if (!SOURCE_ID_PATTERN.test(source.id) || RESERVED_SOURCE_IDS.has(source.id)) {
+    if (!SOURCE_ID_PATTERN.test(source.id)) {
       return yield* InvalidSourceError.make({
         source: source.id,
         reason: "lockfile contains an invalid source id",
@@ -604,14 +597,6 @@ const validateOwnership = Effect.fn("validateSkillOwnership")(function* (
       return yield* InvalidSourceError.make({
         source: preparedSource.source.id,
         reason: "id conflicts with a skill name",
-      });
-    }
-  }
-  for (const reservedFamily of RESERVED_SOURCE_IDS) {
-    if (owners.has(reservedFamily)) {
-      return yield* InvalidSourceError.make({
-        source: reservedFamily,
-        reason: "skill name conflicts with a built-in skill family",
       });
     }
   }
@@ -870,6 +855,11 @@ export const refreshSkillCatalog = Effect.fn("refreshSkillCatalog")(function* (
       });
     }
     sourceIds.add(source.id);
+  }
+  for (const id of options.updateSourceIds ?? []) {
+    if (!sourceIds.has(id)) {
+      return yield* InvalidSourceError.make({ source: id, reason: "source is not in the catalog" });
+    }
   }
   if (options.locked) {
     if (!currentLock) {
