@@ -194,7 +194,7 @@
       "id": "dan-skills",
       "repository": "https://github.com/danieljvdm/skills.git",
       "ref": "main",
-      "resolved": "2fef8e6392e512522cc57720f60a8db52c38b343",
+      "resolved": "5aeaeb56df4ebd20573a6a6778a81938cf5a4884",
       "skillsPath": "skills",
       "include": ["*"],
       "skills": [
@@ -232,14 +232,14 @@
         "project-setup": "Set up TypeScript repositories or workspace packages and integrate their tooling, Effect services, and Cloudflare deployment boundaries.",
         "pull-requests": "Prepare, open, review, update, or land pull requests in any repository, including drafting titles and terse descriptions with diagrams or visual evidence, final diff review, and addressing review feedback.",
         "show-me": "Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts.",
-        "simplify": "Simplify code or workflows by removing unnecessary machinery while preserving required behavior.",
+        "simplify": "Review or simplify code and workflows by questioning architecture and removing unnecessary machinery while preserving required behavior.",
         "testing": "Decide whether committed tests are warranted, design regression tests, or follow explicitly requested TDD."
       },
       "digests": {
         "alchemy": "sha256:29966a3f6e2532aec4b514a9a5e455e1561a4cf8b3e804ffc1a11b2650c68464",
         "animate": "sha256:17e9dfc7e3f76bc418d73ba8d127daccea116167ba7b954611d8d60fca53cefc",
         "cloudflare": "sha256:a3a729c106dd7dd4bd1b811d4e6557055385ef7b9de9028edde90dfb90f26142",
-        "dan-mode": "sha256:9bd64e8cd9918eb0c52c75cd69d7bcd1ee4c21179c03827c6f2bdf11c830c89d",
+        "dan-mode": "sha256:299e2f20de0abb0c355a8e793341c53f0ca6c3254a5b9099a7e787830d32f54c",
         "debugging": "sha256:dca5b4f72d3f9d7702b3250e57215d591a5bdf4c3f5e3f10dfcee73522fc5428",
         "design-ui": "sha256:cccedfa38a9ad20f40f39041d54015552e225eac02d07359116f1bc62810676c",
         "effect": "sha256:4f500b03af178e211c415ee79e5ebfec3cc8808c0a7bc329adc79e66650ca555",
@@ -251,7 +251,7 @@
         "project-setup": "sha256:0d73f04b9b23973d8958d9ca566a1cfb64232578d0b4d86cabe984f137a52ef6",
         "pull-requests": "sha256:ef2e5fb8a8fb13694154c1fb608be2678dc2bce0b0200ea7f60af77b8d643695",
         "show-me": "sha256:e195e0f0c0dcff5edf07c3863036cd91eae7006e22d8c66d149934e710b4ee63",
-        "simplify": "sha256:6b961c89cea6f6aa26478b260811aed1b7ca1eb81fdc5a8703c34b3878e3605c",
+        "simplify": "sha256:720da2762d048ab99554965df5955d1b1f0a745a836858939113d9fdb4e8d304",
         "testing": "sha256:1ca7a7f772bb588267478464306348ad6a0a4d5cc1f22be86153178f150a4dff"
       },
       "licensePath": "LICENSE"
