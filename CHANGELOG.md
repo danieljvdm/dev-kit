@@ -1,5 +1,11 @@
 # @danieljvdm/dev-kit
 
+## 2.2.1
+
+### Patch Changes
+
+- cc70efd: Refresh the shared engineering skills to the latest approved source.
+
 ## 2.2.0
 
 ### Minor Changes
