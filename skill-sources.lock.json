@@ -194,7 +194,7 @@
       "id": "dan-skills",
       "repository": "https://github.com/danieljvdm/skills.git",
       "ref": "main",
-      "resolved": "5aeaeb56df4ebd20573a6a6778a81938cf5a4884",
+      "resolved": "c98954b5a30c8899560da34a0f5052bf5eab8ecb",
       "skillsPath": "skills",
       "include": ["*"],
       "skills": [
@@ -212,6 +212,7 @@
         "orchestrate",
         "project-setup",
         "pull-requests",
+        "scrawl",
         "show-me",
         "simplify",
         "testing"
@@ -231,6 +232,7 @@
         "orchestrate": "Coordinate independent work, parallel coverage, and competing approaches with subagents when delegation materially improves a substantial task.",
         "project-setup": "Set up TypeScript repositories or workspace packages and integrate their tooling, Effect services, and Cloudflare deployment boundaries.",
         "pull-requests": "Prepare, open, review, update, or land pull requests in any repository, including drafting titles and terse descriptions with diagrams or visual evidence, final diff review, and addressing review feedback.",
+        "scrawl": "Read and dig into Scrawl screen captures, where someone recorded their screen while talking, clicking and drawing red marks on it. Use whenever a message contains a Scrawl capture (a line like `[scrawl 0:12 · App “Window” · /path/to/….scrawl]`, a `.scrawl` bundle path, or a contact-sheet.png from one), when the user says \"look at my scrawl\" or refers to something they just recorded or drew, or when you need the `scrawl` CLI to zoom into a moment, pull frames, send a capture to a session, or export one as video.",
         "show-me": "Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts.",
         "simplify": "Review or simplify code and workflows by questioning architecture and removing unnecessary machinery while preserving required behavior.",
         "testing": "Decide whether committed tests are warranted, design regression tests, or follow explicitly requested TDD."
@@ -250,6 +252,7 @@
         "orchestrate": "sha256:3fa5e95282e2cbf803917d1cf5f2db7bd6d88f1016b0deeb89db215f1f8aae75",
         "project-setup": "sha256:0d73f04b9b23973d8958d9ca566a1cfb64232578d0b4d86cabe984f137a52ef6",
         "pull-requests": "sha256:ef2e5fb8a8fb13694154c1fb608be2678dc2bce0b0200ea7f60af77b8d643695",
+        "scrawl": "sha256:5e586a252a5a7917a154fb6f4da750af2661936388e54c14242ea78b9c1c35f8",
         "show-me": "sha256:e195e0f0c0dcff5edf07c3863036cd91eae7006e22d8c66d149934e710b4ee63",
         "simplify": "sha256:720da2762d048ab99554965df5955d1b1f0a745a836858939113d9fdb4e8d304",
         "testing": "sha256:1ca7a7f772bb588267478464306348ad6a0a4d5cc1f22be86153178f150a4dff"
