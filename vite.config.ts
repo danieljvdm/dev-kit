@@ -4,6 +4,9 @@ import { createRecommendedVitePlusConfig } from "./src/vite-plus.ts";
 
 const recommended = createRecommendedVitePlusConfig({
   ignorePatterns: ["src/oxlint-plugin-anti-slop/runtime.js"],
+  typecheck: {
+    command: "effect-tsrs diagnostics --project tsconfig.json --type-check --strict",
+  },
 });
 
 export default defineConfig({
