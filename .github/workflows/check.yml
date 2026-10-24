@@ -35,9 +35,6 @@ jobs:
           run-install: |
             args: ["--frozen-lockfile", "--ignore-scripts"]
 
-      - name: Patch Effect TypeScript-Go
-        run: ./bin/dev-kit.mjs tsgo patch
-
       - name: Check formatting
         run: vp fmt --check
 
@@ -47,5 +44,5 @@ jobs:
       - name: Run tests
         run: vp test
 
-      - name: Type check with Effect TypeScript-Go
+      - name: Type check with Effect tsrs
         run: vp run typecheck

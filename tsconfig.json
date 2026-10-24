@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/@effect/tsgo/schema.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "exactOptionalPropertyTypes": true,

@@ -1,6 +1,6 @@
 ---
 name: update-deps
-description: Update or audit dependencies in this dev-kit repository with compatibility-aware handling for the Effect v4 package family, @effect/vitest and Vitest, @effect/tsgo and its commit-matched native TypeScript compiler, Bun, and ordinary npm packages. Use when asked to update, refresh, audit, check, or pin dependency versions, regenerate bun.lock, refresh local upstream source checkouts, or resolve dependency/toolchain drift in this repository.
+description: Update or audit dependencies in this dev-kit repository with compatibility-aware handling for the Effect v4 package family, @effect/vitest and Vitest, @yielded/effect-tsrs and its bundled tsrs compiler, Bun, and ordinary npm packages. Use when asked to update, refresh, audit, check, or pin dependency versions, regenerate bun.lock, refresh local upstream source checkouts, or resolve dependency/toolchain drift in this repository.
 ---
 
 # Update Dependencies
@@ -59,43 +59,28 @@ For an Effect upgrade:
 Use exact versions. Install the whole group in one package-manager operation so
 the lockfile cannot represent a mixed beta set.
 
-### Effect TypeScript-Go pair
+### Effect tsrs checker
 
-`@effect/tsgo` and native `typescript` are a commit-compatible pair. A matching
-major or semver range is insufficient.
+`@yielded/effect-tsrs` bundles its own tsrs compiler and TypeScript standard
+libraries. A separate `typescript` or `tsrs` package does not select that compiler.
 
-For a tsgo upgrade:
+For a checker upgrade:
 
-1. Resolve the latest published `@effect/tsgo` release from GitHub releases and
-   npm. Do not take the unreleased version from repository `main`.
-2. Inspect the published platform package's compiler metadata. Schema-v4
-   packages use `lib/upstream.json`: select `tags.typescript.latest` unless the
-   user explicitly requests TypeScript next, then verify its entry under
-   `components.typescript`. Older packages use `lib/tsc.json` and
-   `lib/tsc-next.json`; prefer the stable `tsc.json` profile. Do not infer the
-   stable compiler from an unversioned repository checkout.
-3. Verify both `version` and `gitHead`: for schema v4, the selected version key
-   and its `components.typescript[version].gitHead` must equal the metadata from
-   the exact published `typescript` package; for older metadata, compare
-   `tsVersion` and `tsGitHead`. If the platform package is not installed yet,
-   inspect its npm tarball in a temporary directory.
-4. Update both exact dev-dependency pins together.
-5. Update the coupled constants in `src/effect-tsgo.ts`:
-   - `EFFECT_TSGO_VERSION`
-   - `EFFECT_TSGO_TYPESCRIPT_VERSION`
-6. Update README examples and tests that contain either pin.
-7. Refresh `.repos/tsgo` to the published release tag when source-level
-   verification is needed. Keep the checkout under `.repos/`, never `repos/`.
-8. Install first, then run `vp run tsgo:patch`. When the TypeScript version is
-   unchanged, confirm Dev Kit restores any stale prior-version patch backup
-   before applying the new binary. Do not use upstream `--force` for a normal
-   update.
-9. Confirm `vp run tsgo:patch` converges on a second run without creating a
-   numbered backup.
+1. Resolve the current published release from npm and its release documentation.
+2. Inspect the exact release's bundled compiler metadata, supported Effect
+   versions, Node requirement, and platform optional dependencies. Keep optional
+   dependencies enabled; the current checker requires Node >=22.14.
+3. Update the exact `@yielded/effect-tsrs` dev-dependency pin through `vp install`.
+4. Run `vp run typecheck`. It invokes
+   `effect-tsrs diagnostics --project tsconfig.json --strict`, checking both
+   TypeScript and Effect diagnostics and treating warnings as failures.
+5. Keep the `@effect/language-service` plugin name and its diagnostic options in
+   `tsconfig.json`; Effect tsrs reads those options. Do not introduce TypeScript
+   binary patching or change diagnostic severities to mask new failures.
 
-Keep the `@effect/language-service` plugin and tsgo schema in `tsconfig.json`.
-Run the normal `tsc`-based check after patching; the patched compiler emits the
-Effect diagnostics in that same pass.
+The legacy `dev-kit tsgo patch` command and `src/effect-tsgo.ts` version constants
+remain part of the toolbox's supported compatibility behavior. They do not select
+this repository's checker; change them only for an explicit legacy-toolbox update.
 
 ### Other packages
 
@@ -130,10 +115,8 @@ safe. Keep direct dependencies exact unless the repository policy changes.
 Run all of the following after the final group:
 
 ```bash
-vp run tsgo:patch
 vp run check
-vp test
-vp run tsgo:patch --dry-run
+vp run typecheck
 npm pack --dry-run --json
 git diff --check
 ```
@@ -143,8 +126,8 @@ Also verify:
 - `src/` still has no direct `node:*` imports outside an explicit runtime
   adapter or CLI composition boundary.
 - all Effect v4 package versions are identical.
-- installed TypeScript matches the toolkit tsgo pin and the patched compiler is
-  recognized as already patched.
+- the installed Effect tsrs CLI and its platform binary match the exact pin,
+  and project checking preserves the configured diagnostic severities.
 - the npm package contains the runtime implementation but does not contain
   `.agents/skills/update-deps`.
 - `docs/dev-kit-plan.md` remains absent from staged and PR files.
