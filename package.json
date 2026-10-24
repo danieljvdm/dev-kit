@@ -51,7 +51,7 @@
     "@stylistic/eslint-plugin": "5.10.0",
     "@types/node": "25.9.1",
     "@types/semver": "7.8.0",
-    "@yielded/effect-tsrs": "0.2.1",
+    "@yielded/effect-tsrs": "0.2.2",
     "oxfmt": "0.60.0",
     "oxlint": "1.78.0",
     "vite-plus": "0.2.6",

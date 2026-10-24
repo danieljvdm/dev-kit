@@ -72,7 +72,7 @@ For a checker upgrade:
    dependencies enabled; the current checker requires Node >=22.14.
 3. Update the exact `@yielded/effect-tsrs` dev-dependency pin through `vp install`.
 4. Run `vp run typecheck`. It invokes
-   `effect-tsrs diagnostics --project tsconfig.json --strict`, checking both
+   `effect-tsrs diagnostics --project tsconfig.json --type-check --strict`, checking both
    TypeScript and Effect diagnostics and treating warnings as failures.
 5. Keep the `@effect/language-service` plugin name and its diagnostic options in
    `tsconfig.json`; Effect tsrs reads those options. Do not introduce TypeScript
