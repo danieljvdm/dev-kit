@@ -1,5 +1,11 @@
 # @danieljvdm/dev-kit
 
+## 2.2.3
+
+### Patch Changes
+
+- 3adf483: Refresh the shared engineering skills to the latest approved source.
+
 ## 2.2.2
 
 ### Patch Changes
