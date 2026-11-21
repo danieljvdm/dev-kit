@@ -1,6 +1,6 @@
 ---
 name: update-deps
-description: Update or audit dependencies in this dev-kit repository with compatibility-aware handling for the Effect v4 package family, @effect/vitest and Vitest, @yielded/effect-tsrs and its bundled tsrs compiler, Bun, and ordinary npm packages. Use when asked to update, refresh, audit, check, or pin dependency versions, regenerate bun.lock, refresh local upstream source checkouts, or resolve dependency/toolchain drift in this repository.
+description: Update or audit dependencies in this dev-kit repository with compatibility-aware handling for the Effect v4 package family, @effect/vitest and Vitest, @effect/tsgo (tsrs), Bun, and ordinary npm packages. Use when asked to update, refresh, audit, check, or pin dependency versions, regenerate bun.lock, refresh local upstream source checkouts, or resolve dependency/toolchain drift in this repository.
 ---
 
 # Update Dependencies
@@ -61,21 +61,21 @@ the lockfile cannot represent a mixed beta set.
 
 ### Effect tsrs checker
 
-`@yielded/effect-tsrs` bundles its own tsrs compiler and TypeScript standard
-libraries. A separate `typescript` or `tsrs` package does not select that compiler.
+`@effect/tsgo` ships Effect-patched `tsrs` binaries directly via `effect-tsgo tsrs`
+without modifying `node_modules`.
 
 For a checker upgrade:
 
-1. Resolve the current published release from npm and its release documentation.
-2. Inspect the exact release's bundled compiler metadata, supported Effect
-   versions, Node requirement, and platform optional dependencies. Keep optional
-   dependencies enabled; the current checker requires Node >=22.14.
-3. Update the exact `@yielded/effect-tsrs` dev-dependency pin through `vp install`.
+1. Resolve the current published `@effect/tsgo` release from npm and its release documentation.
+2. Inspect the exact release's supported `tsrs` versions, supported Effect
+   versions, and platform optional dependencies. Keep optional
+   dependencies enabled.
+3. Update the exact `@effect/tsgo` dev-dependency pin through `vp install`.
 4. Run `vp run typecheck`. It invokes
-   `effect-tsrs diagnostics --project tsconfig.json --type-check --strict`, checking both
+   `effect-tsgo tsrs --noEmit -p tsconfig.json`, checking both
    TypeScript and Effect diagnostics and treating warnings as failures.
 5. Keep the `@effect/language-service` plugin name and its diagnostic options in
-   `tsconfig.json`; Effect tsrs reads those options. Do not introduce TypeScript
+   `tsconfig.json`; `effect-tsgo tsrs` reads those options. Do not introduce TypeScript
    binary patching or change diagnostic severities to mask new failures.
 
 The legacy `dev-kit tsgo patch` command and `src/effect-tsgo.ts` version constants
@@ -126,7 +126,7 @@ Also verify:
 - `src/` still has no direct `node:*` imports outside an explicit runtime
   adapter or CLI composition boundary.
 - all Effect v4 package versions are identical.
-- the installed Effect tsrs CLI and its platform binary match the exact pin,
+- the installed `@effect/tsgo` CLI and its platform binary match the exact pin,
   and project checking preserves the configured diagnostic severities.
 - the npm package contains the runtime implementation but does not contain
   `.agents/skills/update-deps`.

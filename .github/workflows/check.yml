@@ -44,5 +44,5 @@ jobs:
       - name: Run tests
         run: vp test
 
-      - name: Type check with Effect tsrs
+      - name: Type check with @effect/tsgo (tsrs)
         run: vp run typecheck

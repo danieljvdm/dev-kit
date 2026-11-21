@@ -226,7 +226,7 @@ vp run check
 ```
 
 The package's own `prepare` script explicitly syncs its Effect source checkout
-and configures Vite+ Git hooks. `vp run typecheck` uses Effect tsrs to check both
+and configures Vite+ Git hooks. `vp run typecheck` uses `@effect/tsgo` (`effect-tsgo tsrs`) to check both
 TypeScript and Effect diagnostics, with warnings treated as failures. Those are local
 development operations for Dev Kit itself, not a consumer management model.
 Keep `effect`, `@effect/platform-bun`, and `@effect/platform-node-shared` pinned to
