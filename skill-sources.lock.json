@@ -194,7 +194,7 @@
       "id": "dan-skills",
       "repository": "https://github.com/danieljvdm/skills.git",
       "ref": "main",
-      "resolved": "e644874b198eb7e97fe19a9986eecb2ede315750",
+      "resolved": "e523a957fdfc31930dffa21412be8587488e9a56",
       "skillsPath": "skills",
       "include": ["*"],
       "skills": [
@@ -255,7 +255,7 @@
         "project-setup": "sha256:0d73f04b9b23973d8958d9ca566a1cfb64232578d0b4d86cabe984f137a52ef6",
         "pull-requests": "sha256:ef2e5fb8a8fb13694154c1fb608be2678dc2bce0b0200ea7f60af77b8d643695",
         "rust": "sha256:c773238e2e889a78ce0742f2f5bcdc74e632fb68f9273c8fbfab961da3aeb429",
-        "scrawl": "sha256:5e586a252a5a7917a154fb6f4da750af2661936388e54c14242ea78b9c1c35f8",
+        "scrawl": "sha256:a4f65b7fa7cc487db5b8799d2e5772488b53f868387392dfa3a418cb622e600f",
         "show-me": "sha256:e195e0f0c0dcff5edf07c3863036cd91eae7006e22d8c66d149934e710b4ee63",
         "simplify": "sha256:720da2762d048ab99554965df5955d1b1f0a745a836858939113d9fdb4e8d304",
         "testing": "sha256:1ca7a7f772bb588267478464306348ad6a0a4d5cc1f22be86153178f150a4dff"
